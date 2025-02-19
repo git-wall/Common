@@ -1,4 +1,0 @@
-package org.app.common.thread;
-
-public @interface AutoRegisterThread {
-}
