@@ -1,0 +1,60 @@
+package org.app.common.exception;
+
+import lombok.extern.slf4j.Slf4j;
+import org.app.common.context.DecorateContext;
+import org.app.common.res.ApiResponse;
+import org.app.common.res.ApiResponse2;
+import org.app.common.utils.RequestUtils;
+import org.app.common.utils.ResponseUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Slf4j
+@RestControllerAdvice
+public abstract class GlobalException {
+
+    @ExceptionHandler({MethodArgumentNotValidException.class})
+    public ResponseEntity<Object> exceptionHandler(MethodArgumentNotValidException ex) {
+        String format = "Field: %s, Error: %s";
+        List<String> errors = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> String.format(format, fieldError.getField(), fieldError.getDefaultMessage()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(
+                ResponseUtils.Error.build(DecorateContext.get(RequestUtils.REQUEST_ID), HttpStatus.BAD_REQUEST, errors)
+        );
+    }
+
+    @ExceptionHandler({IllegalArgumentException.class})
+    public ResponseEntity<Object> exceptionHandler(IllegalArgumentException ex) {
+        log.error(ex.getMessage(), ex);
+        return ResponseEntity.ok(body(HttpStatus.BAD_REQUEST));
+    }
+
+    private ApiResponse<Object, ?> body(HttpStatus code) {
+        return ApiResponse.<Object, HttpStatus>builder()
+                .id(DecorateContext.get(RequestUtils.REQUEST_ID))
+                .error(true)
+                .code(code)
+                .message(code.getReasonPhrase())
+                .build();
+    }
+
+    private ApiResponse<Object, ?> body(HttpStatus code, Iterable<?> messageDetailError) {
+        return ApiResponse2.<Object, HttpStatus>builder()
+                .id(DecorateContext.get(RequestUtils.REQUEST_ID))
+                .error(true)
+                .code(code)
+                .message(code.getReasonPhrase())
+                .messageDetail(messageDetailError)
+                .build();
+    }
+}

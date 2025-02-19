@@ -1,0 +1,17 @@
+package org.app.common.utils;
+
+import lombok.SneakyThrows;
+import org.springframework.cache.Cache;
+
+import java.util.concurrent.Callable;
+
+public class CacheUtils {
+    @SneakyThrows
+    public static <T> T handlerAndPutCache(T data, Callable<T> callable, Cache cache) {
+        if (data == null) {
+            T t = callable.call();
+            cache.put("data", t);
+            return t;
+        }
+    }
+}
