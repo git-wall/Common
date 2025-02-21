@@ -3,6 +3,7 @@ package org.app.common.utils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +41,13 @@ public class MapperUtils {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
         GSON = new Gson();
+    }
+
+    @SneakyThrows
+    public static <T> T readValue(String json, Class<T> clazz) {
+        TypeReference<T> type = new TypeReference<>() {
+        };
+        return mapper().readValue(json, type);
     }
 
     @NonNull

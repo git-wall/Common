@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 /**
  * @apiNote
  * <pre>{@code
- *     @AutoRun
+ *     @AutoRun // here is import + extends RunnableProvider
  *     public class ScheduledReport extends RunnableProvider {
  *         @Override
  *         public void before() {
@@ -35,4 +35,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Description(detail = "This class for collect class have injection to register thread to class RunnableProvider")
 public @interface AutoRun {
+    String detail() default "This class is auto-registered for execution.";
 }

@@ -1,7 +1,8 @@
 package org.app.common.data;
 
 import io.vavr.Function2;
-import org.app.common.option.Provider;
+import org.app.common.option.Cover;
+import org.app.common.utils.MapperUtils;
 import org.thymeleaf.util.ListUtils;
 
 import java.util.HashMap;
@@ -11,8 +12,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.app.common.option.Provider.innerMapper;
-import static org.app.common.option.Provider.mapper;
+import static org.app.common.option.Cover.innerMapper;
+import static org.app.common.option.Cover.mapper;
 
 public class MetaData {
     private final Map<Object, Object> data;
@@ -29,6 +30,14 @@ public class MetaData {
 
     public static MetaData of(Object key, Object value) {
         return new MetaData(key, value);
+    }
+
+    public static MetaData fromJson(String json) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> map = MapperUtils.readValue(json, Map.class);
+        MetaData metaData = new MetaData();
+        metaData.data.putAll(map);
+        return metaData;
     }
 
     public MetaData put(Object key, Object value) {
@@ -87,7 +96,7 @@ public class MetaData {
     }
 
     public <T> MetaData innerFilter(Object key, Predicate<T> predicate) {
-        Object value = Provider.innerFilter(this.get(key), predicate);
+        Object value = Cover.innerFilter(this.get(key), predicate);
         this.data.put(key, value);
         return this;
     }
@@ -122,6 +131,10 @@ public class MetaData {
 
     public Map<?, ?> asMap(Object key) {
         return (Map<?, ?>) this.data.get(key);
+    }
+
+    public String asJson() {
+        return MapperUtils.mapper().valueToTree(data).toString();
     }
 }
 

@@ -15,7 +15,8 @@ import java.util.function.Predicate;
  * LOGGER.info(Valid.of(user).valid(User::name, Objects::nonNull, "name is null")
  *     .valid(User::name, name -> !name.isEmpty(), "name is empty")
  *     .valid(User::email, email -> !email.contains("@"), "email not contains '@'")
- *     .valid(User::age, age -> age > 20 && age < 30, "age isn't between...").get()
+ *     .valid(User::age, age -> age > 20 && age < 30, "age isn't between...")
+ *     .get()
  *     .toString());
  * }</pre>
  * */

@@ -13,9 +13,6 @@ public class EntityUserLog implements IEntity {
     private Integer level;
     private Long time;
     private String description;
-    private Integer day;
-    private Integer month;
-    private Integer year;
     private Integer responseStatus;
     private String application;
     private String headers;

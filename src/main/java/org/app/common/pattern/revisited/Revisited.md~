@@ -1,0 +1,5 @@
+Some pattern is convert to revisited
+
+Fluent + chain of responsibility = Java Stream, Optional (JDK 9+) 
+Service locator = ApplicationContext in Spring
+Builder = lombok

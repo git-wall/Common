@@ -41,6 +41,7 @@ public class DynamicClass<T> {
             throw new RuntimeException("Failed to build dynamic class", e);
         }
     }
+
     private DynamicType.Builder<?> createBuilder() throws IllegalAccessException {
         DynamicType.Builder<?> builder = defineClass();
         builder = defineField(builder);

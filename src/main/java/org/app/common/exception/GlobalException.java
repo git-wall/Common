@@ -19,7 +19,7 @@ public abstract class GlobalException {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<Object> exceptionHandler(MethodArgumentNotValidException ex) {
-        String format = "Field: %s, Error: %s";
+        String format = "Field: %s, Error: %s. Pls check and try again.";
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()

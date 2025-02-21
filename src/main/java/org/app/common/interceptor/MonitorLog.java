@@ -99,7 +99,6 @@ public class MonitorLog {
         e.setIp(RequestUtils.getRemoteAddress(hsr));
         e.setSource(RequestUtils.getDomain(hsr));
         e.setTime(new Date().getTime());
-
         return e;
     }
 

@@ -19,8 +19,8 @@ public class ThreadConfig {
         return new ThreadPoolExecutor(
                 CORE_AVAILABLE,                             // Core pool size
                 CORE_AVAILABLE << 1,                        // Max pool size
-                keepAliveTime, unit,                  // Keep-alive time
-                new LinkedBlockingQueue<>(1000),// Queue capacity
+                keepAliveTime, unit,                        // Keep-alive time
+                new LinkedBlockingQueue<>(1000),    // Queue capacity
                 new ThreadFactoryBuilder()
                         .setNameFormat("cpu-pool-%d")
                         .build()
@@ -50,11 +50,13 @@ public class ThreadConfig {
         return executor;
     }
 
+    // Core pool size
     @Bean("logicThreadPool")
     public ExecutorService logicThreadPool() {
         return Executors.newFixedThreadPool(CORE_AVAILABLE);
     }
 
+    // More threads for I/O
     @Bean("ioThreadPool")
     public ExecutorService ioThreadPool() {
         return Executors.newFixedThreadPool(CORE_AVAILABLE << 1);
