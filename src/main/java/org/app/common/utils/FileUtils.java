@@ -6,6 +6,7 @@ import org.springframework.lang.Nullable;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -76,6 +77,16 @@ public class FileUtils {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
             return readerFunction.apply(br);
         }
+    }
+
+    @SneakyThrows
+    public static String readFileContent(String filePath) {
+        return new String(Files.readAllBytes(new File(filePath).toPath()));
+    }
+
+    @SneakyThrows
+    public static void writeToFile(String filePath, String content) {
+        Files.write(new File(filePath).toPath(), content.getBytes());
     }
 }
 

@@ -35,7 +35,7 @@ public class PingController {
     public String ping() {
         Span pingSpan = tracer.nextSpan().name("ping chilling");
         try (Tracer.SpanInScope scope = tracer.withSpanInScope(pingSpan.start())) {
-            return "Hello from " + application;
+            return "Hello from " + application + " !";
         } finally {
             pingSpan.finish();
         }

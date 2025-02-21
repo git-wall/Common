@@ -45,6 +45,10 @@ jar {
 }
 
 dependencies {
+    // new teach
+
+
+
 //    api 'io.sentry:sentry-spring-boot-starter'
 
     annotationProcessor 'org.projectlombok:lombok:1.18.34'

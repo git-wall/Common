@@ -39,6 +39,7 @@ public class DatabaseUtils {
             connection.commit();
         } catch (Exception e) {
             connection.rollback();
+            throw new SQLException(e);
         } finally {
             connection.close();
         }

@@ -1,7 +1,4 @@
-package org.app.common.utils;
-
-import org.app.common.eav.DynamicClass;
-import org.app.common.eav.EAV;
+package org.app.common.eav;
 
 import java.util.Collection;
 

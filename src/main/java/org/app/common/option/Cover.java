@@ -8,10 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class Provider {
-    private Provider() {
-    }
-
+public class Cover {
     // Collection pipeline
     /**
      * Make in function
@@ -60,7 +57,6 @@ public class Provider {
     }
 
     // combine
-
     public static <T> T[] combine(T[] src1, T[] src2) {
         Object[] combineArray = new Object[src1.length + src2.length];
         System.arraycopy(src1, 0, combineArray, 0, src1.length);

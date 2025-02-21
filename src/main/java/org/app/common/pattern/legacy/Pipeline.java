@@ -1,4 +1,4 @@
-package org.app.common.option;
+package org.app.common.pattern.legacy;
 
 /**
  * Use case:
