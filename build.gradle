@@ -2,22 +2,29 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.18'
     id 'io.spring.dependency-management' version '1.1.6'
+    id 'me.champeau.jmh' version '0.7.2'
+    id 'jacoco'
+}
+
+ext {
+    //    sentryVersion = "6.28.0"
 }
 
 apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'java-library'
 apply plugin: 'maven-publish'
-
-//ext {
-//    sentryVersion = "6.28.0"
-//}
+// import this to use 'api' in dependencies
+apply plugin: 'java-library'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(11)
     }
+}
+
+jacoco {
+    toolVersion = "0.8.10"
 }
 
 repositories {
@@ -35,69 +42,146 @@ repositories {
 group = 'com.core'
 version = '1.0.0-SNAPSHOT'
 
-bootJar {
-    enabled = false
-}
-
 jar {
     enabled = true
     archiveFileName = "Common-${version}.jar"
 }
 
 dependencies {
-    // new teach
+    // ===================================================================
+    // Analyze code dependencies
+    // ===================================================================
+    // 1. jmh analyze what func is good
+    api 'org.openjdk.jmh:jmh-core:1.37'
+    api 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+    annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+    // 2. jol analyze the cost of class
+    api 'org.openjdk.jol:jol-core:0.17'
+
+    // ===================================================================
+    // Database & Relation dependencies
+    // ===================================================================
+    // 1. cassandra: good with message data, ...
+    api 'org.apache.cassandra:java-driver-core:4.19.0'
+    // 2. scylla: good with message data, ...
+    //    api 'com.scylladb:scylla-driver-core:3.11.5.6'
+    api 'com.scylladb:scylla-driver-mapping:3.11.5.6'
+    // 3. couchbase: good for auth data
+    api 'com.couchbase.client:java-client:3.7.8'
+    // 4. a Java CouchDB persistence library
+    api 'org.ektorp:org.ektorp:1.5.0'
+    // 5. jooq support syntax sql with java code
+    api 'org.jooq:jooq:3.16.18'
+    api 'org.jooq:jooq-codegen:3.16.18'
+    api 'org.jooq:jooq-meta:3.16.18'
+    // 6 nebula graph database
+    //    api 'com.vesoft:client:5.0.0-rc2'
+    // 7 elasticsearch for server
+    api 'org.elasticsearch:elasticsearch:9.0.0-rc1'
+    // 8 elasticsearch for client
+    api 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.28'
 
 
+    // ===================================================================
+    // Cache & Memory dependencies
+    // ===================================================================
+    // 1. hazelcast used to build distributed cache cluster
+    api 'com.hazelcast:hazelcast:4.2.5'
+    // 2. caffeine
+    api 'com.github.ben-manes.caffeine:caffeine:3.2.0'
+    // 3. valkey: redis cache open source
+    api 'io.valkey:valkey-java:5.3.0'
+    // 4. redis
+    api 'redis.clients:jedis:5.2.0'
 
-//    api 'io.sentry:sentry-spring-boot-starter'
+    // ===================================================================
+    // Monitor dependencies
+    // ===================================================================
+    // 1. sentry
+    // api 'io.sentry:sentry-spring-boot-starter'
+    // 2. slf4j : log
+    api 'org.slf4j:slf4j-api:2.1.0-alpha1'
+    // 3. logback : log send
+    api 'de.siegmar:logback-gelf:4.0.2'
+    // 4. graylog: log receive
+    api 'org.graylog2:gelfj:1.1.16'
 
+    // ===================================================================
+    // Tool & Support Code dependencies
+    // ===================================================================
+    // 1. lombok
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     compileOnlyApi 'org.projectlombok:lombok:1.18.34'
-
-    // monad transformer framework
+    // 2. reflections
+    api 'org.reflections:reflections:0.10.2'
+    // 3. vavr support fluent pattern with monad transformer framework
     api 'io.vavr:vavr:1.0.0-alpha-4'
-
-    // bytebuddy
+    // 4. bytebuddy
     api 'net.bytebuddy:byte-buddy:1.15.10'
-
+    // 5. mapstruct
+    api group: 'org.mapstruct', name: 'mapstruct', version: '1.6.0'
+    api group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.6.0'
+    // 5. jackson: support with json
     api 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
     api 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
     api 'com.fasterxml.jackson.core:jackson-core:2.18.2'
     api 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.18.2'
-
+    // 6. gson: support with json
     api 'com.google.code.gson:gson:2.11.0'
-
-    // mapstruct
-    api group: 'org.mapstruct', name: 'mapstruct', version: '1.6.0'
-    api group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.6.0'
-
-    // model mapper
+    // 7. model mapper: support mapper class with data use reflections | not faster but save time when manual mapper setter data
     api 'org.modelmapper:modelmapper:3.2.1'
-
+    // 8. kafka: message realtime
     api 'org.apache.kafka:kafka-clients:3.8.0'
     api 'org.apache.kafka:kafka-streams:3.8.0'
-
-    api 'org.slf4j:slf4j-api:2.1.0-alpha1'
-    api 'de.siegmar:logback-gelf:4.0.2'
-    api 'org.graylog2:gelfj:1.1.16'
-
+    // 9. parallelconsumer from confluent: support for consumer message better
+    api 'io.confluent.parallelconsumer:parallel-consumer-core:0.5.3.2'
+    // 10. httpclient5: call api
     api 'org.apache.httpcomponents.client5:httpclient5-fluent:5.4.1'
-
+    // 11. commons-lang3: support func utils
     api 'org.apache.commons:commons-lang3:3.14.0'
-    // Thread-Safe in multi-thread | use case: database connection pools, HTTP connection pools
+    // 12. commons-pool2: Thread-Safe in multi-thread | use case: database connection pools, HTTP connection pools
     api 'org.apache.commons:commons-pool2:2.12.0'
-
-    // csv
+    // 13. commons-codec: encoders and decoders for formats such as Base16, Base32, Base64, digest, and Hexadecimal
+    api 'commons-codec:commons-codec:1.18.0'
+    // 13. opencsv: do with csv
     api 'com.opencsv:opencsv:5.9'
+    // 14. poi: do with csv
     api 'org.apache.poi:poi-ooxml:5.4.0'
-
-    // job
+    // 15. mantis
+    // Low-latency, high-throughput data processing.
+    // Auto-scaling stream processing jobs.
+    // Monitor with Mantis UI or Metric
     runtimeOnly 'io.mantisrx:mantis-runtime:3.1.11'
+    // 16. cglib: core of AOP
+    api 'cglib:cglib:3.3.0'
+    // 17. zookeeper: for chose what sever is leader
+    // api 'org.apache.zookeeper:zookeeper:3.9.3'
+    // 18. lucene: for handler text, english, etc ...
+    // api 'org.apache.lucene:lucene-analysis-common:10.1.0'
+    // 19. seata: Saga pattern
+    api 'com.alibaba.cloud:spring-cloud-starter-alibaba-seata:2023.0.3.2'
+    //    api 'io.seata:seata-all:2.0.0'
+    //    api 'io.seata:seata-spring-boot-starter:2.0.0'
+    // 20. grpc
+    api 'io.grpc:grpc-stub:1.70.0'
+    api 'io.grpc:grpc-protobuf:1.70.0'
+    api 'io.grpc:grpc-netty:1.70.0'
+    // 21. google code
+    //    api 'com.google.guava:guava:33.4.5-jre'
+    // 22. flink
+    //    api 'org.apache.flink:flink-core:2.0.0'
+    //    api 'org.apache.flink:flink-java:2.0.0'
+    //    api 'org.apache.flink:flink-streaming-java:2.0.0'
+    //    api 'org.apache.flink:flink-connector-kafka:3.4.0-1.20'
+    //    api 'org.apache.flink:flink-clients:2.0.0'
+    //    api 'org.apache.flink:flink-connector-base:2.0.0'
+    // 23. jasperreports
+    api 'net.sf.jasperreports:jasperreports:7.0.1'
 
-    // saga pattern
-    api 'io.seata:seata-all:2.0.0'
-
-    // spring
+    // ===================================================================
+    // Spring dependencies
+    // ===================================================================
+    api 'org.springframework.boot:spring-boot-starter-tomcat'
     api 'org.springframework.boot:spring-boot-starter'
     api 'org.springframework.boot:spring-boot-starter-actuator'
     api 'org.springframework.boot:spring-boot-starter-cache'
@@ -115,25 +199,36 @@ dependencies {
     api 'org.springframework.cloud:spring-cloud-starter-config'
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
     api 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    api 'org.springframework.boot:spring-boot-starter-jooq'
+    api 'org.springframework.statemachine:spring-statemachine-core:4.0.0'
+    api 'org.springframework.boot:spring-boot-starter-mail'
+    api 'org.springframework.boot:spring-boot-starter-batch'
+    api 'org.springdoc:springdoc-openapi-ui:1.8.0'
+    //    implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
+    //    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
-    api 'org.springframework.security:spring-security-web'
-    api 'org.springframework.security:spring-security-oauth2-client'
+    // ===================================================================
+    // Spring dependencies
+    // ===================================================================
+    api 'org.springframework.boot:spring-boot-starter-data-couchbase'
+    api 'org.springframework.boot:spring-boot-starter-data-cassandra'
 
-
-    // spring cloud
+    // ===================================================================
+    // Spring cloud & monitor dependencies
+    // ===================================================================
     api 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     api 'org.springframework.cloud:spring-cloud-starter-sleuth'
     api 'org.springframework.cloud:spring-cloud-sleuth-zipkin'
     api 'io.zipkin.reporter2:zipkin-reporter-brave'
-
-    // monitoring
     api 'io.micrometer:micrometer-registry-prometheus'
     api group: 'io.micrometer', name: 'micrometer-tracing-bridge-brave', version: '1.3.3'
-
     api 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix:2.2.10.RELEASE'
 }
 
+// ===================================================================
+// Import to dependency
+// ===================================================================
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2021.0.3"
@@ -141,7 +236,23 @@ dependencyManagement {
     }
 }
 
-///////////////////////////////////// PUBLISH TO NEXUS /////////////////////////////////////////////
+// ===================================================================
+// After test with java coco and give the file report
+// ===================================================================
+tasks.test {
+    finalizedBy tasks.jacocoTestReport
+}
+
+tasks.jacocoTestReport {
+    reports {
+        html.required = true
+        xml.required = true
+    }
+}
+
+// ===================================================================
+// PUBLISH TO NEXUS
+// ===================================================================
 // after ./gradlew :Common:build or ./gradlew clean build
 // then use ./gradlew :Common:publish or ./gradlew publish to up jar to nexus
 // if not nexus will create new version + "-number++" like ( common.jar -> common-1.jar -> common-2.jar)

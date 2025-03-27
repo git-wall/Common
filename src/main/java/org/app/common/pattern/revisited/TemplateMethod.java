@@ -3,14 +3,7 @@ package org.app.common.pattern.revisited;
 import org.springframework.lang.NonNull;
 
 import java.util.function.Function;
-/**
- * <blockquote><pre>{@code
- *  TemplateMethod
- *  .action(p -> Map.of("eventTicket", "I'm going!").values().stream().findFirst().get())
- *  .executeFrom(passInformation);
- * }
- * </blockquote></pre>
- * */
+
 public class TemplateMethod<T, R> {
     private final Function<T, R> strategy;
 

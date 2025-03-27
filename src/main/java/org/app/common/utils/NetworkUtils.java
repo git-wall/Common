@@ -18,4 +18,7 @@ public class NetworkUtils {
     public static String getLocalHostName() {
         return InetAddress.getLocalHost().getHostName();
     }
+
+    @SneakyThrows(value = UnknownHostException.class)
+    public static byte[] getAddress() {return InetAddress.getLocalHost().getAddress();}
 }

@@ -42,7 +42,7 @@ public class Client5Utils {
                 .returnContent()
                 .asString();
 
-        JsonObject jsonObject = MapperUtils.gson().fromJson(responseBody, JsonObject.class);
+        JsonObject jsonObject = GsonUtils.fromJson(responseBody, JsonObject.class);
         return clazz.cast(jsonObject.get(field));
     }
 
@@ -77,7 +77,7 @@ public class Client5Utils {
                 .returnContent()
                 .asString();
 
-        return MapperUtils.gson().fromJson(responseBody, JsonObject.class);
+        return GsonUtils.fromJson(responseBody, JsonObject.class);
     }
 
     /**
@@ -97,7 +97,7 @@ public class Client5Utils {
                 .returnContent()
                 .asString();
 
-        return MapperUtils.mapper().readValue(responseBody, clazz);
+        return JacksonUtils.mapper().readValue(responseBody, clazz);
     }
 
     @SneakyThrows

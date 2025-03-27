@@ -1,0 +1,56 @@
+{
+ "paragraphs": [
+  {
+   "user": "anonymous",
+   "config": {
+    "colWidth": 12,
+    "fontSize": 9,
+    "enabled": true,
+    "results": {},
+    "editorSetting": {
+     "language": "scala",
+     "editOnDblClick": false,
+     "completionKey": "TAB",
+     "completionSupport": true
+    },
+    "editorMode": "ace/mode/scala"
+   },
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "jobName": "paragraph_1563110258183_1613653816",
+   "id": "20190714-161738_1950435706",
+   "dateCreated": "2019-07-14T16:17:38+0300",
+   "status": "READY",
+   "progressUpdateIntervalMs": 500,
+   "focus": true,
+   "$$hashKey": "object:394",
+   "text": "private final LoadingCache<String, String> timeBasedCache = CacheConfig.cacheTTL(\n            5,\n            TimeUnit.MINUTES,\n            key -> \"Computed value for \" + key\n    );\n\n    // Access-based expiration cache\n    private final LoadingCache<String, String> accessBasedCache = CacheConfig.cacheWithAccessExpiry(\n            30,\n            TimeUnit.MINUTES,\n            key -> \"Computed value for \" + key\n    );\n\n    // Memory-sensitive cache with soft values\n    private final LoadingCache<String, byte[]> memorySensitiveCache = CacheConfig.cacheWithSoftValues(\n            key -> new byte[1024 * 1024] // 1MB dummy value\n    );\n\n    // Weak keys cache for special references\n    private final LoadingCache<String, String> weakKeysCache = CacheConfig.cacheWithWeakKeys(\n            key -> \"Weak reference value for \" + key\n    );\n\n    // Auto-refreshing cache\n    private final LoadingCache<String, String> refreshingCache = CacheConfig.cacheWithRefresh(\n            1,\n            TimeUnit.HOURS,\n            key -> \"Fresh value for \" + key\n    );\n\n    // Async reloading cache\n    private final LoadingCache<String, String> asyncCache = CacheConfig.cacheWithAsyncReload(\n            5,\n            TimeUnit.MINUTES,\n            key -> {\n                // Simulate slow operation\n                try {\n                    Thread.sleep(1000);\n                } catch (InterruptedException e) {\n                    throw new RuntimeException(e);\n                }\n                return \"Async value for \" + key;\n            }\n    );\n\n    // Statistics-enabled cache\n    private final LoadingCache<String, String> statsCache = CacheConfig.cacheWithStats(\n            10,\n            TimeUnit.MINUTES,\n            key -> \"Monitored value for \" + key\n    );\n\n    // Cache with removal notifications\n    private final LoadingCache<String, String> notifyingCache = CacheConfig.cacheWithRemovalListener(\n            15,\n            TimeUnit.MINUTES,\n            key -> \"Tracked value for \" + key,\n            notification -> log.info(\"Removed {} -> {} due to {}\", \n                    notification.getKey(), \n                    notification.getValue(), \n                    notification.getCause())\n    );"
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "@Configuration\npublic class CacheConfig {\n    \n    @Bean\n    public TwoLevelCacheOperations<String, User> userCache(\n            RedisTemplate<String, User> redisTemplate) {\n        return CacheManagerUtils.createUnifiedTwoLevelCache(\n            redisTemplate,\n            Duration.ofMinutes(10),\n            Duration.ofHours(1)\n        );\n    }\n\n    // Or using Spring Cache managers\n    @Bean\n    public TwoLevelCacheOperations<String, User> userCacheAlt(\n            CacheManager localManager,\n            CacheManager redisManager) {\n        return CacheManagerUtils.createUnifiedTwoLevelCache(\n            localManager,\n            redisManager,\n            \"userCache\"\n        );\n    }\n}",
+   "id": "",
+   "dateCreated": "2025-02-28 10:07:44.437",
+   "config": {}
+  }
+ ],
+ "name": "Zeppelin Notebook",
+ "id": "",
+ "noteParams": {},
+ "noteForms": {},
+ "angularObjects": {},
+ "config": {
+  "isZeppelinNotebookCronEnable": false,
+  "looknfeel": "default",
+  "personalizedMode": "false"
+ },
+ "info": {}
+}

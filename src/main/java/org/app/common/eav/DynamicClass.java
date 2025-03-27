@@ -14,13 +14,13 @@ import java.util.Collection;
 
 public class DynamicClass<T> {
     private final T originalInstance;
-    private Collection<EAV> EAVs;
+    private Iterable<EAV> EAVs;
 
     public DynamicClass(T originalInstance) {
         this.originalInstance = originalInstance;
     }
 
-    public DynamicClass<T> fields(Collection<EAV> EAVs) {
+    public DynamicClass<T> fields(Iterable<EAV> EAVs) {
         this.EAVs = EAVs;
         return this;
     }
@@ -78,7 +78,6 @@ public class DynamicClass<T> {
             Object fieldValue = field.get(originalInstance);
             String getterName = String.format("get%s", capitalize(field.getName()));
 
-            // Override the getter method to return the value from the original instance
             builder = builder
                     .method(ElementMatchers.named(getterName))
                     .intercept(FixedValue.value(fieldValue));

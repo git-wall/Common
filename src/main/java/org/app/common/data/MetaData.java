@@ -1,8 +1,9 @@
 package org.app.common.data;
 
 import io.vavr.Function2;
-import org.app.common.option.Cover;
-import org.app.common.utils.MapperUtils;
+import org.app.common.utils.JacksonUtils;
+import org.app.common.utils.OptionalUtils;
+import org.app.common.utils.StreamUtils;
 import org.thymeleaf.util.ListUtils;
 
 import java.util.HashMap;
@@ -11,9 +12,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static org.app.common.option.Cover.innerMapper;
-import static org.app.common.option.Cover.mapper;
 
 public class MetaData {
     private final Map<Object, Object> data;
@@ -34,7 +32,7 @@ public class MetaData {
 
     public static MetaData fromJson(String json) {
         @SuppressWarnings("unchecked")
-        Map<String, Object> map = MapperUtils.readValue(json, Map.class);
+        Map<String, Object> map = JacksonUtils.readValue(json, Map.class);
         MetaData metaData = new MetaData();
         metaData.data.putAll(map);
         return metaData;
@@ -92,11 +90,11 @@ public class MetaData {
     }
 
     private <T, R> Object getVal(T val, Function<T, R> mapper) {
-        return val instanceof List ? innerMapper((List) val, mapper) : mapper(val, mapper);
+        return val instanceof List ? StreamUtils.innerMapper((List) val, mapper) : OptionalUtils.mapper(val, mapper);
     }
 
     public <T> MetaData innerFilter(Object key, Predicate<T> predicate) {
-        Object value = Cover.innerFilter(this.get(key), predicate);
+        Object value = StreamUtils.innerFilter(this.get(key), predicate);
         this.data.put(key, value);
         return this;
     }
@@ -134,7 +132,7 @@ public class MetaData {
     }
 
     public String asJson() {
-        return MapperUtils.mapper().valueToTree(data).toString();
+        return JacksonUtils.mapper().valueToTree(data).toString();
     }
 }
 

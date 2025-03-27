@@ -14,7 +14,7 @@ import java.util.*;
 @Component
 public class ConsumerProcessor implements BeanPostProcessor {
 
-    private final Map<String, List<ListenerMetadata>> groupedListeners = new HashMap<>(16, 0.75f);
+    private final Map<String, List<ListenerMetadata>> groupedListeners = new HashMap<>(8, 0.75f);
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {

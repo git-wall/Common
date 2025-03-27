@@ -5,14 +5,6 @@ import lombok.Getter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * <blockquote><pre>{@code
- * StrategyContext<PassInformation, String> customContext = new StrategyContext<>();
- * customContext.registerStrategy("custom", info -> "Custom for user: " + info.getUserProfile().toString());
- * customContext.setCurrentStrategy("custom");
- * String customJWT = customContext.execute(passInfo);
- * }</blockquote></pre>
- */
 public class StrategyContext<I, O> {
     private final Map<String, Strategy<I, O>> strategies;
     @Getter

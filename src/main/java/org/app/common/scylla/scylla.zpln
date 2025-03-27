@@ -1,0 +1,56 @@
+{
+ "paragraphs": [
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "scylla:\n  contact-points:\n    - scylla-node1\n    - scylla-node2\n    - scylla-node3\n  local-datacenter: datacenter1\n  keyspace: mykeyspace\n  port: 9042\n  username: scylla\n  password: password\n  max-requests-per-connection: 1024\n  pooling-max-connections-per-host: 8\n  socket-connect-timeout: 5000\n  request-timeout: 5000",
+   "id": "",
+   "dateCreated": "2025-02-23 18:12:22.169",
+   "config": {}
+  },
+  {
+   "user": "anonymous",
+   "config": {
+    "colWidth": 12,
+    "fontSize": 9,
+    "enabled": true,
+    "results": {},
+    "editorSetting": {
+     "language": "scala",
+     "editOnDblClick": false,
+     "completionKey": "TAB",
+     "completionSupport": true
+    },
+    "editorMode": "ace/mode/scala"
+   },
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "jobName": "paragraph_1563110258183_1613653816",
+   "id": "20190714-161738_1950435706",
+   "dateCreated": "2019-07-14T16:17:38+0300",
+   "status": "READY",
+   "progressUpdateIntervalMs": 500,
+   "focus": true,
+   "$$hashKey": "object:394",
+   "text": "@Service\n@RequiredArgsConstructor\npublic class UserService {\n    private final ScyllaTemplate scyllaTemplate;\n    \n    public User findById(String id) {\n        return scyllaTemplate.execute(\n            \"SELECT * FROM users WHERE id = ?\", \n            User.class, \n            id\n        );\n    }\n    \n    public void saveUsers(List<User> users) {\n        BatchStatement batch = scyllaTemplate.createBatch();\n        PreparedStatement stmt = scyllaTemplate.prepare(\n            \"INSERT INTO users (id, name, email) VALUES (?, ?, ?)\"\n        );\n        \n        for (User user : users) {\n            batch.add(scyllaTemplate.bind(stmt, \n                user.getId(), \n                user.getName(), \n                user.getEmail()\n            ));\n        }\n        \n        scyllaTemplate.executeBatch(batch);\n    }\n}"
+  }
+ ],
+ "name": "Zeppelin Notebook",
+ "id": "",
+ "noteParams": {},
+ "noteForms": {},
+ "angularObjects": {},
+ "config": {
+  "isZeppelinNotebookCronEnable": false,
+  "looknfeel": "default",
+  "personalizedMode": "false"
+ },
+ "info": {}
+}

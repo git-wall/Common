@@ -1,54 +1,182 @@
-# Getting Started
+# Common Library
 
-### Reference Documentation
+This is a common library project that provides shared functionality for Spring-based microservices.
 
-For further reference, please consider the following sections:
+## Features & Optimize
+
+* Algorithms: DAG, LevenshteinSearch
+* Benchmark: JMH
+* BRC: for handler millions data in file
+* Cache: Two-level caching with Redis and local cache, Google Cache, Hazelcast
+* Tech support config: cassandra, elastic, couchbase, redis, scylla
+* Health check endpoints
+* EAV: support pattern for handler field outside to class 
+* Interceptor monitor request and response processing
+* Jooq: support code gen entities
+* Kafka:
+  * Kafka Spring with 1 broker 
+  * Kafka Custom with multi broker
+* Multion: support register map enum & factory entities of interface  
+* Notifications: Line, Email, Telegram
+* Patterns:
+  * Legacy: Behavior Chain, Pipeline, Singleton, ServiceLocator, etc...
+  * Revisited: etc...
+  * Test: AAA, ObjectMother, PresentationModel
+* Thread cover 
+* Utils cover etc
+
+## Reference Documentation
 
 * [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/3.3.2/gradle-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/3.3.2/gradle-plugin/packaging-oci-image.html)
-* [Distributed Tracing Reference Guide](https://docs.micrometer.io/tracing/reference/index.html)
-* [Getting Started with Distributed Tracing](https://docs.spring.io/spring-boot/3.3.2/reference/actuator/tracing.html)
-* [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#actuator)
-* [Spring Cache Abstraction](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#io.caching)
-* [Eureka Discovery Client](https://docs.spring.io/spring-cloud-netflix/docs/current/reference/html/#service-discovery-eureka-clients)
-* [OpenFeign](https://docs.spring.io/spring-cloud-openfeign/docs/current/reference/html/)
-* [Gateway](https://docs.spring.io/spring-cloud-gateway/docs/current/reference/html/)
-* [Cloud LoadBalancer](https://docs.spring.io/spring-cloud-commons/docs/current/reference/html/#spring-cloud-loadbalancer)
-* [Resilience4J](https://docs.spring.io/spring-cloud-circuitbreaker/docs/current/reference/html/#configuring-resilience4j-circuit-breakers)
-* [Spring Configuration Processor](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#appendix.configuration-metadata.annotation-processor)
-* [Rest Repositories](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#howto.data-access.exposing-spring-data-repositories-as-rest)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#using.devtools)
-* [Spring for Apache Kafka](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#messaging.kafka)
-* [Apache Kafka Streams Support](https://docs.spring.io/spring-kafka/docs/current/reference/html/#streams-kafka-streams)
-* [Apache Kafka Streams Binding Capabilities of Spring Cloud Stream](https://docs.spring.io/spring-cloud-stream/docs/current/reference/htmlsingle/index.html#_kafka_streams_binding_capabilities_of_spring_cloud_stream)
-* [Prometheus](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#actuator.metrics.export.prometheus)
-* [Thymeleaf](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#web.servlet.spring-mvc.template-engines)
-* [Validation](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#io.validation)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/3.3.2/reference/htmlsingle/index.html#web)
+* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.7.18/gradle-plugin/reference/html/)
+* [Spring Boot Actuator](https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/index.html#actuator)
+* [Spring Cache Abstraction](https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/index.html#io.caching)
+* [Spring Web](https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/index.html#web)
+* [Spring for Apache Kafka](https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/index.html#messaging.kafka)
+* [Validation](https://docs.spring.io/spring-boot/docs/2.7.18/reference/htmlsingle/index.html#io.validation)
 
-### Guides
+## Project Structure
 
-The following guides illustrate how to use some features concretely:
+The project is organized into several packages:
 
-* [Building a RESTful Web Service with Spring Boot Actuator](https://spring.io/guides/gs/actuator-service/)
-* [Caching Data with Spring](https://spring.io/guides/gs/caching/)
-* [Service Registration and Discovery with Eureka and Spring Cloud](https://spring.io/guides/gs/service-registration-and-discovery/)
-* [Client-side load-balancing with Spring Cloud LoadBalancer](https://spring.io/guides/gs/spring-cloud-loadbalancer/)
-* [Accessing JPA Data with REST](https://spring.io/guides/gs/accessing-data-rest/)
-* [Accessing Neo4j Data with REST](https://spring.io/guides/gs/accessing-neo4j-data-rest/)
-* [Accessing MongoDB Data with REST](https://spring.io/guides/gs/accessing-mongodb-data-rest/)
-* [Samples for using Apache Kafka Streams with Spring Cloud stream](https://github.com/spring-cloud/spring-cloud-stream-samples/tree/master/kafka-streams-samples)
-* [Handling Form Submission](https://spring.io/guides/gs/handling-form-submission/)
-* [Validation](https://spring.io/guides/gs/validating-form-input/)
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+* `org.app.common.algorithms` - Algorithms suport
+* `org.app.common.base` - Base classes for controllers and services
+* `org.app.common.benchmark`- Support test in code
+* `org.app.common.cache` - Caching implementations including TwoLevelCache
+* `org.app.common.data` - Data handling utilities
+* `org.app.common.health` - Health check implementations
+* `org.app.common.kafka` - Kafka messaging utilities
+* `org.app.common.multion` - Multion pattern implementation
+* `org.app.common.eav` - EAV pattern database implementation
+* `org.app.common.interceptor` - Interceptor request, response, monitor
+* `org.app.common.pattern` - Design pattern implementations
+* `org.app.common.notification` - Notification support Line, Email, Telegram
+* `org.app.common.utils` - Utils support easy way to use
+* `org.app.common.thread` - Manager thread, create ExecutorService best way
+* `org.app.common.validation` - Valid support way
 
-### Additional Links
+### Health Checks
 
-These additional references should also help you:
+The project includes sever health check implementations:
+* `CacheHealthCheck` - Verifies Redis connectivity
+* `DbHealthCheck` - Verifies database connectivity
+* `SystemHealthCheck` - Reports system metrics
 
-* [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
-* [Declarative REST calls with Spring Cloud OpenFeign sample](https://github.com/spring-cloud-samples/feign-eureka)
+### Caching
+
+`TwoLevelCache` provides a two-level caching mechanism with:
+* Local in-memory cache for fast access
+* Redis-based distributed cache for shared state
+
+### Design Patterns
+
+* `MultionType` - A factory pattern using enums to define types
+* `EAV` - Database design pattern
+* `Pipeline` - Action by action
+* etc...
+
+### Tip Single
+
+```java
+// Good: Async initialization
+@Async
+@EventListener(ApplicationReadyEvent.class)
+public void init() {
+    // Heavy initialization
+}
+
+// Good: Streaming file processing
+@PostMapping("/upload")
+public void handleFileUpload(@RequestParam("file") MultipartFile file) {
+    try (InputStream inputStream = file.getInputStream()) {
+        // Process stream in chunks
+    }
+}
+
+// Good: Bounded cache with eviction
+@Configuration
+@EnableCaching
+public class CacheConfig {
+    @Bean
+    public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager();
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+                .maximumSize(500)
+                .expireAfterWrite(Duration.ofMinutes(10)));
+        return cacheManager;
+    }
+}
+
+// Good: Bounded cache with eviction
+@Component
+public class UserCache {
+    private final Cache<String, User> cache;
+
+    public UserCache() {
+        this.cache = Caffeine.newBuilder()
+                .maximumSize(1000)
+                .expireAfterWrite(Duration.ofHours(1))
+                .build();
+    }
+}
+```
+
+```properties
+// Enable compression
+server:
+compression:
+enabled: true
+mime-types: text/html,text/xml,text/plain,text/css,application/javascript,application/json
+min-response-size: 1024
+```
+
+#### Tip group
+```properties
+// Enable lazy initialization
+spring:
+  main:
+    lazy-initialization: true
+```
+
+```java
+// Selective lazy initialization
+@Configuration
+public class ServiceConfig {
+    @Lazy
+    @Bean
+    public ExpensiveService expensiveService() {
+        return new ExpensiveService();
+    }
+}
+```
+
+## Building
+```shell
+   ./gradlew build
+```
+
+## Publishing
+- need nexus service
+```yaml
+version: '3.8'
+services:
+
+  nexus:
+    image: sonatype/nexus3
+    expose:
+      - 8081
+    ports:
+      - "8381:8081"
+    restart: always 
+```
+- add this with name [gradle.properties]
+```properties
+SNAPSHOT_REPOSITORY_URL=http://localhost:8381/repository/maven-snapshots/
+NEXUS_USERNAME=...
+NEXUS_PASSWORD=...
+```
+- run this after nexus service start
+```shell
+   ./gradlew publish
+```
 

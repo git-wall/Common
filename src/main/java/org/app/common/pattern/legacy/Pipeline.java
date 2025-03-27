@@ -1,10 +1,5 @@
 package org.app.common.pattern.legacy;
 
-/**
- * Use case:
- *      valid pipeline with one input
- * Like ETL data
- */
 public class Pipeline<I, O> {
 
     private Action<I, O> action;

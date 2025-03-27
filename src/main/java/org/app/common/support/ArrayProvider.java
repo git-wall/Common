@@ -1,0 +1,47 @@
+package org.app.common.support;
+
+import java.util.function.Consumer;
+
+public class ArrayProvider {
+    /**
+     * Root of thing to optimize about combine array with layer near JVM
+     * */
+    public static <T> T[] combine(T[] src1, T[] src2) {
+        Object[] combineArray = new Object[src1.length + src2.length];
+
+        System.arraycopy(src1, 0, combineArray, 0, src1.length);
+        System.arraycopy(src2, 0, combineArray, src1.length, src2.length);
+
+        return (T[]) combineArray;
+    }
+
+    /**
+     *
+     * <h3><strong>Attendtion: Not use if array < 10</strong><br>
+     *
+     * <h4>Benefit</h4>
+     * <strong>Performance</strong>: Reduces overhead, leverages CPU and JIT optimizations,
+     * and improves cache usage—ideal for tight loops over large arrays. <br><br>
+     * <strong>Correctness</strong>: The cleanup loop ensures no elements are missed or processed twice, handling arrays of any length safely. <br><br>
+     * <strong>Maintainability</strong>: The code is still readable, with a clear intent (unrolling for performance),
+     * and the comment aids understanding.
+     */
+    public void processArray(int[] array, Consumer<Integer> process) {
+        if (array == null || process == null) {
+            return;
+        }
+
+        // Main unrolled loop: process 4 elements at a time
+        for (int i = 0; i < array.length - 4; i += 4) {
+            process.accept(array[i]);
+            process.accept(array[i + 1]);
+            process.accept(array[i + 2]);
+            process.accept(array[i + 3]);
+        }
+
+        // Cleanup loop: handle remaining elements
+        for (int i = (array.length & ~3); i < array.length; i++) {
+            process.accept(array[i]);
+        }
+    }
+}

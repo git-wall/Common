@@ -25,47 +25,6 @@ package org.app.common.rule;
  *         return "Age must be at least " + minAge;
  *     }
  * }
- *
- * public class IncomeRule implements Rule<Double> {
- *     private final double minIncome;
- *
- *     public IncomeRule(double minIncome) {
- *         this.minIncome = minIncome;
- *     }
- *
- *     @Override
- *     public boolean evaluate(Double income) {
- *         return income >= minIncome;
- *     }
- *
- *     @Override
- *     public String getDescription() {
- *         return "Income must be at least " + minIncome;
- *     }
- * }
- *
- * //
- *
- * public static void main(String[] args) {
- *         DecisionEngine<Integer> ageEngine = new DecisionEngine<>();
- *         ageEngine.addRule(new AgeRule(18));
- *         ageEngine.addRule(new AgeRule(21));
- *
- *         DecisionEngine<Double> incomeEngine = new DecisionEngine<>();
- *         incomeEngine.addRule(new IncomeRule(30000.0));
- *         incomeEngine.addRule(new IncomeRule(50000.0));
- *
- *         // Evaluate age rules
- *         DecisionEngine.DecisionResult ageResult = ageEngine.evaluate(20);
- *         System.out.println("Passed Age Rules: " + ageResult.getPassedRules());
- *         System.out.println("Failed Age Rules: " + ageResult.getFailedRules());
- *
- *         // Evaluate income rules
- *         DecisionEngine.DecisionResult incomeResult = incomeEngine.evaluate(40000.0);
- *         System.out.println("Passed Income Rules: " + incomeResult.getPassedRules());
- *         System.out.println("Failed Income Rules: " + incomeResult.getFailedRules());
- *     }
- * }
  * </>
  *
  * <pre>

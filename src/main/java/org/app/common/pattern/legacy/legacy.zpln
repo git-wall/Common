@@ -1,0 +1,30 @@
+{
+ "paragraphs": [
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "public class Letter extends FluentApi<Letter> {\n    private String from;\n    private String to;\n    \n    public Letter from(String from) {\n         this.from = from;\n         return self;\n     }\n\n     public Letter to(String to) {\n         this.to = to;\n         return self;\n     }\n}",
+   "id": "",
+   "dateCreated": "2025-02-23 11:30:52.184",
+   "config": {
+    "title": true
+   },
+   "title": "FluentSelf"
+  }
+ ],
+ "name": "Zeppelin Notebook",
+ "id": "",
+ "noteParams": {},
+ "noteForms": {},
+ "angularObjects": {},
+ "config": {
+  "isZeppelinNotebookCronEnable": false,
+  "looknfeel": "default",
+  "personalizedMode": "false"
+ },
+ "info": {}
+}

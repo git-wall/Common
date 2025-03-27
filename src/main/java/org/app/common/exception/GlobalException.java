@@ -1,9 +1,9 @@
 package org.app.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.context.DecorateContext;
+import org.app.common.context.ThreadContext;
 import org.app.common.utils.RequestUtils;
-import org.app.common.utils.ResponseUtils;
+import org.app.common.res.ResponseUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,20 +17,21 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public abstract class GlobalException {
 
+    private static final String ERROR_MESSAGE_PATTERN = "Field: %s, Error: %s";
+
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<Object> exceptionHandler(MethodArgumentNotValidException ex) {
-        String format = "Field: %s, Error: %s. Pls check and try again.";
         List<String> errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(fieldError -> String.format(format, fieldError.getField(), fieldError.getDefaultMessage()))
+                .map(fieldError -> String.format(ERROR_MESSAGE_PATTERN, fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.toList());
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         return ResponseEntity.ok(
                 ResponseUtils.Error.build(
-                        DecorateContext.get(RequestUtils.REQUEST_ID),
+                        ThreadContext.get(RequestUtils.REQUEST_ID),
                         status,
                         status.getReasonPhrase(),
                         errors)
@@ -39,8 +40,8 @@ public abstract class GlobalException {
 
     @ExceptionHandler({IllegalArgumentException.class})
     public ResponseEntity<Object> exceptionHandler(IllegalArgumentException ex) {
-        var id = DecorateContext.get(RequestUtils.REQUEST_ID);
-        String message = String.format("Request id: %s, Error: %s", id, ex.getMessage());
+        var id = ThreadContext.get(RequestUtils.REQUEST_ID);
+        String message = String.format("%s - %s", id, ex.getMessage());
         log.error(message, ex);
         return ResponseEntity.ok(
                 ResponseUtils.Error.build(

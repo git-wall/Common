@@ -1,12 +1,12 @@
 package org.app.common.mapper;
 
+import lombok.SneakyThrows;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.lang.NonNull;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.Arrays;
 
 public class GenericRowMapper<T> implements RowMapper<T> {
@@ -23,32 +23,30 @@ public class GenericRowMapper<T> implements RowMapper<T> {
     }
 
     @Override
-    public T mapRow(@NonNull ResultSet rs, int rowNum) throws SQLException {
-        try {
-            // Create an instance of the target class
-            T entity = clazz.getDeclaredConstructor().newInstance();
+    @SneakyThrows
+    public T mapRow(@NonNull ResultSet rs, int rowNum) {
+        // Create an instance of the target class
+        T entity = clazz.getDeclaredConstructor().newInstance();
 
-            // Get metadata about the result set
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columnCount = metaData.getColumnCount();
+        // Get metadata about the result set
+        ResultSetMetaData metaData = rs.getMetaData();
+        int columnCount = metaData.getColumnCount();
 
-            // Iterate through each column in the result set
-            for (int i = 1; i <= columnCount; i++) {
-                String columnName = metaData.getColumnName(i).toLowerCase(); // Normalize column name
-                Object columnValue = rs.getObject(i);
+        // Iterate through each column in the result set
+        for (int i = 1; i <= columnCount; i++) {
+            String columnName = metaData.getColumnName(i).toLowerCase(); // Normalize column name
+            Object columnValue = rs.getObject(i);
 
-                // Find the corresponding field in the entity class
-                Field field = findField(clazz, columnName);
-                if (field != null) {
-                    field.setAccessible(true); // Allow access to private fields
-                    field.set(entity, columnValue); // Set the value
-                }
+            // Find the corresponding field in the entity class
+            Field field = findField(clazz, columnName);
+            if (field != null) {
+                field.setAccessible(true);      // Allow access to private fields
+                field.set(entity, columnValue); // Set the value
+                field.setAccessible(false);     // Close access private field
             }
-
-            return entity;
-        } catch (Exception e) {
-            throw new SQLException("Error mapping row to entity", e);
         }
+
+        return entity;
     }
 
     /**

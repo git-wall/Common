@@ -1,0 +1,44 @@
+{
+ "paragraphs": [
+  {
+   "user": "anonymous",
+   "config": {
+    "colWidth": 12,
+    "fontSize": 9,
+    "enabled": true,
+    "results": {},
+    "editorSetting": {
+     "language": "scala",
+     "editOnDblClick": false,
+     "completionKey": "TAB",
+     "completionSupport": true
+    },
+    "editorMode": "ace/mode/scala"
+   },
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "jobName": "paragraph_1563110258183_1613653816",
+   "id": "20190714-161738_1950435706",
+   "dateCreated": "2019-07-14T16:17:38+0300",
+   "status": "READY",
+   "progressUpdateIntervalMs": 500,
+   "focus": true,
+   "$$hashKey": "object:394",
+   "text": "// Entity\npublic class User extends BaseEntity {\n    private String username;\n    private String email;\n}\n\n// Service\n@Service\npublic class UserService extends AbstractService<UserInput, UserOutput, User, Long> {\n    public UserService(UserRepository repository, \n                      UserInputMapper inputMapper, \n                      UserOutputMapper outputMapper) {\n        super(repository, inputMapper, outputMapper);\n    }\n}\n\n// Controller\n@RestController\n@RequestMapping(\"/api/users\")\npublic class UserController extends AbstractController<UserService, UserInput, UserOutput, Long> {\n    public UserController(UserService service) {\n        super(service);\n    }\n}"
+  }
+ ],
+ "name": "Zeppelin Notebook",
+ "id": "",
+ "noteParams": {},
+ "noteForms": {},
+ "angularObjects": {},
+ "config": {
+  "isZeppelinNotebookCronEnable": false,
+  "looknfeel": "default",
+  "personalizedMode": "false"
+ },
+ "info": {}
+}
