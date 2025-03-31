@@ -1,4 +1,4 @@
-package org.app.common.utils;
+package org.app.common.test.memory.jol;
 
 import org.openjdk.jol.info.ClassLayout;
 import org.openjdk.jol.vm.VM;

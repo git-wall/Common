@@ -41,7 +41,7 @@ public abstract class AbstractServiceCDC
 
     @Override
     public E add(DTO input) {
-        E entity = mapper.dtoToEntity(input);
+        E entity = mapper.toEntity(input);
         return repository.save(entity);
     }
 
@@ -149,7 +149,7 @@ public abstract class AbstractServiceCDC
                 Objects.equals(e.get().getCdcVersion(), input.getCdcVersion()),
                 "Error update, version obj is change. Pls reload and update again"
         );
-        E entity = mapper.dtoToEntity(input);
+        E entity = mapper.toEntity(input);
         return repository.save(entity);
     }
 

@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.security.*;
 import io.swagger.v3.oas.annotations.servers.Server;
 
 @OpenAPIDefinition(
-        info = @Info(title = "${spring.application.name}", description = "${spring.application.name}", version = "1.0"),
+        info = @Info(title = "${spring.application.name}", description = "${spring.application.name}", version = "${spring.application.version}"),
         security = @SecurityRequirement(name = "oauth2_bearer"),
         servers = {@Server(url = "${server.servlet.context-path}", description = "Default Server URL")})
 @SecurityScheme(

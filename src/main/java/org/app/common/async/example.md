@@ -33,8 +33,6 @@ The `AsyncProcessor` class provides a comprehensive set of utilities for working
 
 ```java
 @Autowired
-private AsyncProcessor asyncProcessor;
-
 // Execute a task that returns a value
 CompletableFuture<String> future = asyncProcessor.executeAsync(() -> {
     // Simulate work

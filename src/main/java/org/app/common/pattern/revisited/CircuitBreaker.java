@@ -15,7 +15,7 @@ public class CircuitBreaker {
 
     public <T> T execute(CircuitBreakerOperation<T> operation) throws Exception {
         if (state.get() == State.OPEN) {
-            if (System.currentTimeMillis() - lastFailureTime > 5000) {
+            if (System.currentTimeMillis() - lastFailureTime > 5000L) {
                 state.set(State.HALF_OPEN);
             } else {
                 throw new CircuitBreakerOpenException("Circuit breaker is open");
@@ -54,6 +54,8 @@ public class CircuitBreaker {
     }
 
     public static class CircuitBreakerOpenException extends RuntimeException {
+        private static final long serialVersionUID = 666318998450530040L;
+
         public CircuitBreakerOpenException(String message) {
             super(message);
         }

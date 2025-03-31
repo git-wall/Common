@@ -32,7 +32,7 @@ public abstract class AbstractService<Repo extends JpaRepository<E, ID>, E, ID, 
 
     @Override
     public E add(DTO input) {
-        E entity = mapper.dtoToEntity(input);
+        E entity = mapper.toEntity(input);
         return repository.save(entity);
     }
 
@@ -134,7 +134,7 @@ public abstract class AbstractService<Repo extends JpaRepository<E, ID>, E, ID, 
 
     @Override
     public E update(DTO input) {
-        E entity = mapper.dtoToEntity(input);
+        E entity = mapper.toEntity(input);
         return repository.save(entity);
     }
 

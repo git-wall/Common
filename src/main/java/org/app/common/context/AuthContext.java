@@ -1,6 +1,5 @@
 package org.app.common.context;
 
-import org.app.common.utils.RequestUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -10,7 +9,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -23,7 +21,9 @@ public class AuthContext {
     }
 
     public static String getUserName() {
-        return getAuthHolder().getName();
+        return Optional.ofNullable(getAuthHolder())
+                .map(Authentication::getName)
+                .orElse(null);
     }
 
     public static Collection<? extends GrantedAuthority> getAuthorities() {
@@ -39,7 +39,8 @@ public class AuthContext {
     }
 
     public static <T> T getPrincipal(Class<T> clazz) {
-        return clazz.cast(getAuthHolder().getPrincipal());
+        Object principal = getAuthHolder().getPrincipal();
+        return clazz.isInstance(principal) ? clazz.cast(principal) : null;
     }
 
     private static String getPrincipal(Authentication authentication) {
@@ -60,14 +61,6 @@ public class AuthContext {
         return null;
     }
 
-    public static String getDetails(Authentication auth){
-        return Optional.ofNullable(auth)
-                .map(Authentication::getDetails)
-                .filter(authDetails -> authDetails instanceof WebAuthenticationDetails)
-                .map(authDetails -> RequestUtils.getRemoteAddress((WebAuthenticationDetails) authDetails))
-                .orElse(null);
-    }
-
     public static String getClientId(OAuth2AuthenticationToken auth) {
         return Optional.ofNullable(auth)
                 .map(OAuth2AuthenticationToken::getAuthorizedClientRegistrationId)
@@ -82,7 +75,8 @@ public class AuthContext {
     }
 
     public static String getClientId(ClientRegistrationRepository clientRegistrationRepository, String registrationId) {
-        return Optional.ofNullable(clientRegistrationRepository.findByRegistrationId(registrationId))
+        return Optional.ofNullable(clientRegistrationRepository)
+                .map(repo -> repo.findByRegistrationId(registrationId))
                 .map(ClientRegistration::getClientId)
                 .orElse(null);
     }

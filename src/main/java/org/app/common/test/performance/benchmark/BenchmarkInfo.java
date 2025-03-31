@@ -1,4 +1,4 @@
-package org.app.common.benchmark;
+package org.app.common.test.performance.benchmark;
 
 import lombok.Builder;
 import lombok.Data;

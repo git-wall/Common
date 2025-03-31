@@ -1,6 +1,5 @@
 package org.app.common.utils;
 
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -118,9 +117,9 @@ public class RequestUtils {
         return request.getRequestURL().toString() + "?" + request.getQueryString();
     }
 
-    public static String getRemoteAddress(WebAuthenticationDetails webDetails) {
-        return (webDetails != null) ? webDetails.getRemoteAddress() : null;
-    }
+//    public static String getRemoteAddress(WebAuthenticationDetails webDetails) {
+//        return (webDetails != null) ? webDetails.getRemoteAddress() : null;
+//    }
 
     public static String getDomain(HttpServletRequest request) {
         String host = request.getHeader("host");

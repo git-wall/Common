@@ -41,7 +41,7 @@ public class AsyncProcessor {
      * @param <T>  The return type
      * @return A CompletableFuture with the result
      */
-    public <T> CompletableFuture<T> executeAsync(Supplier<T> task) {
+    public <T> CompletableFuture<T> run(Supplier<T> task) {
         return CompletableFuture.supplyAsync(task, executorService);
     }
 
@@ -51,7 +51,7 @@ public class AsyncProcessor {
      * @param task The task to execute
      * @return A CompletableFuture with no result
      */
-    public CompletableFuture<Void> executeAsync(Runnable task) {
+    public CompletableFuture<Void> run(Runnable task) {
         return CompletableFuture.runAsync(task, executorService);
     }
 
@@ -103,7 +103,7 @@ public class AsyncProcessor {
      * @param <T>   The return type
      * @return A CompletableFuture with a list of results
      */
-    public <T> CompletableFuture<List<T>> executeAll(Collection<Supplier<T>> tasks) {
+    public <T> CompletableFuture<List<T>> runAll(Collection<Supplier<T>> tasks) {
         List<CompletableFuture<T>> futures = tasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(task, executorService))
                 .collect(Collectors.toList());
@@ -122,7 +122,7 @@ public class AsyncProcessor {
      * @param <T>      The return type
      * @return A CompletableFuture that completes when all tasks are done
      */
-    public <T> CompletableFuture<Void> executeAllAndConsume(Collection<Supplier<T>> tasks,
+    public <T> CompletableFuture<Void> runAllConsume(Collection<Supplier<T>> tasks,
                                                             Consumer<T> consumer) {
 
         return CompletableFuture.allOf(
@@ -141,7 +141,7 @@ public class AsyncProcessor {
      * @param <T>     The return type
      * @return A CompletableFuture with the result or a TimeoutException
      */
-    public <T> CompletableFuture<T> executeWithTimeout(Supplier<T> task, long timeout, TimeUnit unit) {
+    public <T> CompletableFuture<T> runWithTimeout(Supplier<T> task, long timeout, TimeUnit unit) {
         CompletableFuture<T> future = CompletableFuture.supplyAsync(task, executorService);
 
         return future.orTimeout(timeout, unit);
@@ -157,9 +157,9 @@ public class AsyncProcessor {
      * @param <T>      The return type
      * @return A CompletableFuture with the result or the fallback value
      */
-    public <T> CompletableFuture<T> executeWithFallback(Supplier<T> task, T fallback,
+    public <T> CompletableFuture<T> runWithFallback(Supplier<T> task, T fallback,
                                                         long timeout, TimeUnit unit) {
-        return executeWithTimeout(task, timeout, unit)
+        return runWithTimeout(task, timeout, unit)
                 .exceptionally(ex -> {
                     log.warn("Task failed or timed out, using fallback value", ex);
                     return fallback;
@@ -176,14 +176,14 @@ public class AsyncProcessor {
      * @param <T>        The return type
      * @return A CompletableFuture with the result
      */
-    public <T> CompletableFuture<T> executeWithRetry(Supplier<T> task, int maxRetries,
+    public <T> CompletableFuture<T> runWithRetry(Supplier<T> task, int maxRetries,
                                                      long delay, TimeUnit unit) {
         CompletableFuture<T> future = new CompletableFuture<>();
-        executeWithRetryInternal(task, maxRetries, delay, unit, future, 0);
+        runWithRetryInternal(task, maxRetries, delay, unit, future, 0);
         return future;
     }
 
-    private <T> void executeWithRetryInternal(Supplier<T> task,
+    private <T> void runWithRetryInternal(Supplier<T> task,
                                               int maxRetries,
                                               long delay,
                                               TimeUnit unit,
@@ -197,7 +197,7 @@ public class AsyncProcessor {
                         log.warn("Attempt {} failed, retrying after delay", attempt + 1, ex);
                         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
                         scheduler.schedule(
-                                () -> executeWithRetryInternal(task, maxRetries, delay, unit, future, attempt + 1),
+                                () -> runWithRetryInternal(task, maxRetries, delay, unit, future, attempt + 1),
                                 delay, unit);
                         scheduler.shutdown();
                     } else {
@@ -218,7 +218,7 @@ public class AsyncProcessor {
      * @param <T>              The return type
      * @return A CompletableFuture with the result or the fallback value
      */
-    public <T> CompletableFuture<T> executeWithCircuitBreaker(Supplier<T> task, T fallback,
+    public <T> CompletableFuture<T> runWithCircuitBreaker(Supplier<T> task, T fallback,
                                                               int failureThreshold, long resetTimeout,
                                                               TimeUnit resetUnit) {
         CircuitBreaker<T> circuitBreaker = new CircuitBreaker<>(executorService, failureThreshold, resetTimeout, resetUnit);
@@ -234,7 +234,7 @@ public class AsyncProcessor {
      * @param <T>            The return type
      * @return A CompletableFuture with the result
      */
-    public <T> CompletableFuture<T> executeWithHandlers(Supplier<T> task,
+    public <T> CompletableFuture<T> runHandler(Supplier<T> task,
                                                         Consumer<T> successHandler,
                                                         Consumer<Throwable> failureHandler) {
         return CompletableFuture.supplyAsync(task, executorService)
@@ -256,7 +256,7 @@ public class AsyncProcessor {
      * @param <R>        The return type of the second task
      * @return A CompletableFuture with the result of the second task
      */
-    public <T, R> CompletableFuture<R> executeSequence(Supplier<T> firstTask,
+    public <T, R> CompletableFuture<R> runSequence(Supplier<T> firstTask,
                                                        Function<T, R> secondTask) {
         return CompletableFuture.supplyAsync(firstTask, executorService)
                 .thenApplyAsync(secondTask, executorService);
@@ -273,7 +273,7 @@ public class AsyncProcessor {
      * @param <R>        The return type after combining
      * @return A CompletableFuture with the combined result
      */
-    public <T, U, R> CompletableFuture<R> executeBoth(Supplier<T> firstTask,
+    public <T, U, R> CompletableFuture<R> runBoth(Supplier<T> firstTask,
                                                       Supplier<U> secondTask,
                                                       BiFunction<T, U, R> combiner) {
         CompletableFuture<T> future1 = CompletableFuture.supplyAsync(firstTask, executorService);
@@ -289,7 +289,7 @@ public class AsyncProcessor {
      * @param <T>   The return type
      * @return A CompletableFuture with the result of the first task to complete
      */
-    public <T> CompletableFuture<T> executeAny(Collection<Supplier<T>> tasks) {
+    public <T> CompletableFuture<T> runAny(Collection<Supplier<T>> tasks) {
         List<CompletableFuture<T>> futures = tasks.stream()
                 .map(task -> CompletableFuture.supplyAsync(task, executorService))
                 .collect(Collectors.toList());
@@ -324,7 +324,145 @@ public class AsyncProcessor {
     }
 
     /**
-     * Simple circuit breaker implementation
+     * Execute a task with exponential backoff retry strategy
+     *
+     * @param task         The task to execute
+     * @param maxRetries   The maximum number of retries
+     * @param initialDelay The initial delay before the first retry
+     * @param maxDelay     The maximum delay between retries
+     * @param unit         The time unit for delays
+     * @param <T>          The return type
+     * @return A CompletableFuture with the result
+     */
+    public <T> CompletableFuture<T> runWithExponentialBackoff(Supplier<T> task,
+                                                                  int maxRetries,
+                                                                  long initialDelay,
+                                                                  long maxDelay,
+                                                                  TimeUnit unit) {
+        CompletableFuture<T> future = new CompletableFuture<>();
+        runWithBackoffInternal(task, (double) maxRetries, initialDelay, maxDelay, unit, future, 0d);
+        return future;
+    }
+
+    private <T> void runWithBackoffInternal(Supplier<T> task,
+                                                double maxRetries,
+                                                long initialDelay,
+                                                long maxDelay,
+                                                TimeUnit unit,
+                                                CompletableFuture<T> future,
+                                                double attempt) {
+        CompletableFuture.supplyAsync(task, executorService)
+                .whenComplete((result, ex) -> {
+                    if (ex == null) {
+                        future.complete(result);
+                    } else if (attempt < maxRetries) {
+                        // Calculate exponential backoff delay
+                        long delay = Math.min(
+                                initialDelay * (long) Math.pow(2.0, attempt),
+                                maxDelay
+                        );
+
+                        log.warn("Attempt {} failed, retrying after {} ms with exponential backoff",
+                                attempt + 1.0, unit.toMillis(delay), ex);
+
+                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+                        scheduler.schedule(
+                                () -> runWithBackoffInternal(
+                                        task, maxRetries, initialDelay, maxDelay, unit, future, attempt + 1.0),
+                                delay, unit);
+                        scheduler.shutdown();
+                    } else {
+                        log.error("All {} retry attempts with exponential backoff failed", maxRetries, ex);
+                        future.completeExceptionally(ex);
+                    }
+                });
+    }
+
+    /**
+     * Execute a task with a deadline (absolute timeout)
+     *
+     * @param task     The task to execute
+     * @param deadline The deadline timestamp in milliseconds
+     * @param <T>      The return type
+     * @return A CompletableFuture with the result or a TimeoutException
+     */
+    public <T> CompletableFuture<T> runWithDeadline(Supplier<T> task, long deadline) {
+        long timeoutMillis = deadline - System.currentTimeMillis();
+        if (timeoutMillis <= 0L) {
+            CompletableFuture<T> future = new CompletableFuture<>();
+            future.completeExceptionally(new TimeoutException("Deadline already passed"));
+            return future;
+        }
+
+        return runWithTimeout(task, timeoutMillis, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Execute a task and cache the result for a specified duration
+     *
+     * @param task     The task to execute
+     * @param cacheKey The cache key
+     * @param duration The cache duration
+     * @param unit     The time unit for the duration
+     * @param <T>      The return type
+     * @return A CompletableFuture with the result
+     */
+    public <T> CompletableFuture<T> runWithCache(Supplier<T> task,
+                                                     Object cacheKey,
+                                                     long duration,
+                                                     TimeUnit unit) {
+        CacheableTask<T> cacheableTask = new CacheableTask<>(executorService, duration, unit);
+        return cacheableTask.execute(task, cacheKey);
+    }
+
+    /**
+     * Execute a task with rate limiting
+     *
+     * @param task       The task to execute
+     * @param permits    The number of permits to acquire
+     * @param maxPermits The maximum permits per second
+     * @param <T>        The return type
+     * @return A CompletableFuture with the result
+     */
+    public <T> CompletableFuture<T> runWithRateLimit(Supplier<T> task,
+                                                         int permits,
+                                                         double maxPermits) {
+        RateLimitedTask<T> rateLimitedTask = new RateLimitedTask<>(executorService, maxPermits);
+        return rateLimitedTask.execute(task, permits);
+    }
+
+    /**
+     * Execute a task with a bulkhead pattern (limiting concurrent executions)
+     *
+     * @param task          The task to execute
+     * @param maxConcurrent The maximum number of concurrent executions
+     * @param maxWaiting    The maximum number of waiting tasks
+     * @param <T>           The return type
+     * @return A CompletableFuture with the result
+     */
+    public <T> CompletableFuture<T> runWithBulkhead(Supplier<T> task,
+                                                        int maxConcurrent,
+                                                        int maxWaiting) {
+        BulkheadTask<T> bulkheadTask = new BulkheadTask<>(executorService, maxConcurrent, maxWaiting);
+        return bulkheadTask.execute(task);
+    }
+
+    /**
+     * Execute a task with a fallback function if it fails
+     *
+     * @param task       The task to execute
+     * @param fallbackFn The function to provide a fallback value
+     * @param <T>        The return type
+     * @return A CompletableFuture with the result or the fallback value
+     */
+    public <T> CompletableFuture<T> runWithFallbackFn(Supplier<T> task,
+                                                          Function<Throwable, T> fallbackFn) {
+        return CompletableFuture.supplyAsync(task, executorService)
+                .exceptionally(fallbackFn);
+    }
+
+    /**
+     * circuit breaker implementation
      */
     private static class CircuitBreaker<T> {
         private final ExecutorService executorService;
@@ -381,145 +519,7 @@ public class AsyncProcessor {
     }
 
     /**
-     * Execute a task with exponential backoff retry strategy
-     *
-     * @param task         The task to execute
-     * @param maxRetries   The maximum number of retries
-     * @param initialDelay The initial delay before the first retry
-     * @param maxDelay     The maximum delay between retries
-     * @param unit         The time unit for delays
-     * @param <T>          The return type
-     * @return A CompletableFuture with the result
-     */
-    public <T> CompletableFuture<T> executeWithExponentialBackoff(Supplier<T> task,
-                                                                  int maxRetries,
-                                                                  long initialDelay,
-                                                                  long maxDelay,
-                                                                  TimeUnit unit) {
-        CompletableFuture<T> future = new CompletableFuture<>();
-        executeWithBackoffInternal(task, (double) maxRetries, initialDelay, maxDelay, unit, future, 0d);
-        return future;
-    }
-
-    private <T> void executeWithBackoffInternal(Supplier<T> task,
-                                                double maxRetries,
-                                                long initialDelay,
-                                                long maxDelay,
-                                                TimeUnit unit,
-                                                CompletableFuture<T> future,
-                                                double attempt) {
-        CompletableFuture.supplyAsync(task, executorService)
-                .whenComplete((result, ex) -> {
-                    if (ex == null) {
-                        future.complete(result);
-                    } else if (attempt < maxRetries) {
-                        // Calculate exponential backoff delay
-                        long delay = Math.min(
-                                initialDelay * (long) Math.pow(2.0, attempt),
-                                maxDelay
-                        );
-
-                        log.warn("Attempt {} failed, retrying after {} ms with exponential backoff",
-                                attempt + 1.0, unit.toMillis(delay), ex);
-
-                        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-                        scheduler.schedule(
-                                () -> executeWithBackoffInternal(
-                                        task, maxRetries, initialDelay, maxDelay, unit, future, attempt + 1.0),
-                                delay, unit);
-                        scheduler.shutdown();
-                    } else {
-                        log.error("All {} retry attempts with exponential backoff failed", maxRetries, ex);
-                        future.completeExceptionally(ex);
-                    }
-                });
-    }
-
-    /**
-     * Execute a task with a deadline (absolute timeout)
-     *
-     * @param task     The task to execute
-     * @param deadline The deadline timestamp in milliseconds
-     * @param <T>      The return type
-     * @return A CompletableFuture with the result or a TimeoutException
-     */
-    public <T> CompletableFuture<T> executeWithDeadline(Supplier<T> task, long deadline) {
-        long timeoutMillis = deadline - System.currentTimeMillis();
-        if (timeoutMillis <= 0L) {
-            CompletableFuture<T> future = new CompletableFuture<>();
-            future.completeExceptionally(new TimeoutException("Deadline already passed"));
-            return future;
-        }
-
-        return executeWithTimeout(task, timeoutMillis, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * Execute a task and cache the result for a specified duration
-     *
-     * @param task     The task to execute
-     * @param cacheKey The cache key
-     * @param duration The cache duration
-     * @param unit     The time unit for the duration
-     * @param <T>      The return type
-     * @return A CompletableFuture with the result
-     */
-    public <T> CompletableFuture<T> executeWithCache(Supplier<T> task,
-                                                     Object cacheKey,
-                                                     long duration,
-                                                     TimeUnit unit) {
-        CacheableTask<T> cacheableTask = new CacheableTask<>(executorService, duration, unit);
-        return cacheableTask.execute(task, cacheKey);
-    }
-
-    /**
-     * Execute a task with rate limiting
-     *
-     * @param task       The task to execute
-     * @param permits    The number of permits to acquire
-     * @param maxPermits The maximum permits per second
-     * @param <T>        The return type
-     * @return A CompletableFuture with the result
-     */
-    public <T> CompletableFuture<T> executeWithRateLimit(Supplier<T> task,
-                                                         int permits,
-                                                         double maxPermits) {
-        RateLimitedTask<T> rateLimitedTask = new RateLimitedTask<>(executorService, maxPermits);
-        return rateLimitedTask.execute(task, permits);
-    }
-
-    /**
-     * Execute a task with a bulkhead pattern (limiting concurrent executions)
-     *
-     * @param task          The task to execute
-     * @param maxConcurrent The maximum number of concurrent executions
-     * @param maxWaiting    The maximum number of waiting tasks
-     * @param <T>           The return type
-     * @return A CompletableFuture with the result
-     */
-    public <T> CompletableFuture<T> executeWithBulkhead(Supplier<T> task,
-                                                        int maxConcurrent,
-                                                        int maxWaiting) {
-        BulkheadTask<T> bulkheadTask = new BulkheadTask<>(executorService, maxConcurrent, maxWaiting);
-        return bulkheadTask.execute(task);
-    }
-
-    /**
-     * Execute a task with a fallback function if it fails
-     *
-     * @param task       The task to execute
-     * @param fallbackFn The function to provide a fallback value
-     * @param <T>        The return type
-     * @return A CompletableFuture with the result or the fallback value
-     */
-    public <T> CompletableFuture<T> executeWithFallbackFn(Supplier<T> task,
-                                                          Function<Throwable, T> fallbackFn) {
-        return CompletableFuture.supplyAsync(task, executorService)
-                .exceptionally(fallbackFn);
-    }
-
-    /**
-     * Simple cache implementation for CompletableFuture results
+     * cache implementation for CompletableFuture results
      */
     private static class CacheableTask<T> {
         private final ExecutorService executorService;
@@ -566,7 +566,7 @@ public class AsyncProcessor {
     }
 
     /**
-     * Rate limiter implementation for CompletableFuture tasks
+     * rate limiter implementation for CompletableFuture tasks
      */
     private static class RateLimitedTask<T> {
         private final ExecutorService executorService;
@@ -604,7 +604,7 @@ public class AsyncProcessor {
     }
 
     /**
-     * Simple rate limiter implementation
+     * rate limiter implementation
      */
     private static class RateLimiter {
         private final double permitsPerSecond;
@@ -644,7 +644,7 @@ public class AsyncProcessor {
     }
 
     /**
-     * Bulkhead implementation for CompletableFuture tasks
+     * bulkhead implementation for CompletableFuture tasks
      */
     private static class BulkheadTask<T> {
         private final ExecutorService executorService;

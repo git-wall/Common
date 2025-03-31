@@ -20,13 +20,13 @@ public class Pipeline<T> {
     }
 
     // Filter operation
-    public Pipeline<T> filter(Predicate<T> predicate) {
+    public Pipeline<T> where(Predicate<T> predicate) {
         List<T> filtered = data.stream().filter(predicate).collect(Collectors.toList());
         return new Pipeline<>(filtered);
     }
 
     // Transform operation
-    public <R> Pipeline<R> transform(Function<T, R> transformer) {
+    public <R> Pipeline<R> select(Function<T, R> transformer) {
         List<R> transformed = data.stream()
                 .map(transformer)
                 .collect(Collectors.toCollection(() -> new ArrayList<>(data.size()))); // Pre-allocate
