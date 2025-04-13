@@ -15,10 +15,16 @@ public class KafkaMultiBrokerService {
     private final BrokerManager brokerManager;
 
     /**
+     * Runs a Kafka consumer for the specified broker and topic with retry logic.
+     *
      * <p>
      * Retry topic: retryTopic(topic + "-retry") <br>
      * Dead letter queue: dlqTopic(topic + "-dlq")
      * </p>
+     *
+     * @param brokerId         the ID of the broker
+     * @param topic            the topic to consume messages from
+     * @param messageProcessor the processor to handle consumed messages
      */
     public void runConsumer(String brokerId, String topic, MessageProcessor<String, String> messageProcessor) {
         if (brokerManager.hasBroker(brokerId)) {
@@ -26,9 +32,16 @@ public class KafkaMultiBrokerService {
         }
     }
 
+    /**
+     * Runs a Kafka consumer for the specified broker and topic without retry logic.
+     *
+     * @param brokerId         the ID of the broker
+     * @param topic            the topic to consume messages from
+     * @param messageProcessor the processor to handle consumed messages
+     */
     public void runConsumerNoRetry(String brokerId,
-                                String topic,
-                                MessageProcessor<String, String> messageProcessor) {
+                                   String topic,
+                                   MessageProcessor<String, String> messageProcessor) {
 
         if (brokerManager.hasBroker(brokerId)) {
             ParallelKafkaConsumer.RetryConfig retryConfig = ParallelKafkaConsumer.RetryConfig.builder()
@@ -42,10 +55,24 @@ public class KafkaMultiBrokerService {
         }
     }
 
+    /**
+     * Retrieves a Kafka producer for the specified broker.
+     *
+     * @param brokerId the ID of the broker
+     * @return the Kafka producer
+     */
     public KafkaProducer<String, String> getProducer(String brokerId) {
         return brokerManager.getProducer(brokerId);
     }
 
+    /**
+     * Sends a message using the Kafka producer for the specified broker and topic.
+     *
+     * @param brokerId the ID of the broker
+     * @param topic    the topic to send the message to
+     * @param key      the key of the message
+     * @param value    the value of the message
+     */
     public void producerSend(String brokerId, String topic, String key, Object value) {
         brokerManager.producerSend(brokerId, topic, key, value);
     }

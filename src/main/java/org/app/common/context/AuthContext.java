@@ -4,6 +4,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -11,10 +12,12 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Optional;
+
 /**
  * Get info client from token
- * */
+ */
 public class AuthContext {
 
     private AuthContext() {
@@ -23,6 +26,32 @@ public class AuthContext {
     public static String getUserName() {
         return Optional.ofNullable(getAuthHolder())
                 .map(Authentication::getName)
+                .orElse(null);
+    }
+
+    public static String getCurrentUsername() {
+        Authentication auth = getAuthHolder();
+        return Optional.ofNullable(auth.getPrincipal())
+                .map(principal -> {
+                    if (principal instanceof UserDetails) {
+                        return ((UserDetails) principal).getUsername();
+                    }
+
+                    if (auth.getPrincipal() instanceof User) {
+                        return ((User) auth.getPrincipal()).getUsername();
+                    }
+
+                    if (auth instanceof OAuth2AuthenticationToken) {
+                        if (principal instanceof HashMap) {
+                            HashMap<String, Object> principalHM = (HashMap<String, Object>) principal;
+                            if (principalHM.containsKey("username")) {
+                                return principalHM.get("username").toString();
+                            }
+                        }
+                    }
+
+                    return principal.toString();
+                })
                 .orElse(null);
     }
 

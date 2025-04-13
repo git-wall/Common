@@ -47,7 +47,7 @@ public class DecisionEngine<T> {
         List<String> failedRules = new ArrayList<>();
 
         for (Rule<T> rule : rules) {
-            if (rule.evaluate(input)) {
+            if (rule.condition(input)) {
                 passedRules.add(rule.getDescription());
             } else {
                 failedRules.add(rule.getDescription());

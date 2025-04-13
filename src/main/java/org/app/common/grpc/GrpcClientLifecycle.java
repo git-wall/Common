@@ -25,7 +25,7 @@ public class GrpcClientLifecycle implements SmartLifecycle {
         if (running) {
             try {
                 log.info("Shutting down gRPC client channel");
-                channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+                channel.shutdown().awaitTermination(5L, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 log.error("Error shutting down gRPC client channel", e);
                 channel.shutdownNow();

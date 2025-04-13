@@ -49,11 +49,11 @@ CompletableFuture<Void> voidFuture = asyncProcessor.executeAsync(() -> {
     Thread.sleep(1000);
     System.out.println("Task completed!");
 });
+```
 
+## Chaining Operations
 
-##Chaining Operations
-
-###Sequential Processing
+### Sequential Processing
 ```java
 // Chain multiple transformations on an initial value
 CompletableFuture<Integer> result = asyncProcessor.chain(

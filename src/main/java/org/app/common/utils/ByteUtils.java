@@ -11,5 +11,5 @@ public class ByteUtils {
     public static final int OMG_SIZE = 536870912;   // 😱
 
     @Param(value = {"1024", "2048", "4096", "8192", "16384", "536870912"})
-    public static int size;
+    public static int size = SMALL_SIZE; // Default size
 }

@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 @Service
 public class RedisService {
@@ -91,5 +93,67 @@ public class RedisService {
     public boolean setIfAbsentWithTimeout(String key, Object value, long timeout, TimeUnit timeUnit) {
         Boolean result = redisTemplate.opsForValue().setIfAbsent(key, value, timeout, timeUnit);
         return result != null && result;
+    }
+
+    /**
+     * Retrieves a value from Redis by its key or loads it using the provided loader if the key does not exist.
+     *
+     * @param <R>    The type of the value to be returned.
+     * @param key    The key to retrieve from Redis.
+     * @param loader A supplier function to load the value if the key does not exist in Redis.
+     * @return The value associated with the key if it exists, or the value provided by the loader.
+     */
+    public <R> R getOrLoad(String key, Supplier<R> loader) {
+        if (hasKey(key)) {
+            return (R) get(key);
+        } else {
+            return loader.get();
+        }
+    }
+
+    // ===================================================================
+    // Skip list | Rank, Score, Range
+    // ===================================================================
+
+    /**
+     * Adds a value to a sorted set with a given score (simulates skip list insert).
+     */
+    public void zAdd(String key, Object value, double score) {
+        redisTemplate.opsForZSet().add(key, value, score);
+    }
+
+    /**
+     * Gets a range of elements by index (simulates skip list range query).
+     */
+    public Set<Object> zRange(String key, long start, long end) {
+        return redisTemplate.opsForZSet().range(key, start, end);
+    }
+
+    /**
+     * Gets elements by score range (inclusive, simulates range search).
+     */
+    public Set<Object> zRangeByScore(String key, double minScore, double maxScore) {
+        return redisTemplate.opsForZSet().rangeByScore(key, minScore, maxScore);
+    }
+
+    /**
+     * Remove elements by score range (inclusive, simulates range search).
+     */
+    public void zRemove(String key, Object value) {
+        redisTemplate.opsForZSet().remove(key, value);
+    }
+
+    /**
+     * Gets the score of a member.
+     */
+    public Double zScore(String key, Object value) {
+        return redisTemplate.opsForZSet().score(key, value);
+    }
+
+    /**
+     * Gets the rank (index) of an element in the sorted set.
+     */
+    public Long zRank(String key, Object value) {
+        return redisTemplate.opsForZSet().rank(key, value);
     }
 }

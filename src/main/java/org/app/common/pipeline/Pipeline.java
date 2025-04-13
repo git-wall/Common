@@ -1,47 +1,54 @@
 package org.app.common.pipeline;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 public class Pipeline<T> {
-    private final List<T> data;
+    private final T data;
 
-    private Pipeline(List<T> data) {
-        this.data = new ArrayList<>(data); // Defensive copy
+    public Pipeline(T data) {
+        this.data = data;
     }
 
-    // Factory method to create pipeline
-    public static <T> Pipeline<T> from(List<T> source) {
+    public static <T> Pipeline<T> from(T source) {
         return new Pipeline<>(source);
     }
 
-    // Filter operation
     public Pipeline<T> where(Predicate<T> predicate) {
-        List<T> filtered = data.stream().filter(predicate).collect(Collectors.toList());
-        return new Pipeline<>(filtered);
+        Optional<T> optional = Optional.of(data).filter(predicate);
+        return optional.map(Pipeline::new)
+                .orElseGet(() -> new Pipeline<>(null));
     }
 
-    // Transform operation
-    public <R> Pipeline<R> select(Function<T, R> transformer) {
-        List<R> transformed = data.stream()
-                .map(transformer)
-                .collect(Collectors.toCollection(() -> new ArrayList<>(data.size()))); // Pre-allocate
-        return new Pipeline<>(transformed);
+    public <X extends Throwable> Pipeline<T> where(Predicate<T> predicate, Supplier<? extends X> exceptionSupplier) throws X {
+        Optional<T> optional = Optional.of(data).filter(predicate);
+        return optional.map(Pipeline::new).orElseThrow(exceptionSupplier);
     }
 
-    // Sink operation
-    public void sink(Consumer<T> consumer) {
-        for (T item : data) {
-            consumer.accept(item);
-        }
+    public <R> Pipeline<R> map(Function<T, R> transformer) {
+        return Optional.of(data)
+                .map(d -> new Pipeline<>(transformer.apply(d)))
+                .orElseGet(() -> new Pipeline<>(null));
     }
 
-    // Collect to list as a terminal operation
-    public List<T> collect() {
-        return new ArrayList<>(data);
+    public Pipeline<T> then(Consumer<T> consumer) {
+        consumer.accept(data);
+        return this;
+    }
+
+    public static <T> Pipeline<T> sink(T source) {
+        return new Pipeline<>(source);
+    }
+
+    public <R> Pipeline<R> sink(Function<T, R> function) {
+        return new Pipeline<>(function.apply(data));
+    }
+
+    public T get() {
+        return data;
     }
 }
+

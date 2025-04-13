@@ -16,7 +16,7 @@ package org.app.common.rule;
  *     }
  *
  *     @Override
- *     public boolean evaluate(Integer age) {
+ *     public boolean condition(Integer age) {
  *         return age >= minAge;
  *     }
  *
@@ -36,6 +36,6 @@ package org.app.common.rule;
  * </>
  */
 public interface Rule<T> {
-    boolean evaluate(T input);
+    boolean condition(T input);
     String getDescription();
 }

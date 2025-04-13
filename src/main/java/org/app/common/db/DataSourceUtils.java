@@ -2,14 +2,12 @@ package org.app.common.db;
 
 import com.zaxxer.hikari.HikariDataSource;
 
-import javax.sql.DataSource;
-
 public class DataSourceUtils {
 
     public static final int STMT_CACHE_SIZE = 25000;
     public static final int STMT_CACHE_LIMIT = 20048;
     public static final int MAX_POOL_SIZE = 10;
-    public static final int MIN_POOL_SIZE = 25000;
+    public static final int MINIMUM_IDLE_SIZE = 25000;
     public static final long CONNECTION_TIMEOUT = 20000L;
 
     public static void appendConfig(HikariDataSource dataSource) {
@@ -20,16 +18,16 @@ public class DataSourceUtils {
         dataSource.addDataSourceProperty("initializationFailFast", true);
     }
 
-    public static DataSource defaultDataSource() {
+    public static HikariDataSource defaultDataSource() {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setMaximumPoolSize(MAX_POOL_SIZE);
-        dataSource.setMinimumIdle(MIN_POOL_SIZE);
+        dataSource.setMinimumIdle(MINIMUM_IDLE_SIZE);
         dataSource.setIdleTimeout(300000L);
         dataSource.setConnectionTimeout(CONNECTION_TIMEOUT);
         return dataSource;
     }
 
-    public static DataSource dataSource(long cnnTimeOut, long idleTimeOut, String poolName) {
+    public static HikariDataSource dataSource(long cnnTimeOut, long idleTimeOut, String poolName) {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setMaximumPoolSize(10);
         dataSource.setMinimumIdle(5);
@@ -39,13 +37,8 @@ public class DataSourceUtils {
         return dataSource;
     }
 
-    public static DataSource hikariDataSource(long cnnTimeOut, long idleTimeOut, String poolName) {
-        HikariDataSource dataSource = new HikariDataSource();
-        dataSource.setMaximumPoolSize(10);
-        dataSource.setMinimumIdle(5);
-        dataSource.setIdleTimeout(idleTimeOut);
-        dataSource.setConnectionTimeout(cnnTimeOut);
-        dataSource.setPoolName(poolName);
+    public static HikariDataSource hikariDataSource(long cnnTimeOut, long idleTimeOut, String poolName) {
+        HikariDataSource dataSource = dataSource(cnnTimeOut, idleTimeOut, poolName);
         appendConfig(dataSource);
         return dataSource;
     }

@@ -14,8 +14,6 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,28 +30,28 @@ public class KafkaMessageConsumer {
      * Fails → my-topic-retry-2 (after 4s) <br>
      * Fails → my-topic-dlt: Processed by messageHandler.dlt
      * </p>
-     * */
+     */
     @RetryableTopic(
-        attempts = "${spring.kafka.retry.max-attempts}",
-        backoff = @Backoff(
-                delay = 1000L,    // first retry 1s
-                multiplier = 2.0, // next retry will be * 2
-                maxDelay = 10000L // but capped at 10s
-        ),
-        autoCreateTopics = "true",
-        topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
-        dltStrategy = DltStrategy.ALWAYS_RETRY_ON_ERROR
+            attempts = "${spring.kafka.retry.max-attempts}",
+            backoff = @Backoff(
+                    delay = 1000L,    // first retry 1s
+                    multiplier = 2.0, // next retry will be * 2
+                    maxDelay = 10000L // but capped at 10s
+            ),
+            autoCreateTopics = "true",
+            topicSuffixingStrategy = TopicSuffixingStrategy.SUFFIX_WITH_INDEX_VALUE,
+            dltStrategy = DltStrategy.ALWAYS_RETRY_ON_ERROR
     )
     @KafkaListener(
-        topics = "${app.kafka.topic}",
-        groupId = "${app.kafka.consumer.group-id}",
-        containerFactory = "kafkaListenerContainerFactory"
+            topics = "${app.kafka.topic}",
+            groupId = "${app.kafka.consumer.group-id}",
+            containerFactory = "kafkaListenerContainerFactory"
     )
     public void processMessage(@Payload String message,
-                             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                             @Header(KafkaHeaders.DLT_EXCEPTION_MESSAGE) Optional<String> dltExceptionMessage,
-                             @Header(KafkaHeaders.DLT_EXCEPTION_STACKTRACE) Optional<String> dltExceptionStacktrace,
-                             Acknowledgment ack) {
+                               @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+//                             @Header(KafkaHeaders.DLT_EXCEPTION_MESSAGE) Optional<String> dltExceptionMessage,
+//                             @Header(KafkaHeaders.DLT_EXCEPTION_STACKTRACE) Optional<String> dltExceptionStacktrace,
+                               Acknowledgment ack) {
         try {
             if (topic.endsWith("-dlt")) {
                 messageHandler.dlt(message, topic);

@@ -5,14 +5,19 @@ import java.util.Arrays;
 import java.util.function.Supplier;
 
 public class Retry<T> {
-    private final int maxAttempts;
-    private final Duration delay;
+    private int RETRIES = 3;
+    private Duration DELAY = Duration.ofMillis(3000L);
     private final Class<? extends Exception>[] retryableExceptions;
 
     @SafeVarargs
-    public Retry(int maxAttempts, Duration delay, Class<? extends Exception>... retryableExceptions) {
-        this.maxAttempts = maxAttempts;
-        this.delay = delay;
+    public Retry(Class<? extends Exception>... retryableExceptions) {
+        this.retryableExceptions = retryableExceptions;
+    }
+
+    @SafeVarargs
+    public Retry(int retries, Duration delay, Class<? extends Exception>... retryableExceptions) {
+        this.RETRIES = retries;
+        this.DELAY = delay;
         this.retryableExceptions = retryableExceptions;
     }
 
@@ -25,18 +30,18 @@ public class Retry<T> {
     public T execute(Supplier<T> action) throws Exception {
         Exception lastException = null;
 
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+        for (int attempt = 1; attempt <= RETRIES; attempt++) {
             try {
                 return action.get();
             } catch (Exception e) {
                 lastException = e;
-                if (!isRetryable(e) || attempt == maxAttempts) {
+                if (!isRetryable(e) || attempt == RETRIES) {
                     throw e;
                 }
-                Thread.sleep(delay.toMillis());
+                Thread.sleep(DELAY.toMillis());
             }
         }
-
+        if (lastException == null) lastException = new Exception("Unknown error occurred");
         throw lastException;
     }
 

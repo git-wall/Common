@@ -10,6 +10,7 @@
 * Monad = Optionally, (io.vavr:vavr:1.0.0-alpha-4)
 * Pipeline = Stream
 * Twin = Tuple0,Tuple1,Tuple2,... (library:io.varvr:vavr:1.0.0-alpha-4)
+* ...
 
 ```java
 void monadExample(){
@@ -24,5 +25,7 @@ void monadExample(){
                     .get());
 }
 ```
+
+[Document Pattern Link](https://java-design-patterns.com/)
 
 

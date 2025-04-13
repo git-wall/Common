@@ -45,7 +45,7 @@ public class JooqCodeGen {
     }
 
     private boolean shouldSkipGeneration() {
-        return Boolean.parseBoolean(environment.getProperty(SKIP_GENERATION_PROPERTY, "false"));
+        return Boolean.parseBoolean(environment.getProperty(SKIP_GENERATION_PROPERTY, "true"));
     }
 
     private Configuration createConfiguration() {

@@ -48,6 +48,6 @@ public class Travel {
     }
 
     private static void logTime(long e, long s) {
-        log.info("time: {}", e - s);
+        log.info("Time taken (ms): {}", e - s);
     }
 }

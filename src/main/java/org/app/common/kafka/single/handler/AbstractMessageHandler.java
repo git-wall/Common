@@ -17,7 +17,12 @@ public abstract class AbstractMessageHandler<T> implements MessageHandler<T> {
 
     @Override
     public void retry(T message, String topic) throws Exception {
-        doRetry(message);
+        try {
+            doRetry(message);
+        } catch (Exception e) {
+            log.error("Error processing message from topic {}: {}", topic, message, e);
+            throw e;
+        }
     }
 
     @Override

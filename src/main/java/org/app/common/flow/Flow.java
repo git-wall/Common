@@ -39,8 +39,8 @@ import java.util.List;
  * }
  *
  * // Usage:
- * Workflow<String> workflow = new Workflow<>();
- *             workflow.addStep(new ValidateInputStep())
+ * Flow<String> flow = new Flow<>()
+ *                     .addStep(new ValidateInputStep())
  *                     .addStep(new TransformInputStep())
  *                     .addStep(new NotifyUserStep());
  *

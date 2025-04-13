@@ -10,6 +10,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
+import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -79,11 +80,11 @@ public class ParallelKafkaConsumer<K, V> {
         try {
             processor.process(record);
         } catch (Exception e) {
-            handleProcessingError(record, e, retryCount);
+            retry(record, e, retryCount);
         }
     }
 
-    private void handleProcessingError(ConsumerRecord<K, V> record, Exception e, int retryCount) {
+    private void retry(ConsumerRecord<K, V> record, Exception e, int retryCount) {
         switch (retryConfig.getStrategy()) {
             case IN_MEMORY_RETRY:
                 inMemoryRetry(record, e, retryCount);
@@ -148,6 +149,7 @@ public class ParallelKafkaConsumer<K, V> {
         });
     }
 
+    @PreDestroy
     public void shutdown() {
         if (running.compareAndSet(true, false)) {
             try {

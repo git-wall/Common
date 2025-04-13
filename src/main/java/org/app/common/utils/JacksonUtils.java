@@ -16,8 +16,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Map;
 
 @Component
 @Slf4j
@@ -27,6 +25,7 @@ public class JacksonUtils {
     // Instead, expose immutable reader and writer for advanced use cases.
     private static final ObjectReader READER;
     private static final ObjectWriter WRITER;
+    private static final ObjectWriter WRITER_PRETTY;
 
     private JacksonUtils() {
     }
@@ -41,6 +40,7 @@ public class JacksonUtils {
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
         READER = MAPPER.reader();
         WRITER = MAPPER.writer();
+        WRITER_PRETTY = MAPPER.writerWithDefaultPrettyPrinter();
     }
 
     /**
@@ -107,34 +107,25 @@ public class JacksonUtils {
         if (data == null)
             return "";
 
-        return MAPPER.writeValueAsString(data).replace("%", "%%");
+        return WRITER_PRETTY.writeValueAsString(data).replace("%", "%%");
     }
 
     @SneakyThrows
     public static String toString(Object data) {
         try {
-            return MAPPER.writeValueAsString(data);
+            return WRITER_PRETTY.writeValueAsString(data);
         } catch (InvalidDefinitionException e) {
             return data.toString();
         } catch (JsonProcessingException e) {
             log.error("Error occurred while parsing json", e);
-            return MAPPER.writeValueAsString(e);
+            // handler more case have special char that make json invalid and not parseable and error
+            return WRITER_PRETTY.writeValueAsString(e).replace('%', ' ');
         }
     }
 
     @SneakyThrows
     public static JsonNode readTree(String data) {
         return MAPPER.readTree(data);
-    }
-
-    @SneakyThrows
-    public static <T> List<T> toList(Object data) {
-        return MAPPER.readValue(data.toString(), List.class);
-    }
-
-    @SneakyThrows
-    public static <T, R> Map<T, R> toMap(Object data) {
-        return MAPPER.readValue(data.toString(), Map.class);
     }
 
     public static void replaceNullStrings(JsonNode node) {

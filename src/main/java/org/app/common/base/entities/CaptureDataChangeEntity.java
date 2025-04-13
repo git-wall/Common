@@ -17,5 +17,5 @@ public abstract class CaptureDataChangeEntity<T extends Serializable> extends Ab
     private static final long serialVersionUID = -3821678677306727806L;
 
     @Version
-    protected Integer version;
+    protected Long version;
 }

@@ -5,7 +5,7 @@ private final ElasticsearchOperations elasticsearchOperations;
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
-    public ProductListGetVm findProductAdvance(ProductCriteriaDto criteria) {
+    public ProductList findProductAdvance(ProductCriteriaDto criteria) {
         // Create a query with the new concise API
         NativeQuery searchQuery = DynamicQueryBuilder.query()
             // Add keyword search with fuzzy matching
@@ -53,7 +53,7 @@ private final ElasticsearchOperations elasticsearchOperations;
         return new ProductList(/* ... */);
     }
     
-    public ProductNameListVm autoCompleteProductName(final String keyword) {
+    public ProductNameList autoCompleteProductName(final String keyword) {
         // Create a query for autocomplete
         NativeQuery searchQuery = DynamicQueryBuilder.query()
             .customize(builder -> 

@@ -11,7 +11,7 @@ import java.util.Map;
 @Component
 @ConfigurationProperties(prefix = "kafka.brokers")
 public class KafkaMultiBrokerProperties {
-    private Map<String, BrokerConfig> configs = new HashMap<>();
+    private Map<String, BrokerConfig> configs = new HashMap<>(16, 0.75f);
 
     @Data
     public static class BrokerConfig {

@@ -197,7 +197,7 @@ public class CompactSet<T> implements Iterable<T> {
     }
 
     /**
-     * Removes all of the elements from this set.
+     * Removes all the elements from this set.
      * Resets all internal data structures to their initial state.
      */
     public void clear() {

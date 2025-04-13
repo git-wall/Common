@@ -1,14 +1,79 @@
 package org.app.common.utils;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.MediaType;
+
+import java.io.IOException;
 import java.net.Authenticator;
 import java.net.InetSocketAddress;
 import java.net.ProxySelector;
+import java.net.URI;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
 public class HttpClientUtils {
+
+    public static <T> T read(T obj, String url) {
+        return decode(body(requestPost(obj, url)));
+    }
+
+    public static <T> CompletableFuture<T> readAsync(T obj, String url) {
+        return CompletableFuture
+                .supplyAsync(() -> requestPost(obj, url))
+                .thenApply(HttpClientUtils::body)
+                .thenApply(HttpClientUtils::decode);
+    }
+
+    public static HttpRequest requestGet(String url, String API_KEY) {
+        return HttpRequest.newBuilder(URI.create(url))
+                .header("Key", API_KEY)
+                .headers("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .headers("Accept", MediaType.APPLICATION_JSON_VALUE)
+                .GET()
+                .build();
+    }
+
+    public static HttpRequest requestGet(String url) {
+        return HttpRequest.newBuilder(URI.create(url))
+                .headers("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .headers("Accept", MediaType.APPLICATION_JSON_VALUE)
+                .GET()
+                .build();
+    }
+
+    public static <T> HttpRequest requestPost(T obj, String url) {
+        try {
+            String body = JacksonUtils.mapper().writeValueAsString(obj);
+
+            return HttpRequest.newBuilder(URI.create(url))
+                    .headers("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                    .headers("Accept", MediaType.APPLICATION_JSON_VALUE)
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .build();
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    public static String body(HttpRequest request) {
+        try {
+            return HttpClient.newHttpClient()
+                    .send(request, HttpResponse.BodyHandlers.ofString())
+                    .body();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static <T> T decode(String response) {
+        return JacksonUtils.readValue(response);
+    }
+
     public static HttpClient buildHttpClient() {
         return HttpClient.newHttpClient();
     }

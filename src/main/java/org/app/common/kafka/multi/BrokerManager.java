@@ -21,6 +21,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Properties;
@@ -31,8 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 @EnableConfigurationProperties(KafkaMultiBrokerProperties.class)
 public class BrokerManager {
-    private final Map<String, KafkaProducer<String, String>> producers = new ConcurrentHashMap<>(4);
-    private final Map<String, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>(4);
+    private final Map<String, KafkaProducer<String, String>> producers = new ConcurrentHashMap<>();
+    private final Map<String, KafkaConsumer<String, String>> consumers = new ConcurrentHashMap<>();
     private final KafkaMultiBrokerProperties brokerProperties;
 
     @PostConstruct
@@ -165,6 +166,7 @@ public class BrokerManager {
         log.info("Started parallel consumer for broker: {} on topic: {} with custom retry configuration", brokerId, topic);
     }
 
+    @PreDestroy
     public void shutdown() {
         consumers.values().forEach(KafkaConsumer::close);
         producers.values().forEach(KafkaProducer::close);

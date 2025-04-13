@@ -50,4 +50,19 @@ public abstract class GlobalException {
                         ex.getMessage())
         );
     }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<Object> handleTooMany(TooManyRequestsException ex) {
+        var id = ThreadContext.get(RequestUtils.REQUEST_ID);
+        String message = String.format("%s - %s", id, ex.getMessage());
+        log.error(message, ex);
+        return ResponseEntity
+                .status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(
+                        ResponseUtils.Error.build(
+                                id,
+                                HttpStatus.BAD_REQUEST,
+                                ex.getMessage())
+                );
+    }
 }

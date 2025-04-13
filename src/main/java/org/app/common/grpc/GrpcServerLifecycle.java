@@ -40,7 +40,7 @@ public class GrpcServerLifecycle implements SmartLifecycle {
     public void stop() {
         if (running) {
             try {
-                server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
+                server.shutdown().awaitTermination(30L, TimeUnit.SECONDS);
                 log.info("gRPC server stopped");
             } catch (InterruptedException e) {
                 log.error("Error shutting down gRPC server", e);

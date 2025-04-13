@@ -88,12 +88,22 @@ dependencies {
     // 6 nebula graph database
     //    api 'com.vesoft:client:5.0.0-rc2'
     // 7 elasticsearch for server
-    api 'org.elasticsearch:elasticsearch:7.17.15'
+    api 'org.elasticsearch:elasticsearch:7.10.2'
     // 8 elasticsearch for client
-    api 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.15'
-    // 9 mybatis
+    api 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.10.2'
+    // 9 opensearch
+    api 'org.opensearch.client:opensearch-rest-high-level-client:3.0.0-alpha1'
+    // 10 mybatis
     api 'org.mybatis:mybatis:3.5.6'
     api 'org.mybatis:mybatis-spring:2.0.7'
+    // 11 mapdb
+    api 'org.mapdb:mapdb:3.1.0'
+    // 12 clickhouse
+    api 'com.clickhouse:clickhouse-jdbc:0.8.3'
+    // 13 ignite
+    api 'org.apache.ignite:ignite-core:2.17.0'
+    api 'org.apache.ignite:ignite-spring:2.17.0'
+    api 'org.apache.ignite:ignite-indexing:2.17.0'
 
     // ===================================================================
     // Cache & Memory dependencies
@@ -102,9 +112,11 @@ dependencies {
     api 'com.hazelcast:hazelcast:4.2.5'
     // 2. caffeine
     api 'com.github.ben-manes.caffeine:caffeine:3.2.0'
-    // 3. valkey: redis cache open source
+    // 3. guava: cache
+    api 'com.google.guava:guava:33.4.7-jre'
+    // 4. valkey: redis cache open source
     api 'io.valkey:valkey-java:5.3.0'
-    // 4. redis
+    // 5. redis
     api 'redis.clients:jedis:5.2.0'
 
     // ===================================================================
@@ -175,6 +187,7 @@ dependencies {
     runtimeOnly 'io.mantisrx:mantis-runtime:3.1.11'
     // 16. cglib: core of AOP
     api 'cglib:cglib:3.3.0'
+    api 'cglib:cglib-nodep:3.3.0'
     // 17. zookeeper: for chose what sever is leader
     // api 'org.apache.zookeeper:zookeeper:3.9.3'
     // 18. lucene: for handler text, english, etc ...
@@ -198,6 +211,10 @@ dependencies {
     //    api 'org.apache.flink:flink-connector-base:2.0.0'
     // 23. jasperreports
     api 'net.sf.jasperreports:jasperreports:7.0.1'
+    // 24. Yahoo / Clearspring
+    api 'com.clearspring.analytics:stream:2.9.8'
+    // 25. Apache DataSketches
+    api 'org.apache.datasketches:datasketches-java:7.0.1'
 
     // ===================================================================
     // Spring dependencies
