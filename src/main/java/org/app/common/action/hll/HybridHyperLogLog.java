@@ -17,7 +17,6 @@ public class HybridHyperLogLog {
     private final ClickHouseWriter clickHouseWriter;
 
     private static final String REDIS_KEY_FORMAT = "hll:%s:%s";
-    private static final int HLL_PRECISION = 12; // Precision for DataSketches HLL
 
     @Value("${hll.ttl.days:30}")
     private long ttlDays;
