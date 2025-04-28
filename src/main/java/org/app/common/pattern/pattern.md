@@ -1,6 +1,6 @@
 # Some pattern is convert to revisited
 
-* Fluent + chain of responsibility = Java Stream, Optional (JDK 9+) 
+* Fluent + chain of responsibility = Java Stream, Optional (JDK 9+)
 * Service locator = ApplicationContext in Spring
 * Builder = lombok
 * CircuitBreaker = Spring cloud
@@ -13,10 +13,10 @@
 * ...
 
 ```java
-void monadExample(){
+void monadExample() {
     Try.of(() -> roleRepository.findByName(dto.getRole()))
             .filter(
-                    Optional::isPresent, 
+                    Optional::isPresent,
                     () -> new IllegalArgumentException("Not found role with " + dto.getRole())
             )
             .andThen(accountRepository::save)

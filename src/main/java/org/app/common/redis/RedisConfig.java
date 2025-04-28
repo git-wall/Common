@@ -1,6 +1,7 @@
 package org.app.common.redis;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,6 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 @Configuration
-@ConditionalOnProperty(value = "redis.enabled", havingValue = "true")
 public class RedisConfig {
 
     @Value("${redis.host}")
@@ -32,6 +32,7 @@ public class RedisConfig {
      * Configures the Redis connection factory.
      */
     @Bean
+    @ConditionalOnProperty(name = {"redis.host", "redis.port"})
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisHost, redisPort);
         return new LettuceConnectionFactory(config);
@@ -41,6 +42,7 @@ public class RedisConfig {
      * Configures the Redis cache settings.
      */
     @Bean
+    @ConditionalOnProperty(name = "redis.ttl")
     public RedisCacheConfiguration cacheConfiguration() {
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofDays(ttl))
@@ -52,6 +54,7 @@ public class RedisConfig {
      * Configures the Redis template for general-purpose use.
      */
     @Bean
+    @ConditionalOnBean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);

@@ -7,6 +7,7 @@ import org.app.common.engine.formula.ExpressionParser;
 import org.app.common.engine.formula.Node;
 import org.app.common.engine.rule.Rule;
 import org.app.common.engine.rule.RuleResult;
+import org.app.common.pipeline.Pipeline;
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
@@ -44,22 +45,18 @@ public class RuleEngine {
      * evaluates the specified rule itself.
      * </p>
      *
-     * @param allRule the list of all available rules
-     * @param rule    the rule to evaluate
-     * @param object  the object containing the data required for rule evaluation
+     * @param rules  the list of all available rules
+     * @param rule   the rule to evaluate
+     * @param object the object containing the data required for rule evaluation
      * @return the result of the evaluated rule, or null if the rule cannot be evaluated
      */
-    public static RuleResult evaluateRule(List<Rule> allRule, Rule rule, Object object) {
-        List<Rule> rules = allRule.stream()
+    public static RuleResult evaluateRule(List<Rule> rules, Rule rule, Object object) {
+        return Pipeline.from(rules)
                 .filter(r -> rule.getReferences().contains(r.getId()))
-                .collect(Collectors.toList());
-        rules.add(rule);
-
-        return evaluateRules(rules, object)
-                .stream()
+                .then(e -> e.add(rule))
+                .sinks(e -> evaluateRules(e, object))
                 .filter(r -> Objects.equals(rule.getId(), r.getId()))
-                .findFirst()
-                .orElse(null);
+                .findFirstOrElse(null);
     }
 
     /**
@@ -67,7 +64,7 @@ public class RuleEngine {
      * @param object The object containing fields required for rule evaluation
      * @return List of RuleResult containing the results of the evaluated rules
      */
-    public static List<RuleResult> evaluateRules(List<Rule> rules, Object object) {
+    public static List<RuleResult> evaluateRules(Collection<Rule> rules, Object object) {
         Map<Long, BigDecimal> resultMap = new HashMap<>();
         Dag<Rule> dag = buildDAG(rules);
 
@@ -83,6 +80,23 @@ public class RuleEngine {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Replaces placeholders in a formula string with actual values derived from the provided object,
+     * rule, and result map.
+     *
+     * <p>
+     * This method performs the following steps:
+     * 1. Replaces template placeholders in the rule's formula with values from the provided object.
+     * 2. Replaces placeholders for rule results with values from the result map.
+     * 3. Replaces placeholders for formulas with the rule's value as a string.
+     * </p>
+     *
+     * @param object    The object containing fields required for template replacement.
+     * @param rule      The rule whose formula and value are used for replacement.
+     * @param resultMap A map containing previously computed rule results, where the key is the rule ID
+     *                  and the value is the result as a BigDecimal.
+     * @return A string representing the formula with all placeholders replaced by actual values.
+     */
     private static @NotNull String replaceValInStr(Object object, Rule rule, Map<Long, BigDecimal> resultMap) {
         String formula = replaceTemplateWithObj(rule.getFormula(), object);
         formula = replaceRuleResults(formula, resultMap);
@@ -96,7 +110,7 @@ public class RuleEngine {
      * @param rules List of rules to be added to the DAG
      * @return A DAG representing the dependencies between rules
      */
-    private static Dag<Rule> buildDAG(List<Rule> rules) {
+    public static Dag<Rule> buildDAG(Collection<Rule> rules) {
         Map<Long, Rule> ruleMap = rules.stream().collect(Collectors.toMap(Rule::getId, Function.identity()));
         Dag<Rule> dag = new HashDag<>();
 

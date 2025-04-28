@@ -1,0 +1,109 @@
+# Utility and support tools dependencies
+
+[dependencies.lombok]
+groupId = "org.projectlombok"
+artifactId = "lombok"
+version = "1.18.34"
+description = "Lombok annotation processor"
+
+[dependencies.reflections]
+groupId = "org.reflections"
+artifactId = "reflections"
+version = "0.10.2"
+description = "Java runtime metadata analysis"
+
+[dependencies.vavr]
+groupId = "io.vavr"
+artifactId = "vavr"
+version = "1.0.0-alpha-4"
+description = "Functional programming library for Java"
+
+[dependencies.byte_buddy]
+groupId = "net.bytebuddy"
+artifactId = "byte-buddy"
+version = "1.15.10"
+description = "Runtime code generation library"
+
+[dependencies.mapstruct]
+groupId = "org.mapstruct"
+artifactId = "mapstruct"
+version = "1.6.0"
+description = "Java bean mappings"
+
+[dependencies.mapstruct_processor]
+groupId = "org.mapstruct"
+artifactId = "mapstruct-processor"
+version = "1.6.0"
+description = "MapStruct annotation processor"
+
+[dependencies.jackson_annotations]
+groupId = "com.fasterxml.jackson.core"
+artifactId = "jackson-annotations"
+version = "2.18.2"
+description = "Jackson annotations"
+
+[dependencies.jackson_databind]
+groupId = "com.fasterxml.jackson.core"
+artifactId = "jackson-databind"
+version = "2.18.2"
+description = "Jackson data binding"
+
+[dependencies.jackson_core]
+groupId = "com.fasterxml.jackson.core"
+artifactId = "jackson-core"
+version = "2.18.2"
+description = "Jackson core"
+
+[dependencies.jackson_csv]
+groupId = "com.fasterxml.jackson.dataformat"
+artifactId = "jackson-dataformat-csv"
+version = "2.18.2"
+description = "Jackson CSV format support"
+
+[dependencies.gson]
+groupId = "com.google.code.gson"
+artifactId = "gson"
+version = "2.11.0"
+description = "Google JSON library"
+
+[dependencies.modelmapper]
+groupId = "org.modelmapper"
+artifactId = "modelmapper"
+version = "3.2.1"
+description = "Object mapping framework"
+
+[dependencies.commons_lang3]
+groupId = "org.apache.commons"
+artifactId = "commons-lang3"
+version = "3.14.0"
+description = "Apache Commons Lang utilities"
+
+[dependencies.commons_pool2]
+groupId = "org.apache.commons"
+artifactId = "commons-pool2"
+version = "2.12.0"
+description = "Apache Commons Pool for object pooling"
+
+[dependencies.commons_codec]
+groupId = "commons-codec"
+artifactId = "commons-codec"
+version = "1.18.0"
+description = "Apache Commons Codec for encoders and decoders"
+
+[dependencies.opencsv]
+groupId = "com.opencsv"
+artifactId = "opencsv"
+version = "5.9"
+description = "CSV parsing library"
+
+[dependencies.poi_ooxml]
+groupId = "org.apache.poi"
+artifactId = "poi-ooxml"
+version = "5.4.0"
+description = "Apache POI for Microsoft documents"
+
+[dependencies.cglib]
+groupId = "cglib"
+artifactId = "cglib"
+version = "3.3.0"
+description = "Byte Code Generation Library"}

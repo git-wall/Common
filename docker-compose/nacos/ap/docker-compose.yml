@@ -1,0 +1,60 @@
+## AP mode prioritizes availability over consistency.
+## This is useful for service discovery scenarios where you need high availability.
+version: '3'
+services:
+  nacos1:
+    image: nacos/nacos-server:latest
+    container_name: nacos-server-1
+    environment:
+      - PREFER_HOST_MODE=hostname
+      - MODE=standalone
+      - NACOS_SERVER_PORT=8848
+      - NACOS_APPLICATION_PORT=8848
+      - JVM_XMS=512m
+      - JVM_XMX=512m
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=mysql
+      - MYSQL_SERVICE_PORT=3306
+      - MYSQL_SERVICE_DB_NAME=nacos_config
+      - MYSQL_SERVICE_USER=nacos
+      - MYSQL_SERVICE_PASSWORD=nacos
+      - NACOS_AUTH_ENABLE=false
+      # AP mode configuration
+      - NACOS_REPLICAS=1
+      - NACOS_SERVER_IP=nacos1
+      - NACOS_SERVERS=nacos1:8848
+      - NACOS_AP_ENABLED=true # Enable AP mode
+    volumes:
+      - ./nacos-data1:/home/nacos/data
+      - ./logs1:/home/nacos/logs
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    networks:
+      - nacos-network
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=nacos_config
+      - MYSQL_USER=nacos
+      - MYSQL_PASSWORD=nacos
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - nacos-network
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
+    ]
+
+networks:
+  nacos-network:
+    driver: bridge

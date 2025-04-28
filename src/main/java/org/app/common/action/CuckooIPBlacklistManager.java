@@ -6,7 +6,6 @@ import org.app.common.utils.HttpClientUtils;
 import org.json.JSONObject;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -63,8 +62,7 @@ public class CuckooIPBlacklistManager<T> {
         return false;
     }
 
-    @KafkaListener(topics = "ip-traffic-events", groupId = "cuckoo-ip-checker")
-    public void listenToTraffic(String ip) throws IOException, InterruptedException {
+    public void checkIpTraffic(String ip) throws IOException, InterruptedException {
         if (!isBlacklisted(ip)) {
             checkAndRegisterFromAbuse(ip);
         }

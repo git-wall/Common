@@ -19,7 +19,7 @@ import java.util.Set;
  * @param <V> class impl (service), singleton
  */
 public class MultionType<K extends Enum<K>, V> {
-    private final Map<K, V> multion = new HashMap<>(10, 0.7f);
+    private final Map<K, V> multion = new HashMap<>(5, 0.7f);
 
     @Getter
     private final Class<K> enumClass;

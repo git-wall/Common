@@ -110,7 +110,7 @@ public class AuthContext {
                 .orElse(null);
     }
 
-    private static Authentication getAuthHolder() {
+    public static Authentication getAuthHolder() {
         return Optional.ofNullable(SecurityContextHolder.getContext())
                 .map(SecurityContext::getAuthentication)
                 .orElse(null);

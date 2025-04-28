@@ -20,27 +20,27 @@ public class DataHolder extends FluentApi<DataHolder> {
 
     public DataHolder put(String key, Object value) {
         holder.put(key, value);
-        return self;
+        return self();
     }
 
     public DataHolder remove(String key) {
         holder.remove(key);
-        return self;
+        return self();
     }
 
     public DataHolder update(String key, Object value) {
         holder.put(key, value);
-        return self;
+        return self();
     }
 
     public DataHolder clear() {
         holder.clear();
-        return self;
+        return self();
     }
 
     public DataHolder putNextWithKey(String key, String nextKey, Function<Object, Object> function) {
         holder.put(nextKey, function.apply(holder.get(key)));
-        return self;
+        return self();
     }
 
     public <T> T get(String key) {

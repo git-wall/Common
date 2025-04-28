@@ -216,7 +216,7 @@ public class CompactSet<T> implements Iterable<T> {
     @Override
     @NonNull
     public Iterator<T> iterator() {
-        return new Iterator<T>() {
+        return new Iterator<>() {
             private int currentIndex = 0;
             private int returnedCount = 0;
 

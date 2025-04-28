@@ -48,9 +48,9 @@ jar {
 }
 
 dependencies {
-    // ===================================================================
-    // Fix dependencies
-    // ===================================================================
+       // ========================================================\\
+      //                    Fix dependencies                       \\
+     // ============================================================\\
     // warning: unknown enum constant XmlAccessType.FIELD
     // reason: class file for jakarta.xml.bind.annotation.XmlAccessType not found
     // Note: Some input files use unchecked or unsafe operations.
@@ -59,19 +59,25 @@ dependencies {
     api 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
     api 'org.glassfish.jaxb:jaxb-runtime:3.0.2'
 
-    // ===================================================================
-    // Analyze code dependencies
-    // ===================================================================
+      //==========================================================\\
+     //                  Security dependencies                     \\
+    //==============================================================\\
+    api 'io.jsonwebtoken:jjwt-api:0.12.6'
+
+       //===========================================================\\
+      //                  Analyze code dependencies                  \\
+     //===============================================================\\
     // 1. jmh analyze what func is good
     api 'org.openjdk.jmh:jmh-core:1.37'
     api 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
     // 2. jol analyze the cost of class
     api 'org.openjdk.jol:jol-core:0.17'
 
-    // ===================================================================
-    // Database & Relation dependencies
-    // ===================================================================
+       // ===========================================================\\
+      //                Database & Relation dependencies              \\
+     // ===============================================================\\
     // 1. cassandra: good with message data, ...
     api 'org.apache.cassandra:java-driver-core:4.19.0'
     // 2. scylla: good with message data, ...
@@ -105,9 +111,9 @@ dependencies {
     api 'org.apache.ignite:ignite-spring:2.17.0'
     api 'org.apache.ignite:ignite-indexing:2.17.0'
 
-    // ===================================================================
-    // Cache & Memory dependencies
-    // ===================================================================
+       //===============================================================\\
+      //                  Cache & Memory dependencies                    \\
+     //===================================================================\\
     // 1. hazelcast used to build distributed cache cluster
     api 'com.hazelcast:hazelcast:4.2.5'
     // 2. caffeine
@@ -119,9 +125,9 @@ dependencies {
     // 5. redis
     api 'redis.clients:jedis:5.2.0'
 
-    // ===================================================================
-    // Monitor dependencies
-    // ===================================================================
+       //============================================================\\
+      //                      Monitor dependencies                    \\
+     //================================================================\\
     // 1. sentry
     // api 'io.sentry:sentry-spring-boot-starter'
     // 2. slf4j : log
@@ -131,17 +137,17 @@ dependencies {
     // 4. graylog: log receive
     api 'org.graylog2:gelfj:1.1.16'
 
-    // ===================================================================
-    // Test dependencies
-    // ===================================================================
+       // ===============================================================\\
+      //                        Test dependencies                         \\
+     // ===================================================================\\
     // 1. Integration test: testcontainers with postgresql
     api 'org.testcontainers:postgresql:1.20.4'
     // 2. Unit Test, Integration Test : jacoco helps whether code has been fully tested
     api 'org.jacoco:org.jacoco.agent:0.8.12'
 
-    // ===================================================================
-    // Tool & Support Code dependencies
-    // ===================================================================
+       //=====================================================================\\
+      //                       Tool & Support Code dependencies                \\
+     //=========================================================================\\
     // 1. lombok
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
     compileOnlyApi 'org.projectlombok:lombok:1.18.34'
@@ -193,9 +199,8 @@ dependencies {
     // 18. lucene: for handler text, english, etc ...
     // api 'org.apache.lucene:lucene-analysis-common:10.1.0'
     // 19. seata: Saga pattern
-    api 'com.alibaba.cloud:spring-cloud-starter-alibaba-seata:2023.0.3.2'
-    //    api 'io.seata:seata-all:2.0.0'
-    //    api 'io.seata:seata-spring-boot-starter:2.0.0'
+//    api 'io.seata:seata-all:2.0.0'
+    api 'io.seata:seata-spring-boot-starter:2.0.0'
     // 20. grpc
     api 'io.grpc:grpc-stub:1.70.0'
     api 'io.grpc:grpc-protobuf:1.70.0'
@@ -213,8 +218,10 @@ dependencies {
     api 'net.sf.jasperreports:jasperreports:7.0.1'
     // 24. Yahoo / Clearspring
     api 'com.clearspring.analytics:stream:2.9.8'
-    // 25. Apache DataSketches
+    // 25. Apache DataSketches | best for case hardware analyze data than clearspring is lightweight
     api 'org.apache.datasketches:datasketches-java:7.0.1'
+    // 26. toml4j easy to use for config file
+    api 'com.moandjiezana.toml:toml4j:0.7.2'
 
     // ===================================================================
     // Spring dependencies
@@ -241,8 +248,12 @@ dependencies {
     api 'org.springframework.statemachine:spring-statemachine-core:4.0.0'
     api 'org.springframework.boot:spring-boot-starter-mail'
     api 'org.springframework.boot:spring-boot-starter-batch'
-    api 'org.springdoc:springdoc-openapi-ui:1.8.0'
     api 'org.springframework.boot:spring-boot-starter-test'
+
+    // ===================================================================
+    // Spring documentation dependencies
+    // ===================================================================
+    api 'org.springdoc:springdoc-openapi-ui:1.8.0'
     //    implementation group: 'io.springfox', name: 'springfox-swagger2', version: '2.9.2'
     //    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.9.2'
 
@@ -266,6 +277,14 @@ dependencies {
     api 'io.micrometer:micrometer-registry-prometheus'
     api group: 'io.micrometer', name: 'micrometer-tracing-bridge-brave', version: '1.3.3'
     api 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix:2.2.10.RELEASE'
+
+    // ===================================================================
+    // Spring alibaba cloud & monitor dependencies
+    // ===================================================================
+    // 1. nacos-discovery better than eureka | nacos is a service discovery and configuration management platform
+    api 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
+    // 2. nacos config better than spring config by manager all in 1 place is (NACOS SERVER)
+    implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
 }
 
 // ===================================================================
@@ -274,6 +293,7 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2021.0.3"
+        mavenBom "com.alibaba.cloud:spring-cloud-alibaba-dependencies:2021.0.1.0"
 //        mavenBom "io.sentry:sentry-bom:$sentryVersion"
     }
 }

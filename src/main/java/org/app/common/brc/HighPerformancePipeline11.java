@@ -92,7 +92,7 @@ public class HighPerformancePipeline11<T> {
     /**
      * Set mapper function for transforming input lines
      */
-    public HighPerformancePipeline11<T> withMapper(Function<String, T> mapper) {
+    public HighPerformancePipeline11<T> map(Function<String, T> mapper) {
         this.mapper = mapper;
         return this;
     }
@@ -100,7 +100,7 @@ public class HighPerformancePipeline11<T> {
     /**
      * Set filter predicate for processing pipeline
      */
-    public HighPerformancePipeline11<T> withFilter(Predicate<T> filter) {
+    public HighPerformancePipeline11<T> filter(Predicate<T> filter) {
         this.filter = filter;
         return this;
     }
@@ -108,7 +108,7 @@ public class HighPerformancePipeline11<T> {
     /**
      * Set transformer for final processing stage
      */
-    public HighPerformancePipeline11<T> withTransformer(Function<T, ?> transformer) {
+    public HighPerformancePipeline11<T> transformer(Function<T, ?> transformer) {
         this.transformer = transformer;
         return this;
     }

@@ -33,13 +33,13 @@ public class JsonTemplate extends FluentApi<JsonTemplate> {
     public JsonTemplate addObject(Object... os) {
         if (objects == null) objects = new ArrayList<>();
         objects.addAll(List.of(os));
-        return self;
+        return self();
     }
 
     public JsonTemplate addObject(Object object) {
         if (objects == null) objects = new ArrayList<>();
         objects.add(object);
-        return self;
+        return self();
     }
 
     public JsonTemplate build() {
@@ -48,7 +48,7 @@ public class JsonTemplate extends FluentApi<JsonTemplate> {
         replaceValueTemplates();
         treeNode = JacksonUtils.readTree(template);
         JacksonUtils.replaceNullStrings(treeNode);
-        return self;
+        return self();
     }
 
     @SneakyThrows
@@ -98,7 +98,7 @@ public class JsonTemplate extends FluentApi<JsonTemplate> {
         String key = fieldName.startsWith("$") ? fieldName : "$" + fieldName;
         String stringValue = value != null ? value.toString() : "null";
         fields.put(key, stringValue);
-        return self;
+        return self();
     }
 
     /**

@@ -2,11 +2,14 @@ package org.app.common.cache.ignite;
 
 import lombok.Getter;
 import org.apache.ignite.Ignite;
+import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteTransactions;
+import org.apache.ignite.cache.query.SqlFieldsQuery;
 import org.apache.ignite.transactions.Transaction;
 import org.apache.ignite.transactions.TransactionConcurrency;
 import org.apache.ignite.transactions.TransactionIsolation;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -19,8 +22,7 @@ public class TransactionService {
 
     /**
      * -- GETTER --
-     *  Gets the underlying Ignite instance.
-     *
+     * Gets the underlying Ignite instance.
      */
     @Getter
     private final Ignite ignite;
@@ -36,8 +38,8 @@ public class TransactionService {
      *
      * @param txOperation The transactional operation to execute
      * @param concurrency The transaction concurrency level
-     * @param isolation The transaction isolation level
-     * @param <T> The return type of the operation
+     * @param isolation   The transaction isolation level
+     * @param <T>         The return type of the operation
      * @return The result of the operation
      */
     public <T> T executeInTransaction(
@@ -62,7 +64,7 @@ public class TransactionService {
      *
      * @param txOperation The transactional operation to execute
      * @param concurrency The transaction concurrency level
-     * @param isolation The transaction isolation level
+     * @param isolation   The transaction isolation level
      */
     public void executeInTransaction(
             Consumer<Transaction> txOperation,
@@ -84,7 +86,7 @@ public class TransactionService {
      * Executes an operation within a pessimistic transaction.
      *
      * @param txOperation The transactional operation to execute
-     * @param <T> The return type of the operation
+     * @param <T>         The return type of the operation
      * @return The result of the operation
      */
     public <T> T executeInPessimisticTransaction(Function<Transaction, T> txOperation) {
@@ -98,7 +100,7 @@ public class TransactionService {
      * Executes an operation within an optimistic transaction.
      *
      * @param txOperation The transactional operation to execute
-     * @param <T> The return type of the operation
+     * @param <T>         The return type of the operation
      * @return The result of the operation
      */
     public <T> T executeInOptimisticTransaction(Function<Transaction, T> txOperation) {
@@ -108,75 +110,77 @@ public class TransactionService {
                 TransactionIsolation.SERIALIZABLE);
     }
 
-//    /**
-//     * Executes a SQL query within a transaction.
-//     *
-//     * @param query The SQL query to execute
-//     * @param args The arguments for the SQL query
-//     * @return The result of the SQL query
-//     */
-//    public List<List<?>> executeSqlQueryInTransaction(String query, Object... args) {
-//        return executeInPessimisticTransaction(tx -> {
-//            SqlFieldsQuery sqlQuery = new SqlFieldsQuery(query);
-//
-//            if (args != null && args.length > 0) {
-//                sqlQuery.setArgs(args);
-//            }
-//
-//            return ignite.context().query().querySqlFields(sqlQuery, true).getAll();
-//        });
-//    }
-//
-//    /**
-//     * Executes an atomic put operation within a transaction.
-//     *
-//     * @param cacheName The name of the cache
-//     * @param key The key
-//     * @param value The value
-//     * @param <K> The key type
-//     * @param <V> The value type
-//     */
-//    public <K, V> void putInTransaction(String cacheName, K key, V value) {
-//        executeInPessimisticTransaction(tx -> {
-//            IgniteCache<K, V> cache = ignite.cache(cacheName);
-//            cache.put(key, value);
-//        });
-//    }
-//
-//    /**
-//     * Executes an atomic remove operation within a transaction.
-//     *
-//     * @param cacheName The name of the cache
-//     * @param key The key to remove
-//     * @param <K> The key type
-//     */
-//    public <K> void removeInTransaction(String cacheName, K key) {
-//        executeInPessimisticTransaction(tx -> {
-//            IgniteCache<K, Object> cache = ignite.cache(cacheName);
-//            cache.remove(key);
-//        });
-//    }
-//
-//    /**
-//     * Executes a bulk put operation within a transaction.
-//     *
-//     * @param cacheName The name of the cache
-//     * @param dataMap The data to put into the cache
-//     * @param <K> The key type
-//     * @param <V> The value type
-//     */
-//    public <K, V> void putAllInTransaction(String cacheName, java.util.Map<K, V> dataMap) {
-//        executeInPessimisticTransaction(tx -> {
-//            IgniteCache<K, V> cache = ignite.cache(cacheName);
-//            cache.putAll(dataMap);
-//        });
-//    }
+    /**
+     * Executes a SQL query within a transaction.
+     *
+     * @param query The SQL query to execute
+     * @param args  The arguments for the SQL query
+     * @return The result of the SQL query
+     */
+    public List<List<?>> executeSqlQueryInTransaction(String query, Object... args) {
+        return executeInPessimisticTransaction(tx -> {
+            IgniteCache<?, ?> cache = ignite.cache("default"); // Replace "default" with your cache name
+            SqlFieldsQuery sqlQuery = new SqlFieldsQuery(query);
+
+            if (args != null && args.length > 0) {
+                sqlQuery.setArgs(args);
+            }
+
+            return cache.query(sqlQuery).getAll();
+        });
+    }
+
+    /**
+     * Executes an atomic put operation within a transaction.
+     *
+     * @param cacheName The name of the cache
+     * @param key       The key
+     * @param value     The value
+     * @param <K>       The key type
+     * @param <V>       The value type
+     */
+    public <K, V> void putInTransaction(String cacheName, K key, V value) {
+        executeInTransaction(tx -> {
+            IgniteCache<K, V> cache = ignite.cache(cacheName);
+            cache.put(key, value);
+        }, TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
+    }
+
+    /**
+     * Executes an atomic remove operation within a transaction.
+     *
+     * @param cacheName The name of the cache
+     * @param key       The key to remove
+     * @param <K>       The key type
+     */
+    public <K> void removeInTransaction(String cacheName, K key) {
+        executeInTransaction(tx -> {
+            IgniteCache<K, Object> cache = ignite.cache(cacheName);
+            cache.remove(key);
+        }, TransactionConcurrency.PESSIMISTIC, TransactionIsolation.REPEATABLE_READ);
+    }
+
+    /**
+     * Executes a bulk put operation within a transaction.
+     *
+     * @param cacheName The name of the cache
+     * @param dataMap   The data to put into the cache
+     * @param <K>       The key type
+     * @param <V>       The value type
+     */
+    public <K, V> void putAllInTransaction(String cacheName, java.util.Map<K, V> dataMap) {
+        executeInPessimisticTransaction(tx -> {
+            IgniteCache<K, V> cache = ignite.cache(cacheName);
+            cache.putAll(dataMap);
+            return null;
+        });
+    }
 
     /**
      * Begins a new multi-operation transaction.
      *
      * @param concurrency The transaction concurrency level
-     * @param isolation The transaction isolation level
+     * @param isolation   The transaction isolation level
      * @return The transaction object
      */
     public Transaction beginTransaction(

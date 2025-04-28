@@ -1,0 +1,127 @@
+# Spring framework dependencies
+
+[dependencies.spring_boot_starter]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter"
+version = "latest"
+description = "Spring Boot starter"
+
+[dependencies.spring_boot_starter_tomcat]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-tomcat"
+version = "latest"
+description = "Spring Boot Tomcat starter"
+
+[dependencies.spring_boot_starter_actuator]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-actuator"
+version = "latest"
+description = "Spring Boot Actuator starter"
+
+[dependencies.spring_boot_starter_cache]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-cache"
+version = "latest"
+description = "Spring Boot Cache starter"
+
+[dependencies.spring_boot_starter_validation]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-validation"
+version = "latest"
+description = "Spring Boot Validation starter"
+
+[dependencies.spring_boot_starter_web]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-web"
+version = "latest"
+description = "Spring Boot Web starter"
+
+[dependencies.spring_boot_starter_aop]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-aop"
+version = "latest"
+description = "Spring Boot AOP starter"
+
+[dependencies.spring_boot_starter_data_redis]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-data-redis"
+version = "latest"
+description = "Spring Boot Redis starter"
+
+[dependencies.spring_boot_starter_data_jpa]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-data-jpa"
+version = "latest"
+description = "Spring Boot JPA starter"
+
+[dependencies.spring_boot_starter_webflux]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-webflux"
+version = "latest"
+description = "Spring Boot WebFlux starter"
+
+[dependencies.spring_boot_starter_thymeleaf]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-thymeleaf"
+version = "latest"
+description = "Spring Boot Thymeleaf starter"
+
+[dependencies.spring_boot_starter_data_elasticsearch]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-data-elasticsearch"
+version = "latest"
+description = "Spring Boot Elasticsearch starter"
+
+[dependencies.spring_boot_starter_jooq]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-jooq"
+version = "latest"
+description = "Spring Boot jOOQ starter"
+
+[dependencies.spring_boot_starter_mail]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-mail"
+version = "latest"
+description = "Spring Boot Mail starter"
+
+[dependencies.spring_boot_starter_batch]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-batch"
+version = "latest"
+description = "Spring Boot Batch starter"
+
+[dependencies.spring_boot_starter_data_couchbase]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-data-couchbase"
+version = "latest"
+description = "Spring Boot Couchbase starter"
+
+[dependencies.spring_boot_starter_data_cassandra]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-data-cassandra"
+version = "latest"
+description = "Spring Boot Cassandra starter"
+
+[dependencies.spring_statemachine_core]
+groupId = "org.springframework.statemachine"
+artifactId = "spring-statemachine-core"
+version = "4.0.0"
+description = "Spring State Machine core"
+
+[dependencies.spring_security_core]
+groupId = "org.springframework.security"
+artifactId = "spring-security-core"
+version = "5.7.11"
+description = "Spring Security core"
+
+[dependencies.spring_security_oauth2_client]
+groupId = "org.springframework.security"
+artifactId = "spring-security-oauth2-client"
+version = "5.7.11"
+description = "Spring Security OAuth2 client"
+
+[dependencies.springdoc_openapi_ui]
+groupId = "org.springdoc"
+artifactId = "springdoc-openapi-ui"
+version = "1.8.0"
+description = "SpringDoc OpenAPI UI"

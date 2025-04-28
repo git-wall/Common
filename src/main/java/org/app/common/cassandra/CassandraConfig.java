@@ -4,7 +4,6 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import lombok.Data;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +16,6 @@ import java.time.Duration;
 @Data
 @Configuration
 @EnableConfigurationProperties(CassandraProperties.class)
-@ConditionalOnProperty(prefix = "spring.cassandra", name = "enabled", havingValue = "true")
 public class CassandraConfig {
 
     @Bean

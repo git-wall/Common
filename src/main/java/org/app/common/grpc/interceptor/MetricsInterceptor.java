@@ -29,7 +29,7 @@ public class MetricsInterceptor implements ServerInterceptor {
         long startTime = System.currentTimeMillis();
         
         // Increment request counter
-        requestCounters.computeIfAbsent(methodName, k -> new AtomicLong(0)).incrementAndGet();
+        requestCounters.computeIfAbsent(methodName, k -> new AtomicLong(0L)).incrementAndGet();
         
         return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
                 next.startCall(new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
@@ -37,12 +37,12 @@ public class MetricsInterceptor implements ServerInterceptor {
                     public void close(Status status, Metadata trailers) {
                         // Calculate response time
                         long responseTime = System.currentTimeMillis() - startTime;
-                        responseTimeAccumulators.computeIfAbsent(methodName, k -> new AtomicLong(0))
+                        responseTimeAccumulators.computeIfAbsent(methodName, k -> new AtomicLong(0L))
                                 .addAndGet(responseTime);
                         
                         // Increment error counter if status is not OK
                         if (!status.isOk()) {
-                            errorCounters.computeIfAbsent(methodName, k -> new AtomicLong(0))
+                            errorCounters.computeIfAbsent(methodName, k -> new AtomicLong(0L))
                                     .incrementAndGet();
                         }
                         
@@ -64,7 +64,7 @@ public class MetricsInterceptor implements ServerInterceptor {
      */
     public long getRequestCount(String methodName) {
         AtomicLong counter = requestCounters.get(methodName);
-        return counter != null ? counter.get() : 0;
+        return counter != null ? counter.get() : 0L;
     }
     
     /**
@@ -75,7 +75,7 @@ public class MetricsInterceptor implements ServerInterceptor {
      */
     public long getErrorCount(String methodName) {
         AtomicLong counter = errorCounters.get(methodName);
-        return counter != null ? counter.get() : 0;
+        return counter != null ? counter.get() : 0L;
     }
     
     /**
@@ -88,8 +88,8 @@ public class MetricsInterceptor implements ServerInterceptor {
         AtomicLong timeAccumulator = responseTimeAccumulators.get(methodName);
         AtomicLong requestCounter = requestCounters.get(methodName);
         
-        if (timeAccumulator != null && requestCounter != null && requestCounter.get() > 0) {
-            return (double) timeAccumulator.get() / requestCounter.get();
+        if (timeAccumulator != null && requestCounter != null && requestCounter.get() > 0L) {
+            return (double) timeAccumulator.get() / (double) requestCounter.get();
         }
         
         return 0;

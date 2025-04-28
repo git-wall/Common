@@ -1,0 +1,20 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ee:latest
+    container_name: gitlab
+    restart: always
+    hostname: 'gitlab.experiment.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        nginx['redirect_http_to_https'] = false
+        external_url 'http://gitlab.experiment.com:8929'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2424
+    ports:
+      - '8929:8929'
+      - '443:443'
+      - '2424:22'
+    volumes:
+      - //e/Experiment/gitlab/GITLAB_HOME/config:/etc/gitlab
+      - //e/Experiment/gitlab/GITLAB_HOME/logs:/var/log/gitlab
+      - //e/Experiment/gitlab/GITLAB_HOME/data:/var/opt/gitlab
+    shm_size: '256m'

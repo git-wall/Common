@@ -12,7 +12,9 @@ import org.apache.ignite.services.ServiceDescriptor;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Manager for Apache Ignite Service Grid - a distributed microservices' framework.
@@ -154,15 +156,20 @@ public class ServiceGridManager {
         return deployedServices.keySet();
     }
 
-//    /**
-//     * Gets the node IDs where a specific service is deployed.
-//     *
-//     * @param serviceName The name of the service
-//     * @return A collection of node IDs
-//     */
-//    public Collection<UUID> getServiceNodeIds(String serviceName) {
-//        return ignite.services().serviceTopology(serviceName);
-//    }
+    /**
+      * Gets the node IDs where a specific service is deployed.
+      *
+      * @param serviceName The name of the service
+      * @return A collection of node IDs
+      */
+     public Collection<UUID> getServiceNodeIds(String serviceName) {
+         return ignite.services()
+                 .serviceDescriptors()
+                 .stream()
+                 .filter(desc -> desc.name().equals(serviceName))
+                 .flatMap(desc -> desc.topologySnapshot().keySet().stream())
+                 .collect(Collectors.toList());
+     }
 
     /**
      * Helper class for executing tasks with service injection.

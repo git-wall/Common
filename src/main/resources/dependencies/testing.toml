@@ -1,0 +1,19 @@
+# Testing dependencies
+
+[dependencies.testcontainers_postgresql]
+groupId = "org.testcontainers"
+artifactId = "postgresql"
+version = "1.20.4"
+description = "Testcontainers PostgreSQL module"
+
+[dependencies.jacoco_agent]
+groupId = "org.jacoco"
+artifactId = "org.jacoco.agent"
+version = "0.8.12"
+description = "JaCoCo Agent for code coverage"
+
+[dependencies.spring_boot_starter_test]
+groupId = "org.springframework.boot"
+artifactId = "spring-boot-starter-test"
+version = "latest"
+description = "Spring Boot Test starter"

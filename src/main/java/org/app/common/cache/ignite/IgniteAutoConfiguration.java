@@ -131,14 +131,4 @@ public class IgniteAutoConfiguration {
     public ServiceGridManager serviceGridManager(Ignite ignite) {
         return new ServiceGridManager(ignite, properties.getServiceGrid());
     }
-
-    /**
-     * Machine learning service.
-     */
-//    @Bean
-//    @ConditionalOnBean(annotation = EnableApacheIgnite.class)
-//    @ConditionalOnProperty(name = "ignite.machine-learning.enabled", havingValue = "true", matchIfMissing = false)
-//    public MLService mlService(Ignite ignite) {
-//        return new MLService(ignite, properties.getMachineLearning());
-//    }
 }

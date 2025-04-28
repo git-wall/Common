@@ -1,0 +1,17 @@
+services:
+  nacos:
+    image: nacos/nacos-server:latest
+    container_name: nacos-standalone
+    restart: always
+    environment:
+      - MODE=standalone
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+
+networks:
+    default:
+        driver: bridge
+        name: nacos_default
+        external: true

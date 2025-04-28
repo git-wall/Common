@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Filterer<T> {
-    private final List<Predicate<T>> filters = new ArrayList<>();
+    private final List<Predicate<T>> filters = new ArrayList<>(8);
 
     public Filterer<T> add(Predicate<T> filter) {
         filters.add(filter);

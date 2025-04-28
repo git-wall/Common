@@ -7,7 +7,6 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,14 +15,13 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "*")
 @RefreshScope
-@ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true")
 public class ElasticsearchConfig {
 
     @Value("${elasticsearch.host}")
     private String host;
 
-    @Value("${elasticsearch.port}")
-    private int port = 9200;
+    @Value("${elasticsearch.port=9200}")
+    private int port;
 
     @Bean
     public ElasticsearchClient elasticsearchClient() {

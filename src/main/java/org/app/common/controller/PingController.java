@@ -26,7 +26,7 @@ public class PingController {
 
     private static final String ERROR_MESSAGE = "Request fails. It takes long time to response";
 
-    @InterceptorLog(type = InterceptorLog.LogType.LOG)
+    @InterceptorLog(type = InterceptorLog.LogType.GRAYLOG)
     @GetMapping(TagURL.PING)
     @HystrixCommand(fallbackMethod = "fallback",
             commandProperties = {
