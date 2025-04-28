@@ -1,6 +1,6 @@
-# ===========================================================================================================
-# Builder stage 1 : Compile the application and prepare dependencies
-# ===========================================================================================================
+  #==============================================================================#
+ #     Builder stage 1 : Compile the application and prepare dependencies         #
+#==================================================================================#
 FROM eclipse-temurin:11-jdk as build
 WORKDIR /app
 # Copy all project files (source code, Gradle files, etc.) to the container
