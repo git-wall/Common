@@ -1,0 +1,31 @@
+# Caching dependencies
+
+[dependencies.hazelcast]
+groupId = "com.hazelcast"
+artifactId = "hazelcast"
+version = "4.2.5"
+description = "Hazelcast distributed cache"
+
+[dependencies.caffeine]
+groupId = "com.github.ben-manes.caffeine"
+artifactId = "caffeine"
+version = "3.2.0"
+description = "Caffeine high performance caching library"
+
+[dependencies.guava]
+groupId = "com.google.guava"
+artifactId = "guava"
+version = "33.4.7-jre"
+description = "Google Guava libraries including caching"
+
+[dependencies.valkey_java]
+groupId = "io.valkey"
+artifactId = "valkey-java"
+version = "5.3.0"
+description = "Valkey Redis cache client"
+
+[dependencies.jedis]
+groupId = "redis.clients"
+artifactId = "jedis"
+version = "5.2.0"
+description = "Redis Java client"

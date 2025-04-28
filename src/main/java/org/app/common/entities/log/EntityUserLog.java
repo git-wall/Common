@@ -1,9 +1,13 @@
 package org.app.common.entities.log;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.app.common.interceptor.log.InterceptorLog;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class EntityUserLog implements IEntity {
     private String id;
     private String deviceId;
@@ -20,7 +24,7 @@ public class EntityUserLog implements IEntity {
     private String description;
 
     @Override
-    public InterceptorLog.LogType getTracingLogType() {
+    public InterceptorLog.LogType[] getTracingLogType() {
         return tracingLog.getType();
     }
 }

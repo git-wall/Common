@@ -1,6 +1,9 @@
 package org.app.common.db;
 
 import com.zaxxer.hikari.HikariDataSource;
+import io.seata.rm.datasource.DataSourceProxy;
+
+import javax.sql.DataSource;
 
 public class DataSourceUtils {
 
@@ -9,6 +12,14 @@ public class DataSourceUtils {
     public static final int MAX_POOL_SIZE = 10;
     public static final int MINIMUM_IDLE_SIZE = 25000;
     public static final long CONNECTION_TIMEOUT = 20000L;
+
+    /**
+     * Do with AT Mode in Saga Seat (JDBC & Mybatis)
+     * With AT Mode is use for local service function
+     * */
+    public static DataSourceProxy getDataSource(DataSource dataSource) {
+        return new DataSourceProxy(dataSource);
+    }
 
     public static void appendConfig(HikariDataSource dataSource) {
         dataSource.addDataSourceProperty("cachePrepStmts", true);

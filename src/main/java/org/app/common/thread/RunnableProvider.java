@@ -1,30 +1,11 @@
 package org.app.common.thread;
 
-/**
- * @apiNote
- * <pre>{@code
- *     @AutoRun
- *     public class ScheduledReport extends RunnableProvider {
- *         @Override
- *         public void before() {
- *             logg(this.getClass().getSimpleName(), " ready to run");
- *         }
- *
- *         @Override
- *         public void now() {
- *         }
- *
- *         @Override
- *         public void after() {
- *             logg(this.getClass().getSimpleName(), " close");
- *         }
- *     }
- * }</pre>
- * */
-public abstract class RunnableProvider implements Runnable {
+import org.app.common.pattern.legacy.TemplateMethod;
 
-    private ThreadHook hook;
-    private Thread thread;
+public abstract class RunnableProvider extends TemplateMethod implements Runnable {
+
+    protected ThreadHook hook;
+    protected Thread thread;
 
     public void hook(ThreadHook hook) {
         this.hook = hook;
@@ -42,17 +23,9 @@ public abstract class RunnableProvider implements Runnable {
     @Override
     public void run() {
         before();
-        while (true) {
-            boolean running = hook.isRunning();
-            if (!running) break;
+        while (hook.isRunning()) {
             now();
         }
         after();
     }
-
-    public abstract void before();
-
-    public abstract void now();
-
-    public abstract void after();
 }

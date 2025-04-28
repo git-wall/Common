@@ -1,0 +1,103 @@
+# Database related dependencies
+
+[dependencies.cassandra_driver]
+groupId = "org.apache.cassandra"
+artifactId = "java-driver-core"
+version = "4.19.0"
+description = "Cassandra Java driver"
+
+[dependencies.scylla_driver_mapping]
+groupId = "com.scylladb"
+artifactId = "scylla-driver-mapping"
+version = "3.11.5.6"
+description = "ScyllaDB driver mapping"
+
+[dependencies.couchbase_client]
+groupId = "com.couchbase.client"
+artifactId = "java-client"
+version = "3.7.8"
+description = "Couchbase Java client"
+
+[dependencies.ektorp]
+groupId = "org.ektorp"
+artifactId = "org.ektorp"
+version = "1.5.0"
+description = "Java CouchDB persistence library"
+
+[dependencies.jooq]
+groupId = "org.jooq"
+artifactId = "jooq"
+version = "3.16.18"
+description = "jOOQ SQL builder"
+
+[dependencies.jooq_codegen]
+groupId = "org.jooq"
+artifactId = "jooq-codegen"
+version = "3.16.18"
+description = "jOOQ code generator"
+
+[dependencies.jooq_meta]
+groupId = "org.jooq"
+artifactId = "jooq-meta"
+version = "3.16.18"
+description = "jOOQ metadata"
+
+[dependencies.elasticsearch]
+groupId = "org.elasticsearch"
+artifactId = "elasticsearch"
+version = "7.10.2"
+description = "Elasticsearch server"
+
+[dependencies.elasticsearch_client]
+groupId = "org.elasticsearch.client"
+artifactId = "elasticsearch-rest-high-level-client"
+version = "7.10.2"
+description = "Elasticsearch client"
+
+[dependencies.opensearch_client]
+groupId = "org.opensearch.client"
+artifactId = "opensearch-rest-high-level-client"
+version = "3.0.0-alpha1"
+description = "OpenSearch client"
+
+[dependencies.mybatis]
+groupId = "org.mybatis"
+artifactId = "mybatis"
+version = "3.5.6"
+description = "MyBatis SQL mapper"
+
+[dependencies.mybatis_spring]
+groupId = "org.mybatis"
+artifactId = "mybatis-spring"
+version = "2.0.7"
+description = "MyBatis Spring integration"
+
+[dependencies.mapdb]
+groupId = "org.mapdb"
+artifactId = "mapdb"
+version = "3.1.0"
+description = "MapDB database engine"
+
+[dependencies.clickhouse_jdbc]
+groupId = "com.clickhouse"
+artifactId = "clickhouse-jdbc"
+version = "0.8.3"
+description = "ClickHouse JDBC driver"
+
+[dependencies.ignite_core]
+groupId = "org.apache.ignite"
+artifactId = "ignite-core"
+version = "2.17.0"
+description = "Apache Ignite core"
+
+[dependencies.ignite_spring]
+groupId = "org.apache.ignite"
+artifactId = "ignite-spring"
+version = "2.17.0"
+description = "Apache Ignite Spring integration"
+
+[dependencies.ignite_indexing]
+groupId = "org.apache.ignite"
+artifactId = "ignite-indexing"
+version = "2.17.0"
+description = "Apache Ignite indexing"

@@ -54,7 +54,7 @@ public class KafkaConfig {
     @Bean
     @ConditionalOnProperty(name = "spring.kafka.consumer")
     public ConsumerFactory<String, Object> consumerFactory() {
-        Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties()); // Load defaults
+        Map<String, Object> props = new HashMap<>(kafkaProperties.buildConsumerProperties());
 
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);

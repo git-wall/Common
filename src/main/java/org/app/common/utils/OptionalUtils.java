@@ -15,7 +15,7 @@ public class OptionalUtils {
                 .orElseThrow(() -> new IllegalStateException(error));
     }
 
-    public static <T> T filterAndElse(T t, Predicate<T> filter, T other) {
+    public static <T> T filterAndOrElse(T t, Predicate<T> filter, T other) {
         return Optional.ofNullable(t)
                 .filter(filter)
                 .orElse(other);

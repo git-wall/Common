@@ -6,12 +6,10 @@ public class Topic1MessageProcessor implements MessageProcessor<String, String> 
     }
 }
 
-final KafkaMultiBrokerService kafkaMultiBrokerService;
-
-kafkaMultiBrokerService.runConsumer("broker1", "topic1", Topic1MessageProcessor);
-kafkaMultiBrokerService.runConsumerNoRetry("broker1", "topic1", Topic1MessageProcessor);
-kafkaMultiBrokerService.producerSend("broker1", "topic1", "key", "value");
-KafkaProducer<String, String> producer = kafkaMultiBrokerService.getProducer("broker1");
+MultiKafkaService.runConsumer("broker1", "topic1", Topic1MessageProcessor);
+MultiKafkaService.runConsumerNoRetry("broker1", "topic1", Topic1MessageProcessor);
+MultiKafkaService.producerSend("broker1", "topic1", "key", "value");
+KafkaProducer<String, String> producer = MultiKafkaService.getProducer("broker1");
 ```
 
 ```yaml

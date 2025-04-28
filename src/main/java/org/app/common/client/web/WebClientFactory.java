@@ -4,7 +4,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.context.ThreadContext;
+import org.app.common.context.TracingContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -78,7 +78,7 @@ public class WebClientFactory {
                 .ofRequestProcessor(clientRequest -> {
                     log.info(
                             "{} - URL: {}, Method: {}, Header: {} , Body: {}",
-                            ThreadContext.getRequestId(),
+                            TracingContext.getRequestId(),
                             clientRequest.url(),
                             clientRequest.method(),
                             clientRequest.headers(),
@@ -92,7 +92,7 @@ public class WebClientFactory {
         return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
             log.info(
                     "{} - Status: {}, Response Body: {}",
-                    ThreadContext.getRequestId(),
+                    TracingContext.getRequestId(),
                     clientResponse.statusCode(),
                     clientResponse.bodyToMono(Object.class).block()
             );

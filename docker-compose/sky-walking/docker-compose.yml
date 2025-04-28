@@ -1,0 +1,47 @@
+services:
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    networks:
+      - nacos-network
+
+  skywalking-oap:
+    image: apache/skywalking-oap-server:10.0.1
+    container_name: skywalking-oap
+    restart: always
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    ports:
+      - "12800:12800"
+      - "11800:11800"
+    environment:
+      - SW_STORAGE=elasticsearch
+      - SW_STORAGE_ES_CLUSTER_NODES=elasticsearch:9200
+    networks:
+      - nacos-network
+
+  skywalking-ui:
+    image: apache/skywalking-ui:10.0.1
+    container_name: skywalking-ui
+    restart: always
+    depends_on:
+      - skywalking-oap
+    ports:
+      - "8088:8080"
+    environment:
+      - SW_OAP_ADDRESS=http://skywalking-oap:12800
+      - SW_UI_ENABLE=true
+      - SW_ENABLE_UPDATE_UI_TEMPLATE=true
+    networks:
+      - nacos-network
+
+networks:
+  nacos-network:
+    external: true

@@ -2,16 +2,14 @@ package org.app.common.kafka.multi.processor;
 
 import io.confluent.parallelconsumer.ParallelConsumerOptions;
 import io.confluent.parallelconsumer.ParallelStreamProcessor;
-import lombok.Builder;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.app.common.kafka.multi.config.RetryConfig;
 
 import javax.annotation.PreDestroy;
-import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -22,25 +20,6 @@ public class ParallelKafkaConsumer<K, V> {
     private final MessageProcessor<K, V> processor;
     private final RetryConfig retryConfig;
     private final KafkaProducer<K, V> producer;
-
-    @Builder
-    @Getter
-    public static class RetryConfig {
-        private final RetryStrategy strategy;
-        private final int maxRetries;
-        private final Duration retryDelay;
-        private final String retryTopic;
-        private final String dlqTopic;
-    }
-
-    public enum RetryStrategy {
-        // IN_MEMORY_RETRY: Retries processing in the same consumer
-        IN_MEMORY_RETRY,
-        // RETRY_TOPIC: Sends failed messages to a retry topic
-        RETRY_TOPIC,
-        // DLQ_IMMEDIATE: Sends failed messages directly to Dead Letter Queue
-        DLQ_IMMEDIATE
-    }
 
     public ParallelKafkaConsumer(KafkaConsumer<K, V> consumer,
                                  KafkaProducer<K, V> producer,
@@ -67,7 +46,7 @@ public class ParallelKafkaConsumer<K, V> {
 
             parallelConsumer.poll(context -> {
                 ConsumerRecord<K, V> record = context.getSingleRecord().getConsumerRecord();
-                processWithRetry(record, retryConfig.maxRetries);
+                processWithRetry(record, retryConfig.getMaxRetries());
             });
         } catch (Exception e) {
             log.error("Fatal error in consumer", e);

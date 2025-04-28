@@ -3,7 +3,7 @@ package org.app.common.engine.rule;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.context.ThreadContext;
+import org.app.common.context.TracingContext;
 import org.app.common.engine.condition.Condition;
 import org.app.common.engine.condition.ConditionGroup;
 import org.app.common.engine.contain.Operator;
@@ -47,7 +47,7 @@ public class Rule {
 
     public boolean evaluateCondition(Object request) {
         if (ListUtils.isEmpty(conditionGroups)) {
-            log.error("{} - conditions is null or empty", ThreadContext.getRequestId());
+            log.error("{} - conditions is null or empty", TracingContext.getRequestId());
             return false;
         }
 

@@ -1,0 +1,31 @@
+# Monitoring and logging dependencies
+
+[dependencies.slf4j_api]
+groupId = "org.slf4j"
+artifactId = "slf4j-api"
+version = "2.1.0-alpha1"
+description = "SLF4J API module"
+
+[dependencies.logback_gelf]
+groupId = "de.siegmar"
+artifactId = "logback-gelf"
+version = "4.0.2"
+description = "Logback GELF appender"
+
+[dependencies.gelfj]
+groupId = "org.graylog2"
+artifactId = "gelfj"
+version = "1.1.16"
+description = "Graylog Extended Log Format for Java"
+
+[dependencies.micrometer_prometheus]
+groupId = "io.micrometer"
+artifactId = "micrometer-registry-prometheus"
+version = "latest"
+description = "Prometheus registry for Micrometer"
+
+[dependencies.micrometer_tracing]
+groupId = "io.micrometer"
+artifactId = "micrometer-tracing-bridge-brave"
+version = "1.3.3"
+description = "Micrometer Tracing bridge for Brave"

@@ -7,15 +7,15 @@ import org.springframework.stereotype.Service;
 public class BRDActionConfig {
 
     @Bean
-    public BRDAction<User> userBRDAction(RedisTemplate<String, String> redisTemplate,
+    public BloomAction<User> userBRDAction(RedisTemplate<String, String> redisTemplate,
                                          UserRepository userRepository) {
 
         QuerySupplier<User> query = QuerySupplier.<User>of()
-                .exits(() -> userRepository.exits())
-                .insert(() -> userRepository.insert())
+                .exits(userRepository::exists)
+                .insert(userRepository::insert)
                 .findFields(userRepository::findAllUsernames);
 
-        return new BRDAction<>(redisTemplate, 10_000)
+        return new BloomAction<>(redisTemplate, 10_000)
                 .query(query)
                 .load(); // preload BloomFilter + Redis
     }
@@ -23,7 +23,7 @@ public class BRDActionConfig {
 
 @Service
 public class UserService {
-    private final BRDAction<User> brdAction;
+    private final BloomAction<User> brdAction;
 
     public boolean checkUserExists(String username) {
         return brdAction.exists(username);

@@ -1,0 +1,19 @@
+# Security related dependencies
+
+[dependencies.jjwt_api]
+groupId = "io.jsonwebtoken"
+artifactId = "jjwt-api"
+version = "0.12.6"
+description = "JJWT API"
+
+[dependencies.spring_security_core]
+groupId = "org.springframework.security"
+artifactId = "spring-security-core"
+version = "5.7.11"
+description = "Spring Security Core"
+
+[dependencies.spring_security_oauth2_client]
+groupId = "org.springframework.security"
+artifactId = "spring-security-oauth2-client"
+version = "5.7.11"
+description = "Spring Security OAuth2 Client"

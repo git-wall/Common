@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Service
@@ -93,6 +95,17 @@ public class RedisService {
     public boolean setIfAbsentWithTimeout(String key, Object value, long timeout, TimeUnit timeUnit) {
         Boolean result = redisTemplate.opsForValue().setIfAbsent(key, value, timeout, timeUnit);
         return result != null && result;
+    }
+
+    public <T> void setIfAbsentWithTimeout(List<T> list,
+                                           String keyFormat,
+                                           Function<T, ?> keyExtractor,
+                                           long timeout,
+                                           TimeUnit timeUnit) {
+        list.forEach(e -> {
+            String key = String.format(keyFormat, keyExtractor.apply(e));
+            setIfAbsentWithTimeout(key, e, timeout, timeUnit);
+        });
     }
 
     /**

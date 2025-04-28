@@ -10,7 +10,7 @@ public class TracingLog implements Serializable {
     private static final long serialVersionUID = 8412664333538998193L;
     private String requestId;
     private String tracID;
-    private InterceptorLog.LogType type;
+    private InterceptorLog.LogType[] type;
     private String url;
     private String method;
     private String request;

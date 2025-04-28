@@ -1,9 +1,8 @@
 package org.app.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.context.ThreadContext;
-import org.app.common.utils.RequestUtils;
 import org.app.common.res.ResponseUtils;
+import org.app.common.utils.RequestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -26,16 +25,13 @@ public abstract class GlobalException {
                 .stream()
                 .map(fieldError -> String.format(ERROR_MESSAGE_PATTERN, fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.toList());
+        var id = ThreadContext.get(RequestUtils.REQUEST_ID);
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
-        return ResponseEntity.ok(
-                ResponseUtils.Error.build(
-                        ThreadContext.get(RequestUtils.REQUEST_ID),
-                        status,
-                        status.getReasonPhrase(),
-                        errors)
-        );
+        return ResponseEntity
+                .status(status)
+                .body(ResponseUtils.Error.build(id, status, status.getReasonPhrase(), errors));
     }
 
     @ExceptionHandler({IllegalArgumentException.class})
@@ -43,12 +39,10 @@ public abstract class GlobalException {
         var id = ThreadContext.get(RequestUtils.REQUEST_ID);
         String message = String.format("%s - %s", id, ex.getMessage());
         log.error(message, ex);
-        return ResponseEntity.ok(
-                ResponseUtils.Error.build(
-                        id,
-                        HttpStatus.BAD_REQUEST,
-                        ex.getMessage())
-        );
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        return ResponseEntity
+                .status(status)
+                .body(ResponseUtils.Error.build(id, status, ex.getMessage()));
     }
 
     @ExceptionHandler(TooManyRequestsException.class)
@@ -56,13 +50,9 @@ public abstract class GlobalException {
         var id = ThreadContext.get(RequestUtils.REQUEST_ID);
         String message = String.format("%s - %s", id, ex.getMessage());
         log.error(message, ex);
+        HttpStatus status = HttpStatus.TOO_MANY_REQUESTS;
         return ResponseEntity
-                .status(HttpStatus.TOO_MANY_REQUESTS)
-                .body(
-                        ResponseUtils.Error.build(
-                                id,
-                                HttpStatus.BAD_REQUEST,
-                                ex.getMessage())
-                );
+                .status(status)
+                .body(ResponseUtils.Error.build(id, status, ex.getMessage()));
     }
 }

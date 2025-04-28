@@ -4,7 +4,6 @@ import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.config.DefaultDriverOption;
 import com.datastax.oss.driver.api.core.config.DriverConfigLoader;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 @Configuration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(ScyllaProperties.class)
-@ConditionalOnProperty(value = "scylla.enabled", havingValue = "true")
 public class ScyllaConfig {
 
     private final ScyllaProperties properties;

@@ -72,6 +72,11 @@ public class JacksonUtils {
         return readValue(json, Type.refer());
     }
 
+    @SneakyThrows
+    public static <T> T readValue(Object json) {
+        return readValue(json.toString(), Type.refer());
+    }
+
     /**
      * increase from default of 20 MB to 20 MiB (note megabytes vs mebibyte)
      */

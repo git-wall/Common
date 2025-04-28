@@ -8,13 +8,13 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InterceptorLog {
-    LogType type() default LogType.LOG;
+    LogType[] type() default LogType.GRAYLOG;
 
     enum LogType {
         GRAYLOG,
         KAFKA,
         ELK,
         NIFI,
-        LOG
+        CLICKHOUSE,
     }
 }

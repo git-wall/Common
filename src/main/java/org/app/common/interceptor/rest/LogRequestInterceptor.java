@@ -2,7 +2,7 @@ package org.app.common.interceptor.rest;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.context.ThreadContext;
+import org.app.common.context.TracingContext;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -31,7 +31,7 @@ public class LogRequestInterceptor implements ClientHttpRequestInterceptor {
     }
 
     private void startCollection(HttpRequest request, byte[] body) {
-        String requestId = ThreadContext.getRequestId();
+        String requestId = TracingContext.getRequestId();
         log.info(
                 "{} - URI: {}, Method: {}, Body: {}",
                 requestId,
@@ -43,7 +43,7 @@ public class LogRequestInterceptor implements ClientHttpRequestInterceptor {
 
     @SneakyThrows
     private void endCollection(ClientHttpResponse response) {
-        String requestId = ThreadContext.getRequestId();
+        String requestId = TracingContext.getRequestId();
         log.info("{} - Response Body: {}", requestId, StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8));
     }
 }

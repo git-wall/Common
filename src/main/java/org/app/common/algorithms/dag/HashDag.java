@@ -1,6 +1,7 @@
 package org.app.common.algorithms.dag;
 
 import lombok.AllArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -176,7 +177,7 @@ public class HashDag<E> implements Dag<E> {
      * @return true if this DAG contains all nodes in the specified collection
      */
     @Override
-    public boolean containsAll(Collection<?> c) {
+    public boolean containsAll(@NotNull Collection<?> c) {
         return map.keySet().containsAll(c);
     }
 
@@ -186,7 +187,7 @@ public class HashDag<E> implements Dag<E> {
      * @return an iterator over the nodes in this DAG
      */
     @Override
-    public Iterator<E> iterator() {
+    public @NotNull Iterator<E> iterator() {
         return map.keySet().iterator();
     }
 
@@ -196,7 +197,7 @@ public class HashDag<E> implements Dag<E> {
      * @return an array containing all nodes in this DAG
      */
     @Override
-    public Object[] toArray() {
+    public Object @NotNull [] toArray() {
         return map.keySet().toArray();
     }
 
@@ -207,7 +208,7 @@ public class HashDag<E> implements Dag<E> {
      * @return an array containing all nodes in this DAG
      */
     @Override
-    public <T> T[] toArray(T[] array) {
+    public <T> T @NotNull [] toArray(T @NotNull [] array) {
         return map.keySet().toArray(array);
     }
 
@@ -271,7 +272,7 @@ public class HashDag<E> implements Dag<E> {
      * @throws NullPointerException if the specified collection is null
      */
     @Override
-    public boolean retainAll(Collection<?> c) {
+    public boolean retainAll(@NotNull Collection<?> c) {
         Objects.requireNonNull(c, "Collection is null");
         boolean modified = map.keySet().retainAll(c);
         if (modified) {

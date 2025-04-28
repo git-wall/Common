@@ -6,7 +6,7 @@ import java.util.Currency;
 public class Monetary {
     // Eurozone (EUR) – EUR (Euro) (Used by many European countries, including Germany, France, Spain, etc.)
     public static Money EUR(BigDecimal amount) {
-        return new Money(amount, Currency.getInstance("EUR")).;
+        return new Money(amount, Currency.getInstance("EUR"));
     }
 
     // United Kingdom (GB) – GBP (British Pound Sterling) (English is spoken, but the UK is the country)

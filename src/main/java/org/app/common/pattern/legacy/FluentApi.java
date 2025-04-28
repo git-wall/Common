@@ -1,18 +1,12 @@
 package org.app.common.pattern.legacy;
 
-public abstract class FluentApi<T> {
-
-    protected T self;
-
-    public FluentApi() {
-    }
-
-    protected FluentApi(T self) {
-        this.self = self;
-    }
+/**
+ * This use Fluent pattern + Curiously Recurring Template Pattern
+ * */
+public abstract class FluentApi<T extends FluentApi<T>> {
 
     @SuppressWarnings("unchecked")
-    public T instance() {
+    protected T self() {
         return (T) this;
     }
 }

@@ -1,0 +1,7 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.app.common.grpc.server.GrpcServerConfiguration,\
+org.app.common.grpc.client.GrpcClientConfiguration,\
+org.app.common.grpc.GrpcAutoConfiguration,\
+org.app.common.seata.config.SeataConfiguration,\
+org.app.common.seata.saga.SagaConfiguration,\
+org.app.common.seata.monitoring.SeataMonitoringConfiguration

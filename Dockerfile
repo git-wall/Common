@@ -40,37 +40,16 @@ RUN jlink  \
     --no-man-pages \
     --output build/image
 
-
 # ===========================================================================================================
-# Extractor Stage 2 : Extract Spring Boot layers for efficient Docker caching
+# Run stage 2 : Compile the application and run
 # ===========================================================================================================
-# Note: Your Gradle config should have -> 'layered { enabled = true  dependencies {intoLayer 'dependencies'} }'
-# to ensure the JAR supports layertools extraction
-FROM eclipse-temurin:11-jre AS extractor
-WORKDIR /opt/app
-# Copy the built JAR from the builder stage (fixed path from /app to /opt/app)
-COPY --from=build /opt/app/build/libs/Common.jar application.jar
-# Extract layers using Spring Boot's layertools
-# Layers typically include: dependencies, spring-boot-loader, snapshot-dependencies, application
-RUN java -Djarmode=layertools -jar application.jar extract
-
-
-# ===========================================================================================================
-# Runtime Stage 3 : Build the final image with a custom JRE and GC( ZGC, SerialGC, G1GC, ParallelGC )
-# ===========================================================================================================
-FROM ubuntu:jammy
-# Set JAVA_HOME to the custom JRE location
-ENV JAVA_HOME=/opt/java/jdk11
-# Update PATH to include Java binaries
-ENV PATH=${JAVA_HOME}/bin:${PATH}
-# Copy the custom JRE from the builder stage (fixed typo 'myjre' to 'build/image')
-COPY --from=build /opt/app/myjre ${JAVA_HOME}
-WORKDIR /opt/app
-# Copy Spring Boot layers from the extractor stage for efficient caching
-COPY --from=extractor /opt/app/dependencies/ ./
-COPY --from=extractor /opt/app/spring-boot-loader/ ./
-COPY --from=extractor /opt/app/snapshot-dependencies/ ./
-COPY --from=extractor /opt/app/application/ ./
+FROM debian:bullseye-slim
+WORKDIR /app
+COPY --from=builder /app/build/libs/Common-0.0.1-SNAPSHOT.jar app.jar
+COPY --from=builder /app/build/image /opt/java/openjdk
+ENV PATH="/opt/java/openjdk/bin:${PATH}"
+# ENV JAVA_OPTS=""
+# EXPOSE 8080
 # Configure JVM with ZGC and NUMA awareness
 # - '-XX:+UnlockExperimentalVMOptions': Required to enable ZGC in Java 11 (experimental)
 # - '-XX:+UseZGC': Enables Z Garbage Collector for low-latency GC

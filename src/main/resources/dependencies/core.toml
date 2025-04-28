@@ -1,0 +1,19 @@
+# Core dependencies
+
+[dependencies.jakarta_xml_bind]
+groupId = "jakarta.xml.bind"
+artifactId = "jakarta.xml.bind-api"
+version = "3.0.1"
+description = "Jakarta XML Binding API"
+
+[dependencies.jaxb_runtime]
+groupId = "org.glassfish.jaxb"
+artifactId = "jaxb-runtime"
+version = "3.0.2"
+description = "JAXB Runtime"
+
+[dependencies.toml4j]
+groupId = "io.hotmoka"
+artifactId = "toml4j"
+version = "0.7.3"
+description = "TOML parser for Java"

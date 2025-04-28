@@ -1,0 +1,67 @@
+# Spring Cloud dependencies
+
+[dependencies.spring_cloud_stream]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-stream"
+version = "latest"
+description = "Spring Cloud Stream"
+
+[dependencies.spring_cloud_starter_vault_config]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-starter-vault-config"
+version = "latest"
+description = "Spring Cloud Vault Config starter"
+
+[dependencies.spring_cloud_stream_binder_kafka]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-stream-binder-kafka"
+version = "latest"
+description = "Spring Cloud Stream Kafka binder"
+
+[dependencies.spring_cloud_stream_binder_kafka_streams]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-stream-binder-kafka-streams"
+version = "latest"
+description = "Spring Cloud Stream Kafka Streams binder"
+
+[dependencies.spring_cloud_starter_config]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-starter-config"
+version = "latest"
+description = "Spring Cloud Config starter"
+
+[dependencies.spring_cloud_starter_circuitbreaker_resilience4j]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-starter-circuitbreaker-resilience4j"
+version = "latest"
+description = "Spring Cloud Circuit Breaker Resilience4j starter"
+
+[dependencies.spring_cloud_starter_netflix_eureka_client]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-starter-netflix-eureka-client"
+version = "latest"
+description = "Spring Cloud Netflix Eureka client starter"
+
+[dependencies.spring_cloud_starter_sleuth]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-starter-sleuth"
+version = "latest"
+description = "Spring Cloud Sleuth starter"
+
+[dependencies.spring_cloud_sleuth_zipkin]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-sleuth-zipkin"
+version = "latest"
+description = "Spring Cloud Sleuth Zipkin"
+
+[dependencies.spring_cloud_starter_netflix_hystrix]
+groupId = "org.springframework.cloud"
+artifactId = "spring-cloud-starter-netflix-hystrix"
+version = "2.2.10.RELEASE"
+description = "Spring Cloud Netflix Hystrix starter"
+
+[dependencies.zipkin_reporter_brave]
+groupId = "io.zipkin.reporter2"
+artifactId = "zipkin-reporter-brave"
+version = "latest"
+description = "Zipkin Reporter Brave"

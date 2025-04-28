@@ -1,0 +1,25 @@
+# Messaging and event processing dependencies
+
+[dependencies.kafka_clients]
+groupId = "org.apache.kafka"
+artifactId = "kafka-clients"
+version = "3.8.0"
+description = "Apache Kafka clients"
+
+[dependencies.kafka_streams]
+groupId = "org.apache.kafka"
+artifactId = "kafka-streams"
+version = "3.8.0"
+description = "Apache Kafka Streams"
+
+[dependencies.spring_kafka]
+groupId = "org.springframework.kafka"
+artifactId = "spring-kafka"
+version = "latest"
+description = "Spring for Apache Kafka"
+
+[dependencies.parallel_consumer_core]
+groupId = "io.confluent.parallelconsumer"
+artifactId = "parallel-consumer-core"
+version = "0.5.3.2"
+description = "Confluent Parallel Consumer Core"
