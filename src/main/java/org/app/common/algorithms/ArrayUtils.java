@@ -25,19 +25,6 @@ public class ArrayUtils {
         return Arrays.asList(array);
     }
 
-    /**
-     * Good for small, ok if size is <= 7
-     *
-     * @param dest size <= 7
-     * @param low  min size
-     * @param high max size
-     */
-    public static <T extends Comparable<T>> void insert(T[] dest, int low, int high) {
-        for (int i = low; i < high; ++i)
-            for (int j = i; j > low && (dest[j - 1]).compareTo(dest[j]) > 0; j--)
-                swap(dest, i, j - 1);
-    }
-
     public static <T extends Comparable<T>> void merge(T[] src, T[] dest, int low, int high, int offset) {
         int length = high - low;
 
@@ -67,6 +54,19 @@ public class ArrayUtils {
             else
                 dest[i] = src[q++];
         }
+    }
+
+    /**
+     * Good for small, ok if size is <= 7
+     *
+     * @param dest size <= 7
+     * @param low  min size
+     * @param high max size
+     */
+    public static <T extends Comparable<T>> void insert(T[] dest, int low, int high) {
+        for (int i = low; i < high; ++i)
+            for (int j = i; j > low && (dest[j - 1]).compareTo(dest[j]) > 0; j--)
+                swap(dest, i, j - 1);
     }
 
     public static <T> void swap(T[] x, int a, int b) {

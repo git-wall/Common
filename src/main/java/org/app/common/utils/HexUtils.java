@@ -1,5 +1,7 @@
 package org.app.common.utils;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -22,5 +24,13 @@ public class HexUtils {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not found", e);
         }
+    }
+
+    public static String hash(String input) {
+        return DigestUtils.sha256Hex(input);
+    }
+
+    public static String hash(Object input) {
+        return DigestUtils.sha256Hex(input.toString());
     }
 }

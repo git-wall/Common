@@ -58,7 +58,7 @@ public class ThreadUtils {
             );
         }
 
-        public static ScheduledExecutorService scheduledPool() {
+        public static ExecutorService scheduledPool() {
             return new ScheduledThreadPoolExecutor(CORE_AVAILABLE);
         }
     }
@@ -109,11 +109,11 @@ public class ThreadUtils {
             );
         }
 
-        public static ScheduledExecutorService scheduledPool() {
+        public static ExecutorService scheduledPool() {
             return new ScheduledThreadPoolExecutor(getProcessors());
         }
 
-        public static ScheduledExecutorService scheduledSmallPool() {
+        public static ExecutorService scheduledSmallPool() {
             return new ScheduledThreadPoolExecutor(2);
         }
 

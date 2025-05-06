@@ -1,0 +1,36 @@
+services:
+  team-city:
+    container_name: teamcity-server
+    image: jetbrains/teamcity-server
+    environment:
+      - TEAMCITY_SERVER_MEM_OPTS="-Xmx3g -XX:MaxPermSize=270m -XX:ReservedCodeCacheSize=640m"
+    ports:
+      - "8111:8111"
+    volumes:
+      - "C:/teamcity/data:/data/teamcity_server/datadir"
+      - "C:/teamcity/logs:/opt/teamcity/logs"
+      - "C:/teamcity/temp:/opt/teamcity/temp"
+
+  hub-server:
+    container_name: hub-server-instance
+    image: jetbrains/hub:2025.1.74704
+    ports:
+      - "8080:8080"
+    volumes:
+      - "C:/hub/data:/opt/hub/data"
+      - "C:/hub/conf:/opt/hub/conf"
+      - "C:/hub/logs:/opt/hub/logs"
+      - "C:/hub/backups:/opt/hub/backups"
+    restart: unless-stopped
+
+  youtrack:
+    image: jetbrains/youtrack:2025.1.74704
+    container_name: youtrack-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - "C:/youtrack/data:/opt/youtrack/data"
+      - "C:/youtrack/conf:/opt/youtrack/conf"
+      - "C:/youtrack/logs:/opt/youtrack/logs"
+      - "C:/youtrack/backups:/opt/youtrack/backups"
+    restart: unless-stopped

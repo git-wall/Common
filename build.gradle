@@ -66,12 +66,11 @@ dependencies {
     api 'io.jsonwebtoken:jjwt-api:0.12.6'
 
        //===========================================================\\
-      //                  Analyze code dependencies                  \\
+      //                   Analyze code dependencies                  \\
      //===============================================================\\
     // 1. jmh analyze what func is good
     api 'org.openjdk.jmh:jmh-core:1.37'
     api 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
-    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
     // 2. jol analyze the cost of class
     api 'org.openjdk.jol:jol-core:0.17'
@@ -99,7 +98,7 @@ dependencies {
     // 8 elasticsearch for client
     api 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.10.2'
     // 9 opensearch
-    api 'org.opensearch.client:opensearch-rest-high-level-client:3.0.0-alpha1'
+    api 'org.opensearch.client:opensearch-rest-high-level-client:3.0.0-beta1'
     // 10 mybatis
     api 'org.mybatis:mybatis:3.5.6'
     api 'org.mybatis:mybatis-spring:2.0.7'
@@ -200,7 +199,7 @@ dependencies {
     // 18. lucene: for handler text, english, etc ...
     // api 'org.apache.lucene:lucene-analysis-common:10.1.0'
     // 19. seata: Saga pattern
-//    api 'io.seata:seata-all:2.0.0'
+    // api 'io.seata:seata-all:2.0.0'
     api 'io.seata:seata-spring-boot-starter:2.0.0'
     // 20. grpc
     api 'io.grpc:grpc-stub:1.70.0'
@@ -235,21 +234,19 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter-web'
     api 'org.springframework.boot:spring-boot-starter-aop'
     api 'org.springframework.boot:spring-boot-starter-data-redis'
-    api 'org.springframework.kafka:spring-kafka'
-    api 'org.springframework.cloud:spring-cloud-stream'
-    api 'org.springframework.cloud:spring-cloud-starter-vault-config'
-    api 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
-    api 'org.springframework.cloud:spring-cloud-stream-binder-kafka-streams'
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
     api 'org.springframework.boot:spring-boot-starter-webflux'
-    api 'org.springframework.cloud:spring-cloud-starter-config'
     api 'org.springframework.boot:spring-boot-starter-thymeleaf'
     api 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     api 'org.springframework.boot:spring-boot-starter-jooq'
-    api 'org.springframework.statemachine:spring-statemachine-core:4.0.0'
     api 'org.springframework.boot:spring-boot-starter-mail'
     api 'org.springframework.boot:spring-boot-starter-batch'
     api 'org.springframework.boot:spring-boot-starter-test'
+
+    // ===================================================================
+    // Spring machine
+    // ===================================================================
+    api 'org.springframework.statemachine:spring-statemachine-core:4.0.0'
 
     // ===================================================================
     // Spring documentation dependencies
@@ -262,7 +259,7 @@ dependencies {
     api 'org.springframework.security:spring-security-oauth2-client:5.7.11'
 
     // ===================================================================
-    // Spring dependencies
+    // Spring data
     // ===================================================================
     api 'org.springframework.boot:spring-boot-starter-data-couchbase'
     api 'org.springframework.boot:spring-boot-starter-data-cassandra'
@@ -270,6 +267,14 @@ dependencies {
     // ===================================================================
     // Spring cloud & monitor dependencies
     // ===================================================================
+    api 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    api 'org.springframework.cloud:spring-cloud-starter-config'
+    api 'org.springframework.cloud:spring-cloud-stream'
+    api 'org.springframework.cloud:spring-cloud-starter-vault-config'
+    api 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+    api 'org.springframework.cloud:spring-cloud-stream-binder-kafka-streams'
+    api 'org.springframework.kafka:spring-kafka'
+
     api 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
     api 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     api 'org.springframework.cloud:spring-cloud-starter-sleuth'
