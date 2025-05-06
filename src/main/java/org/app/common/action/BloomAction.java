@@ -3,10 +3,13 @@ package org.app.common.action;
 import com.google.common.hash.Funnels;
 import org.app.common.db.QuerySupplier;
 import org.app.common.filter.ScalableBloomFilter;
+import org.app.common.utils.HexUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.UUID;
 
 // ScalableBloomFilter → RedisTemplate (cache) → Real DB (query)
 // supper fast -> fast -> slow(safe)
@@ -46,26 +49,65 @@ public class BloomAction<T> {
         return this;
     }
 
-    public boolean exists(String element) {
-        if (!bloomFilter.mightContain(element)) {
-            return false;
-        }
+    public BloomAction<T> load(List<T> items) {
+        items.stream()
+                .map(Object::hashCode)
+                .map(HexUtils::hash)
+                .forEach(hash -> {
+                    redisTemplate.opsForValue().set(hash, UUID.randomUUID().toString());
+                    bloomFilter.add(hash);
+                });
+        return this;
+    }
 
-        if (redisTemplate.opsForValue().get(element) != null) {
+    public boolean exists(String hash) {
+        if (bloomFilter.mightContain(hash)) {
             return true;
         }
 
-        return query.getExits().get();
+        if (redisTemplate.opsForValue().get(hash) != null) {
+            return true;
+        }
+
+        if (query != null) {
+            return query.getExits().get();
+        }
+
+        return false;
     }
 
-    public T register(String element, String message) {
-        if (exists(element)) {
+    public T register(T element, String message) {
+        String hash = HexUtils.hash(element.hashCode());
+        if (exists(hash)) {
             throw new IllegalArgumentException(message);
         }
 
         // Insert into DB, Redis and Bloom
-        redisTemplate.opsForValue().set(element, element);
-        bloomFilter.add(element);
-        return query.getInsert().get();
+        redisTemplate.opsForValue().set(hash, UUID.randomUUID().toString());
+        bloomFilter.add(hash);
+
+        if (query != null) {
+            return query.getInsert().get();
+        }
+
+        return element;
+    }
+
+    public T register(T element) {
+        String hash = HexUtils.hash(element.hashCode());
+
+        if (exists(hash)) {
+            return null;
+        }
+
+        // Insert into DB, Redis and Bloom
+        redisTemplate.opsForValue().set(hash, UUID.randomUUID().toString());
+        bloomFilter.add(hash);
+
+        if (query != null) {
+            return query.getInsert().get();
+        }
+
+        return element;
     }
 }

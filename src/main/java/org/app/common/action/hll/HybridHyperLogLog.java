@@ -1,9 +1,7 @@
 package org.app.common.action.hll;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -11,19 +9,18 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.temporal.Temporal;
 
-@Component
 public class HybridHyperLogLog {
     private final StringRedisTemplate redisTemplate;
     private final ClickHouseWriter clickHouseWriter;
 
     private static final String REDIS_KEY_FORMAT = "hll:%s:%s";
 
-    @Value("${hll.ttl.days:30}")
-    private long ttlDays;
+    private final long ttlDays;
 
-    public HybridHyperLogLog(StringRedisTemplate redisTemplate, ClickHouseWriter clickHouseWriter) {
+    public HybridHyperLogLog(StringRedisTemplate redisTemplate, ClickHouseWriter clickHouseWriter, long ttlDays) {
         this.redisTemplate = redisTemplate;
         this.clickHouseWriter = clickHouseWriter;
+        this.ttlDays = ttlDays;
     }
 
     public void addDailyEvent(String prefix, String value) {

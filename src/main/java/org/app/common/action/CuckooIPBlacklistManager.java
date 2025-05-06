@@ -62,10 +62,11 @@ public class CuckooIPBlacklistManager<T> {
         return false;
     }
 
-    public void checkIpTraffic(String ip) throws IOException, InterruptedException {
+    public boolean checkIpTraffic(String ip) throws IOException, InterruptedException {
         if (!isBlacklisted(ip)) {
-            checkAndRegisterFromAbuse(ip);
+            return checkAndRegisterFromAbuse(ip);
         }
+        return false;
     }
 
     @Scheduled(fixedRateString = "${ip.blacklist.refresh.rate:3600000}")

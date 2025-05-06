@@ -60,10 +60,6 @@ import java.util.List;
 public class Flow<T> extends FluentApi<Flow<T>> {
     private final List<Step<T>> steps = new ArrayList<>(16);
 
-    protected Flow(Flow<T> self) {
-        super(self);
-    }
-
     public Flow<T> step(Step<T> step) {
         steps.add(step);
         return this;

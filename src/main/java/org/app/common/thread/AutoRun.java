@@ -13,5 +13,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Description(detail = "This class for collect class have injection to register thread to class RunnableProvider")
 public @interface AutoRun {
-    String detail() default "This class is auto-registered for execution.";
+    String detail() default "This class is auto-registered for execution";
 }

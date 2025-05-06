@@ -4,17 +4,17 @@
 @Component
 public class DosDetectionFilter implements Filter {
 
-    private final DosDetectionService dosDetectionService;
+    private final DosDetection dosDetection;
 
-    public DosDetectionFilter(DosDetectionService dosDetectionService) {
-        this.dosDetectionService = dosDetectionService;
+    public DosDetectionFilter(DosDetection dosDetection) {
+        this.dosDetection = dosDetection;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         String clientIp = request.getRemoteAddr();
-        if (dosDetectionService.isSuspectedDos(clientIp)) {
+        if (dosDetection.isSuspectedDos(clientIp)) {
             ((HttpServletResponse) response).sendError(HttpServletResponse.SC_TOO_MANY_REQUESTS, "Too many requests");
             return;
         }
