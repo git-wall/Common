@@ -1,0 +1,339 @@
+{
+ "paragraphs": [
+  {
+   "title": "DataLocality",
+   "text": "List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);\nDataLocality<Integer> locality = new DataLocality<>(numbers, 3);\n\nlocality.processBatch(batch -> {\n    System.out.println(\"Processing batch: \" + batch);\n});\n\nList<String> transformed = locality.transformBatch(\n    batch -> batch.stream()\n        .map(String::valueOf)\n        .collect(Collectors.toList())\n);",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "Registry",
+   "text": "Registry<String, Service> registry = new Registry<>();\n\nregistry.register(\"userService\", new UserService());\nregistry.registerFactory(\"orderService\", OrderService::new);\n\nService userService = registry.get(\"userService\").orElseThrow();\nService orderService = registry.get(\"orderService\").orElseThrow();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "StepBuilder",
+   "text": "User user = StepBuilder.of(new User())\n    .step(u -> u.setName(\"John\"))\n    .step(u -> u.setAge(30))\n    .step(u -> u.setEmail(\"john@example.com\"))\n    .build();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true,
+    "editorHide": false
+   }
+  },
+  {
+   "title": "Trampoline",
+   "text": "Trampoline<Integer> factorial = n -> n == 0\n    ? Trampoline.done(1)\n    : Trampoline.more(() -> factorial.next().map(x -> x * n));\n\nInteger result = factorial.evaluate();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "VersionNumber",
+   "text": "VersionNumber<String> versionedString = new VersionNumber<>(\"initial\");\n\nString updated = versionedString.update(s -> s + \" updated\");\nlong version = versionedString.getVersion();\nboolean isNewer = versionedString.isNewer(0);",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "Interpreter",
+   "text": "Interpreter<Context, Integer> interpreter = new Interpreter();\n\ninterpreter.register(\"+\", ctx -> ctx.getLeft() + ctx.getRight());\ninterpreter.register(\"-\", ctx -> ctx.getLeft() - ctx.getRight());\n\nInteger result = interpreter.interpret(\"+\", new Context(5, 3));",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "Servant",
+   "text": "Servant<Task> servant = new Servant<>(Task::isReady);\nList<Task> tasks = Arrays.asList(new Task(), new Task());\n\nservant.serve(tasks, Task::execute);\n\nList<String> results = new ArrayList();\nservant.serveAndCollect(tasks, Task::getResult, results);",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "Bridge",
+   "text": "Bridge<String, Integer> bridge = new Bridge<>(String::length);\nInteger result = bridge.execute(\"test\");\n\nBridge<String, String> extended = \n    bridge.extend(len -> \"Length: \" + len);",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "Retry",
+   "text": "Retry<String> retry = new Retry<>\n    3,                          // max attempts\n    Duration.ofSeconds(1),      // delay\n    IOException.class            // retryable exception\n);\n\nString result = retry.execute(() -> {\n    return \"success\";\n});",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "RoleObject",
+   "text": "RoleObject<User> userRoles = new RoleObject<>(user);\n\nuserRoles.addRole(AdminRole.class, user -> new AdminRole());\nuserRoles.addRole(CustomerRole.class, CustomerRole::new);\n\nAdminRole adminRole = userRoles.getRole(AdminRole.class).orElseThrow();\n\nuserRoles.getRole(BORROWER, BorrowerRole.class)\n            .ifPresent(inv -> inv.setName(\"Johny\"));",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": " StrategyContext  customContext = new StrategyContext();\n customContext.registerStrategy(\"custom\", info -> \"Custom for user: \" + info. getUserProfile().toString());\n customContext.setCurrentStrategy(\"custom\");\n String customJWT = customContext.execute(passInfo);",
+   "id": "",
+   "dateCreated": "2025-02-23 23:05:55.408",
+   "config": {
+    "title": true
+   },
+   "title": "StrategyContext"
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "TemplateMethod\n  .action(p -> Map. of(\"eventTicket\", \"I'm going!\").values().stream().findFirst().get())\n  .executeFrom(passInformation);",
+   "id": "",
+   "dateCreated": "2025-02-23 23:06:06.225",
+   "config": {
+    "title": true
+   },
+   "title": "TemplateMethod"
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "EventPublisher<Event> publisher = new EventPublisher<>();\npublisher.subscribe(UserCreatedEvent.class, \n   event -> log.info(\"User created: {}\", event)\n);",
+   "id": "",
+   "dateCreated": "2025-02-23 23:06:17.759",
+   "config": {
+    "title": true
+   },
+   "title": "EventPublisher"
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "Decorator<String> decorator = new Decorator<>();\n        decorator\n            .add(s -> s.trim())\n            .add(s -> s.toLowerCase())\n            .add(s -> s.replace(\" \", \"_\"));\n           \nString result = decorator.apply(\" Hello World \"); // result: \"hello_world\"",
+   "id": "",
+   "dateCreated": "2025-02-23 23:06:27.793",
+   "config": {
+    "title": true
+   },
+   "title": "Decorator"
+  },
+  {
+   "title": "LazyLoader",
+   "text": "LazyLoader<ExpensiveResource> lazy = LazyLoader.of(loadExpensiveResource);\n\nif (!lazy.isInitialized()) {\n    System.out.println(\"Resource not yet loaded\");\n}\nExpensiveResource resource = lazy.get();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "HalfSyncHalfAsync",
+   "text": "HalfSyncHalfAsync<String, Integer> processor = \n    new HalfSyncHalfAsync<>(4, 100);\n\nCompletableFuture<Integer> future = \n    processor.submit(\"input\", str -> str.length());\n\nInteger result = processor.processSync();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "Ambassador",
+   "text": "Ambassador<RemoteService, String> ambassador = new Ambassador<>(\n    () -> new RemoteService(),\n    service -> service.call(),\n    ex -> \"Fallback response\",\n    3\n);\n\nString result = ambassador.execute();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "DoubleBuffer",
+   "text": "DoubleBuffer<GameState> buffer = new DoubleBuffer<>(\n    new GameState(),\n    new GameState()\n);\n\nbuffer.update(state -> state.updatePositions());\nbuffer.swap();\nGameState currentState = buffer.getCurrentBuffer();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "ParameterObject",
+   "text": "SearchParameters params = new SearchParameters()\n    .withKeyword(\"java\")\n    .withMaxResults(10);\n\nParameterObject<SearchParameters, SearchResult> search = \n    ParameterObject.of(params, p -> searchService.search(p));\n\nSearchResult result = search.execute();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "SeparatedInterface",
+   "text": "SeparatedInterface<Context> interfaces = new SeparatedInterface<>();\n\ninterfaces.register(Logger.class, \n    ctx -> new ConsoleLogger(ctx.getLogLevel()));\ninterfaces.register(Validator.class, \n    ctx -> new SchemaValidator(ctx.getSchema()));\n\nLogger logger = interfaces.getImplementation(Logger.class, context);",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "LazyLoader",
+   "text": "LazyLoader<ExpensiveObject> lazy = LazyLoader.of(() -> {\n    Thread.sleep(1000);\n    return new ExpensiveObject();\n});\n\nExpensiveObject obj = lazy.get(); // loads only when needed\nboolean isLoaded = lazy.isInitialized();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "TableModule",
+   "text": "TableModule<String, User> userTable = new TableModule<>(User::getId);\n\nUser user = new User(\"1\", \"John\");\nuserTable.insert(user);\n\nList<User> activeUsers = userTable.find(User::isActive);\nuserTable.update(user.withName(\"John Doe\"));\nuserTable.delete(\"1\");",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "CollectingParameter",
+   "text": "CollectingParameter<Integer, Double> collector = \n    new CollectingParameter<>(list -> \n        list.stream()\n            .mapToDouble(Integer::doubleValue)\n            .average()\n            .orElse(0.0)\n    );\n\ncollector.collect(1);\ncollector.collect(2);\ncollector.collect(3);\n\nDouble average = collector.process();",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "AntiCorruptionLayer",
+   "text": "AntiCorruptionLayer<LegacyData, ModernData> acl = new AntiCorruptionLayer<>();\n\nacl.registerTranslator(\n    ModernData.class,\n    legacy -> new ModernData(legacy.getValue()),\n    modern -> new LegacyData(modern.getData())\n);\n\nModernData modern = acl.translate(legacyData, ModernData.class);\nLegacyData legacy = acl.reverseTranslate(modern, ModernData.class);",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "Monitor",
+   "text": "Monitor<SharedResource> monitor = new Monitor<>(new SharedResource());\n\nmonitor.await(resource -> resource.isReady());\nmonitor.signal(() -> new SharedResource(\"updated\"));",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "ValueObject",
+   "text": "ValueObject.Money price1 = ValueObject.Money.of(new BigDecimal(\"10.00\"), \"USD\");\nValueObject.Money price2 = ValueObject.Money.of(new BigDecimal(\"20.00\"), \"USD\");\n\nValueObject.Money total = price1.add(price2);\nSystem.out.println(total); // 30.00 USD",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "title": "AbstractDocument",
+   "text": "Map<String, Object> properties = new HashMap<>();\nproperties.put(\"type\", \"laptop\");\nproperties.put(\"price\", 1299.99);\n\nList<Map<String, Object>> parts = new ArrayList<>();\nparts.add(Map.of(\"type\", \"cpu\", \"price\", 299.99));\nparts.add(Map.of(\"type\", \"ram\", \"price\", 99.99));\nproperties.put(\"parts\", parts);\n\nProduct laptop = new Product(properties);\nSystem.out.println(laptop.getType()); // laptop\nSystem.out.println(laptop.getPrice()); // 1299.99\nlaptop.getParts().forEach(part -> \n    System.out.println(part.getType() + \": $\" + part.getPrice())\n);",
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "config": {
+    "title": true
+   }
+  },
+  {
+   "settings": {
+    "params": {},
+    "forms": {}
+   },
+   "apps": [],
+   "status": "READY",
+   "text": "class Person {\n    String name;\n    Person(String name) { this.name = name; }\n}\n\nPerson person = new Person(\"John\");\nExtensionObjects<Person> ext = new ExtensionObjects<>(person);\n\next.registerExtension(Integer.class, p -> p.name.length());\n\nOptional<Integer> nameLength = ext.getExtension(Integer.class);\nSystem.out.println(nameLength.get());",
+   "id": "",
+   "dateCreated": "2025-02-26 17:03:40.262",
+   "config": {
+    "title": true
+   },
+   "title": "ExtensionObjects"
+  }
+ ],
+ "name": "Revisited Patterns Examples",
+ "config": {
+  "isZeppelinNotebookCronEnable": false,
+  "looknfeel": "default",
+  "personalizedMode": "false"
+ }
+}

@@ -1,0 +1,22 @@
+# 02-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{service-name}}-config
+  namespace: {{namespace}}
+data:
+  # Application configuration variables
+  APP_ENV: "environment"
+  #    "INFO"
+  #    "WARN"
+  #    "ERROR"
+  #    "FATAL"
+  LOG_LEVEL: "DEBUG"
+  CONFIG_OPTION_1: "config-value-1"
+  # Configuration files can be included directly
+  app-config.json: |
+    {
+      "feature1": "feature1-enabled",
+      "feature2":" feature2-enabled",
+      "timeout": "timeout-seconds"
+    }

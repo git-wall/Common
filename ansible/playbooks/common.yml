@@ -1,0 +1,70 @@
+# Common Setup Playbook
+# This playbook sets up common configurations for all servers
+
+---
+# Playbook name and target hosts
+- name: Common server setup
+  # Target all servers
+  hosts: servers
+  # Become root for privileged operations
+  become: true
+  # Variables used in this playbook
+  vars:
+    # Timezone to set
+    timezone: UTC
+    # Packages to install
+    common_packages:
+      - vim
+      - curl
+      - wget
+      - htop
+      - net-tools
+      - unzip
+      - git
+
+  # Tasks to execute
+  tasks:
+    # Update apt cache
+    - name: Update apt cache
+      # Use apt module to update cache
+      apt:
+        # Update cache only
+        update_cache: yes
+        # Cache valid time
+        cache_valid_time: 3600
+
+    # Install common packages
+    - name: Install common packages
+      # Use apt module to install packages
+      apt:
+        # Package name from common_packages list
+        name: "{{ common_packages }}"
+        # Ensure packages are installed
+        state: present
+
+    # Set timezone
+    - name: Set timezone
+      # Use timezone module
+      timezone:
+        # Timezone value from vars
+        name: "{{ timezone }}"
+
+    # Configure NTP
+    - name: Ensure NTP is installed
+      # Use apt module to install NTP
+      apt:
+        # Package name
+        name: ntp
+        # Ensure package is installed
+        state: present
+
+    # Start and enable NTP service
+    - name: Ensure NTP service is running
+      # Use service module to manage services
+      service:
+        # Service name
+        name: ntp
+        # Ensure service is started
+        state: started
+        # Enable service at boot
+        enabled: yes

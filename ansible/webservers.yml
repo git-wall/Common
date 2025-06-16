@@ -1,0 +1,71 @@
+---
+# Web Servers Playbook
+# This playbook configures web servers
+
+# Name of the playbook
+- name: Configure web servers
+  # Target the webservers group
+  hosts: webservers
+  # Whether to gather facts about the servers
+  gather_facts: yes
+  # Variables to use in the playbook
+  vars:
+    # Web server package to install
+    web_server_package: nginx
+    # Web server service name
+    web_server_service: nginx
+    # Web server port
+    web_server_port: 80
+    # Web server document root
+    web_server_docroot: /var/www/html
+  
+  # Tasks to execute on web servers
+  tasks:
+    # Install web server package
+    - name: Install web server
+      package:
+        name: "{{ web_server_package }}"
+        state: present
+    
+    # Create document root directory
+    - name: Create document root
+      file:
+        path: "{{ web_server_docroot }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: '0755'
+    
+    # Deploy web server configuration
+    - name: Deploy web server configuration
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart web server
+    
+    # Deploy default website
+    - name: Deploy default website
+      template:
+        src: templates/index.html.j2
+        dest: "{{ web_server_docroot }}/index.html"
+        owner: www-data
+        group: www-data
+        mode: '0644'
+    
+    # Ensure web server is running
+    - name: Ensure web server is running
+      service:
+        name: "{{ web_server_service }}"
+        state: started
+        enabled: yes
+  
+  # Handlers to run when notified by tasks
+  handlers:
+    # Restart web server handler
+    - name: Restart web server
+      service:
+        name: "{{ web_server_service }}"
+        state: restarted

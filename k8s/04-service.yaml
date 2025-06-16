@@ -1,0 +1,28 @@
+# 04-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{service-name}}
+  namespace: {{namespace}}
+  labels:
+    app: service-name # change this to match your app label
+    tier: service-tier
+  annotations:
+    prometheus.io/scrape: "{{prometheus-scrape}}"
+    prometheus.io/path: "{{prometheus-path}}"
+    prometheus.io/port: "{{prometheus-port}}"
+spec:
+  type: ClusterIP # or NodePort, LoadBalancer
+  ports:
+    - port: 8888 # The port that the service will expose
+      targetPort: {{container-port}}
+      protocol: TCP # or UDP
+      name: {{port-name}}
+      # If NodePort type
+      # nodePort: {{node-port}} # Optional: only for NodePort type
+  selector:
+    app: service-name # change this to match your app label
+    tier: service-tier
+  # For LoadBalancer type
+  loadBalancerIP: {{load-balancer-ip}} # Optional
+  externalTrafficPolicy: Cluster # or Local

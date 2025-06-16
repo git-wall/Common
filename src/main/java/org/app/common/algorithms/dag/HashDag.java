@@ -197,7 +197,7 @@ public class HashDag<E> implements Dag<E> {
      * @return an array containing all nodes in this DAG
      */
     @Override
-    public Object @NotNull [] toArray() {
+    public Object [] toArray() {
         return map.keySet().toArray();
     }
 
@@ -208,7 +208,7 @@ public class HashDag<E> implements Dag<E> {
      * @return an array containing all nodes in this DAG
      */
     @Override
-    public <T> T @NotNull [] toArray(T @NotNull [] array) {
+    public <T> T [] toArray(T [] array) {
         return map.keySet().toArray(array);
     }
 

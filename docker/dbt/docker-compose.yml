@@ -1,0 +1,28 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: dbt_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dbt_user
+      POSTGRES_PASSWORD: dbt_pass
+      POSTGRES_DB: dbt_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  dbt:
+    image: ghcr.io/dbt-labs/dbt-postgres:1.8.1  # latest stable version
+    container_name: dbt_cli
+    depends_on:
+      - postgres
+    volumes:
+      - ./dbt:/usr/app
+    working_dir: /usr/app
+    environment:
+      DBT_PROFILES_DIR: /usr/app
+    entrypoint: [ "tail", "-f", "/dev/null" ]  # keep container running for exec
+
+volumes:
+  postgres_data:

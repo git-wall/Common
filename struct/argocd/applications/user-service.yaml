@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: user-service
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://gitlab.com/your-group/k8s-config
+    targetRevision: HEAD
+    path: charts/microservice
+    helm:
+      valueFiles:
+        - ../../services/user-service/values.yaml
+      parameters:
+        - name: image.tag
+          value: $ARGOCD_APP_REVISION
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: production
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

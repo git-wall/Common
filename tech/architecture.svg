@@ -1,0 +1,189 @@
+<svg viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background and styling -->
+    <defs>
+        <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+        </linearGradient>
+
+        <!-- Flow arrows -->
+        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#495057" />
+        </marker>
+
+        <!-- Tool icons backgrounds -->
+        <linearGradient id="gitlabGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#FCA326;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#FC6D26;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="k8sGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#326CE5;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#326CE5;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="dockerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#2496ED;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#2496ED;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="helmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0F1689;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#0F1689;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="terraformGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#7B42BC;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#7B42BC;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="ansibleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#EE0000;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#EE0000;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="argoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0DADEA;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#0DADEA;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="promGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#E6522C;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#E6522C;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="envoyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#9FEAFF;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#9FEAFF;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="istioGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#466BB0;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#466BB0;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="opaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#7d9199;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#7d9199;stop-opacity:0.2" />
+        </linearGradient>
+        <linearGradient id="veleroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#00CFE4;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:#00CFE4;stop-opacity:0.2" />
+        </linearGradient>
+    </defs>
+
+    <!-- Main background -->
+    <rect width="1000" height="700" fill="url(#bgGradient)" rx="5" ry="5" />
+
+    <!-- Title -->
+    <text x="500" y="40" font-family="Arial" font-size="24" text-anchor="middle" font-weight="bold" fill="#212529">Cloud Native Architecture Flow</text>
+
+    <!-- Main sections -->
+    <rect x="50" y="70" width="900" height="80" rx="10" ry="10" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2" />
+    <text x="750" y="110" font-family="Arial" font-size="18" text-anchor="middle" fill="#495057" font-weight="bold">Development And Source Control</text>
+
+    <rect x="50" y="170" width="900" height="80" rx="10" ry="10" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2" />
+    <text x="750" y="210" font-family="Arial" font-size="18" text-anchor="middle" fill="#495057" font-weight="bold">Infrastructure as Code</text>
+
+    <rect x="50" y="270" width="900" height="80" rx="10" ry="10" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2" />
+    <text x="750" y="310" font-family="Arial" font-size="18" text-anchor="middle" fill="#495057" font-weight="bold">Container Orchestration</text>
+
+    <rect x="50" y="370" width="450" height="280" rx="10" ry="10" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2" />
+    <text x="275" y="600" font-family="Arial" font-size="18" text-anchor="middle" fill="#495057" font-weight="bold">Service Mesh And Security</text>
+
+    <rect x="510" y="370" width="440" height="280" rx="10" ry="10" fill="#f8f9fa" stroke="#dee2e6" stroke-width="2" />
+    <text x="730" y="600" font-family="Arial" font-size="18" text-anchor="middle" fill="#495057" font-weight="bold">Monitoring, Backup And Deployment</text>
+
+    <!-- Tools -->
+    <!-- Development & Source Control -->
+    <circle cx="200" cy="110" r="30" fill="url(#gitlabGradient)" stroke="#FC6D26" stroke-width="2" />
+    <text x="200" y="115" font-family="Arial" font-size="14" text-anchor="middle" fill="#495057" font-weight="bold">GitLab</text>
+
+    <!-- Infrastructure as Code -->
+    <circle cx="200" cy="210" r="30" fill="url(#terraformGradient)" stroke="#7B42BC" stroke-width="2" />
+    <text x="200" y="215" font-family="Arial" font-size="14" text-anchor="middle" fill="#495057" font-weight="bold">Terraform</text>
+
+    <circle cx="330" cy="210" r="30" fill="url(#ansibleGradient)" stroke="#EE0000" stroke-width="2" />
+    <text x="330" y="215" font-family="Arial" font-size="14" text-anchor="middle" fill="#495057" font-weight="bold">Ansible</text>
+
+    <!-- Container Orchestration -->
+    <circle cx="200" cy="310" r="30" fill="url(#dockerGradient)" stroke="#2496ED" stroke-width="2" />
+    <text x="200" y="315" font-family="Arial" font-size="14" text-anchor="middle" fill="#495057" font-weight="bold">Docker</text>
+
+    <circle cx="330" cy="310" r="30" fill="url(#k8sGradient)" stroke="#326CE5" stroke-width="2" />
+    <text x="330" y="315" font-family="Arial" font-size="14" text-anchor="middle" fill="#495057" font-weight="bold">K8s</text>
+
+    <circle cx="460" cy="310" r="30" fill="url(#helmGradient)" stroke="#0F1689" stroke-width="2" />
+    <text x="460" y="315" font-family="Arial" font-size="14" text-anchor="middle" fill="#495057" font-weight="bold">Helm</text>
+
+    <!-- Service Mesh & Security -->
+    <circle cx="150" cy="480" r="40" fill="url(#istioGradient)" stroke="#466BB0" stroke-width="2" />
+    <text x="150" y="465" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057" font-weight="bold">Istio</text>
+    <text x="150" y="485" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Service Mesh</text>
+    <text x="150" y="505" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Control Plane</text>
+
+    <circle cx="275" cy="480" r="40" fill="url(#envoyGradient)" stroke="#9FEAFF" stroke-width="2" />
+    <text x="275" y="465" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057" font-weight="bold">Envoy</text>
+    <text x="275" y="485" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Data Plane</text>
+    <text x="275" y="505" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Proxy</text>
+
+    <circle cx="400" cy="480" r="40" fill="url(#opaGradient)" stroke="#7d9199" stroke-width="2" />
+    <text x="400" y="465" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057" font-weight="bold">OPA</text>
+    <text x="400" y="485" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Policy</text>
+    <text x="400" y="505" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Enforcement</text>
+
+    <!-- Monitoring, Backup & Deployment -->
+    <circle cx="580" cy="480" r="40" fill="url(#promGradient)" stroke="#E6522C" stroke-width="2" />
+    <text x="580" y="465" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057" font-weight="bold">Grafana</text>
+    <text x="580" y="485" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Monitoring</text>
+    <text x="580" y="505" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057"> Alerting</text>
+
+    <circle cx="730" cy="480" r="40" fill="url(#argoGradient)" stroke="#0DADEA" stroke-width="2" />
+    <text x="730" y="465" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057" font-weight="bold">ArgoCD</text>
+    <text x="730" y="485" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">GitOps</text>
+    <text x="730" y="505" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Deployment</text>
+
+    <circle cx="880" cy="480" r="40" fill="url(#veleroGradient)" stroke="#00CFE4" stroke-width="2" />
+    <text x="880" y="465" font-family="Arial" font-size="16" text-anchor="middle" fill="#495057" font-weight="bold">Velero</text>
+    <text x="880" y="485" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Backup And</text>
+    <text x="880" y="505" font-family="Arial" font-size="12" text-anchor="middle" fill="#495057">Recovery</text>
+
+    <!-- Flow arrows -->
+    <!-- GitLab to others -->
+    <path d="M 200 140 L 200 180" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- Terraform/Ansible to K8s -->
+    <path d="M 200 240 L 200 280" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+    <path d="M 330 240 L 330 280" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- Docker to K8s -->
+    <path d="M 230 310 L 300 310" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- K8s to Helm -->
+    <path d="M 360 310 L 430 310" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- K8s to Service Mesh & Security -->
+    <path d="M 330 345 C 330 380, 280 400, 275 440" stroke="#212529" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+    <path d="M 330 345 C 330 380, 220 390, 150 440" stroke="#212529" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+    <path d="M 330 345 C 330 380, 370 400, 400 440" stroke="#212529" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- K8s to Monitoring, Backup & Deployment -->
+    <path d="M 330 340 C 330 380, 450 400, 580 440" stroke="#212529" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+    <path d="M 330 340 C 330 380, 530 390, 730 440" stroke="#212529" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+    <path d="M 330 340 C 330 380, 600 380, 880 440" stroke="#212529" stroke-width="3" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- Istio to Envoy -->
+    <path d="M 190 480 L 235 480" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- Envoy to OPA -->
+    <path d="M 315 480 L 360 480" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" />
+
+    <!-- ArgoCD to K8s -->
+    <path d="M 730 440 Q 600 370 460 340" stroke="#495057" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,3" />
+
+    <!-- Service Mesh description -->
+    <text x="275" y="560" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">
+        Flow: Istio (Control) → Envoy (Proxy) → OPA (Policy)
+    </text>
+
+    <!-- Monitoring description -->
+    <text x="730" y="560" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">
+        Operations: Monitor → Deploy → Backup
+    </text>
+
+    <!-- Legend section -->
+    <rect x="50" y="660" width="900" height="30" rx="5" ry="5" fill="#f8f9fa" stroke="#dee2e6" stroke-width="1" />
+    <text x="500" y="680" font-family="Arial" font-size="14" text-anchor="middle" fill="#6c757d">
+        Flow direction: Source Control → Infrastructure → Orchestration → Service Mesh/Monitoring
+    </text>
+</svg>

@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ${SERVICE_NAME}-fault-injection
+  namespace: ${NAMESPACE}
+spec:
+  hosts:
+  - ${SERVICE_NAME}
+  http:
+  - fault:
+      delay:
+        percentage:
+          value: 10
+        fixedDelay: 5s
+      abort:
+        percentage:
+          value: 5
+        httpStatus: 500
+    route:
+    - destination:
+        host: ${SERVICE_NAME}

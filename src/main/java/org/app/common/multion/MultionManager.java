@@ -15,7 +15,7 @@ public class MultionManager {
     private static final MultionManager INSTANCE = new MultionManager();
 
     // Store MultionType instances by their type signature
-    private final Map<Class<?>, Object> multionInstances = new ConcurrentHashMap<>();
+    private final Map<Class<?>, Object> multionInstances = new ConcurrentHashMap<>(16, 0.75f, 16);
 
     private MultionManager() {
         // Private constructor to enforce singleton pattern

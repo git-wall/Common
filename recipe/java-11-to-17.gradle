@@ -1,0 +1,24 @@
+plugins {
+    id 'org.openrewrite.rewrite' version '5.40.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    rewrite 'org.openrewrite.recipe:rewrite-java:4.40.0'
+    rewrite 'org.openrewrite.recipe:rewrite-java-17:1.13.0'
+}
+
+rewrite {
+    activeRecipe('org.openrewrite.java.migrate.Java11toJava17')
+}
+
+tasks.named('rewriteRun').configure {
+    // Increase timeout if needed for larger projects
+    dependsOn tasks.named('rewriteDryRun')
+    doFirst {
+        println "Running Java 11 to 17 migration recipes"
+    }
+}

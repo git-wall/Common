@@ -1,0 +1,44 @@
+# Spring Boot Service Template
+# This template generates the systemd service file for Spring Boot application
+
+# Unit section
+[Unit]
+# Service description
+Description=Spring Boot Application
+# Dependencies
+After=network.target
+# Documentation URL
+Documentation=https://spring.io/projects/spring-boot
+
+# Service section
+[Service]
+# User to run as
+User={{ app_user }}
+# Group to run as
+Group={{ app_group }}
+# Working directory
+WorkingDirectory={{ app_home }}
+# Command to execute
+ExecStart=/usr/bin/java -jar {{ app_home }}/{{ app_jar }} \
+    --spring.config.location=file:{{ app_config_dir }}/application.properties
+# Restart policy
+Restart=always
+# Restart delay
+RestartSec=10
+# Environment variables
+Environment="JAVA_OPTS=-Xms256m -Xmx512m"
+# Standard output log
+StandardOutput=journal
+# Standard error log
+StandardError=journal
+# Success exit status
+SuccessExitStatus=143
+# Timeout for stopping
+TimeoutStopSec=10
+# Type of service
+Type=simple
+
+# Install section
+[Install]
+# Start at boot
+WantedBy=multi-user.target

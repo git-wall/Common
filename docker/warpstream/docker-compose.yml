@@ -1,0 +1,38 @@
+services:
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"  # S3 API
+      - "9001:9001"  # MinIO Console
+    environment:
+      MINIO_ROOT_USER: warpstream # This is your access key in WARPSTREAM
+      MINIO_ROOT_PASSWORD: warpstream123 # This is your secret key in WARPSTREAM
+    volumes:
+      - ./minio-data:/data
+
+  warpstream:
+    image: public.ecr.aws/warpstream-labs/warpstream_agent:latest
+    container_name: warpstream
+    depends_on:
+      - minio
+    ports:
+      - "9092:9092"  # Client port
+      - "9094:9094"  # Schema registry port (if needed)
+      - "8080:8080"  # Metrics endpoint
+    volumes:
+      - ./warpstream.yaml:/warpstream.yaml
+    command: --config /warpstream.yaml
+#    command: playground # save in memory for dev
+    environment:
+      WARPSTREAM_STORAGE_BACKEND: s3               # Just means "talk using S3 API"
+      WARPSTREAM_MINIO_ENDPOINT: http://minio:9000 # Local MinIO service
+      WARPSTREAM_MINIO_ACCESS_KEY: warpstream      # Local credentials
+      WARPSTREAM_MINIO_SECRET_KEY: warpstream123
+      WARPSTREAM_MINIO_BUCKET: warpstream-bucket   # Local bucket name
+      WARPSTREAM_REGION: us-east-1                 # Dummy region, required by S3 protocol
+      WARPSTREAM_FORCE_PATH_STYLE: true            # Required for MinIO compatibility
+      WARPSTREAM_LOG_LEVEL: info  # Adjust log level as needed
+    restart: unless-stopped
+

@@ -1,6 +1,7 @@
 package org.app.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.app.common.context.TracingContext;
 import org.app.common.res.ResponseUtils;
 import org.app.common.utils.RequestUtils;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public abstract class GlobalException {
                 .stream()
                 .map(fieldError -> String.format(ERROR_MESSAGE_PATTERN, fieldError.getField(), fieldError.getDefaultMessage()))
                 .collect(Collectors.toList());
-        var id = ThreadContext.get(RequestUtils.REQUEST_ID);
+        var id = TracingContext.getRequestId();
 
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
@@ -36,7 +37,7 @@ public abstract class GlobalException {
 
     @ExceptionHandler({IllegalArgumentException.class})
     public ResponseEntity<Object> exceptionHandler(IllegalArgumentException ex) {
-        var id = ThreadContext.get(RequestUtils.REQUEST_ID);
+        var id = TracingContext.getRequestId();
         String message = String.format("%s - %s", id, ex.getMessage());
         log.error(message, ex);
         HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -47,7 +48,7 @@ public abstract class GlobalException {
 
     @ExceptionHandler(TooManyRequestsException.class)
     public ResponseEntity<Object> handleTooMany(TooManyRequestsException ex) {
-        var id = ThreadContext.get(RequestUtils.REQUEST_ID);
+        var id = TracingContext.getRequestId();
         String message = String.format("%s - %s", id, ex.getMessage());
         log.error(message, ex);
         HttpStatus status = HttpStatus.TOO_MANY_REQUESTS;

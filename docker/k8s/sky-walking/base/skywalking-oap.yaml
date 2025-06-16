@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-oap
+  namespace: monitoring
+spec:
+  selector:
+    app: skywalking-oap
+  ports:
+    - name: rest
+      port: 12800
+      targetPort: 12800
+    - name: grpc
+      port: 11800
+      targetPort: 11800
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skywalking-oap
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: skywalking-oap
+  template:
+    metadata:
+      labels:
+        app: skywalking-oap
+    spec:
+      containers:
+        - name: skywalking-oap
+          image: apache/skywalking-oap-server:10.0.1
+          env:
+            - name: SW_STORAGE
+              value: elasticsearch
+            - name: SW_STORAGE_ES_CLUSTER_NODES
+              value: elasticsearch:9200
+          ports:
+            - containerPort: 12800
+            - containerPort: 11800
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"

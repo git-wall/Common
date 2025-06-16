@@ -1,5 +1,7 @@
 package org.app.common.client.rest;
 
+import org.app.common.client.AuthTokenInfo;
+import org.app.common.client.ClientBasicAuthInfo;
 import org.app.common.utils.JacksonUtils;
 import org.slf4j.Logger;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,7 +17,10 @@ import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
 /**
- * Fluent Res-template
+ * Fluent API for making REST calls
+ * Provides a builder pattern for configuring and executing REST requests
+ * 
+ * @param <T> The type of response expected from the API call
  */
 public class RestfulApi<T> {
     // for call API
@@ -32,14 +37,29 @@ public class RestfulApi<T> {
     private Logger logger;
     private String error;
 
+    /**
+     * Default constructor
+     */
     public RestfulApi() {
     }
 
+    /**
+     * Constructor with headers and client
+     * 
+     * @param headers HTTP headers to use for requests
+     * @param client RestTemplate client to use for requests
+     */
     public RestfulApi(HttpHeaders headers, RestTemplate client) {
         this.client = client;
         this.headers = headers;
     }
 
+    /**
+     * Creates a RestfulApi instance with default configuration
+     * 
+     * @param restTemplate RestTemplate to use, or null to create a new one
+     * @return RestfulApi instance
+     */
     public static <T> RestfulApi<T> of(RestTemplate restTemplate) {
         var client = restTemplate == null
                 ? RestTemplateUtils.build(5000)
@@ -50,6 +70,13 @@ public class RestfulApi<T> {
         );
     }
 
+    /**
+     * Creates a RestfulApi instance with authentication token
+     * 
+     * @param restTemplate RestTemplate to use, or null to create a new one
+     * @param authToken Authentication token to use
+     * @return RestfulApi instance with authentication
+     */
     public static <T> RestfulApi<T> ofAuth(RestTemplate restTemplate, String authToken) {
         var client = restTemplate == null
                 ? RestTemplateUtils.build(5000)
@@ -57,6 +84,22 @@ public class RestfulApi<T> {
 
         return new RestfulApi<>(
                 HttpHeaderUtils.createHeaders(authToken),
+                client
+        );
+    }
+
+    /**
+     * Creates a RestfulApi instance with token refresh capability
+     * 
+     * @param authTokenInfo Information about the authentication token
+     * @param clientInfo Information about the client
+     * @return RestfulApi instance with token refresh capability
+     */
+    public static <T> RestfulApi<T> ofAuthWithRefresh(AuthTokenInfo authTokenInfo, ClientBasicAuthInfo clientInfo) {
+        RestTemplate client = RestTemplateUtils.buildWithTokenRefresh(authTokenInfo, clientInfo);
+
+        return new RestfulApi<>(
+                HttpHeaderUtils.createHeaders(),  // Headers will be added by the interceptor
                 client
         );
     }
@@ -109,18 +152,18 @@ public class RestfulApi<T> {
 
     public RestfulApi<T> exchange() {
         HttpEntity<?> entity = new HttpEntity<>(request, headers);
-        ParameterizedTypeReference<T> type = new ParameterizedTypeReference<T>() {
+        ParameterizedTypeReference<T> type = new ParameterizedTypeReference<>() {
         };
 
         if (logger != null)
-            executeTry(entity, type);
+            executeCatch(entity, type);
         else
             execute(entity, type);
 
         return this;
     }
 
-    private void executeTry(HttpEntity<?> entity, ParameterizedTypeReference<T> type) {
+    private void executeCatch(HttpEntity<?> entity, ParameterizedTypeReference<T> type) {
         try {
             execute(entity, type);
         } catch (Exception e) {
@@ -140,6 +183,10 @@ public class RestfulApi<T> {
 
     public <R> R sink(Class<R> clazz) {
         return JacksonUtils.readValue(response.toString(), clazz);
+    }
+
+    public <R> R sink() {
+        return JacksonUtils.readValue(response);
     }
 
     public Optional<T> getOptional() {

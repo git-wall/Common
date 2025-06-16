@@ -1,0 +1,56 @@
+# kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# List all resource files
+resources:
+  - 01-namespace.yaml
+  - 02-configmap.yaml
+  - 03-secret.yaml
+  - 04-service.yaml
+  - 05-deployment.yaml
+  - 06-hpa.yaml
+  - 07-pvc.yaml
+  - 08-ingress.yaml
+  - 09-network-policy.yaml
+  - 10-rbac.yaml
+
+# Common labels to apply to all resources
+labels:
+  - pairs:
+      environment: {{environment}}
+    includeSelectors: true
+
+# Namespace for all resources
+namespace: {{namespace}}
+
+# ConfigMap generator
+configMapGenerator:
+  - name: {{service-name}}-config
+    behavior: merge
+    literals:
+      - VERSION={{version}}
+
+# Secret generator
+secretGenerator:
+  - name: {{service-name}}-secrets
+    behavior: merge
+    literals:
+      - SECRET_KEY={{secret-key-value}}
+
+# Patch specific resources
+patchesStrategicMerge:
+  # Example patch to customize the deployment
+  - |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: {{service-name}}
+    spec:
+      template:
+        spec:
+          containers:
+            - name: {{container-name}}
+              env:
+                - name: ENVIRONMENT_SPECIFIC_VAR
+                  value: {{environment-specific-value}}

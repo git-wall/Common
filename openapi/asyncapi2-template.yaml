@@ -1,0 +1,290 @@
+asyncapi: '2.0.0'
+info:
+  title: Event-Driven API
+  version: '1.0.0'
+  description: |
+    This is a sample AsyncAPI specification for an event-driven API.
+    It demonstrates how to document message-driven APIs.
+  termsOfService: https://example.com/terms/
+  contact:
+    name: API Support
+    url: https://example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  production:
+    url: mqtt://broker.example.com:{port}
+    protocol: mqtt
+    description: Production MQTT broker
+    variables:
+      port:
+        description: Secure connection (TLS) is available through port 8883.
+        default: '1883'
+        enum:
+          - '1883'
+          - '8883'
+    security:
+      - userPassword: []
+  development:
+    url: mqtt://localhost:{port}
+    protocol: mqtt
+    description: Development MQTT broker
+    variables:
+      port:
+        default: '1883'
+    security:
+      - userPassword: []
+
+defaultContentType: application/json
+
+channels:
+  users/signup:
+    description: Channel for user signup events
+    publish:
+      summary: Publish a new user signup event
+      operationId: publishUserSignup
+      message:
+        $ref: '#/components/messages/UserSignedUp'
+    subscribe:
+      summary: Receive user signup events
+      operationId: receiveUserSignup
+      message:
+        $ref: '#/components/messages/UserSignedUp'
+
+  users/updated:
+    description: Channel for user update events
+    publish:
+      summary: Publish a user update event
+      operationId: publishUserUpdated
+      message:
+        $ref: '#/components/messages/UserUpdated'
+    subscribe:
+      summary: Receive user update events
+      operationId: receiveUserUpdated
+      message:
+        $ref: '#/components/messages/UserUpdated'
+
+  orders/created:
+    description: Channel for order creation events
+    publish:
+      summary: Publish a new order event
+      operationId: publishOrderCreated
+      message:
+        $ref: '#/components/messages/OrderCreated'
+    subscribe:
+      summary: Receive new order events
+      operationId: receiveOrderCreated
+      message:
+        $ref: '#/components/messages/OrderCreated'
+
+components:
+  messages:
+    UserSignedUp:
+      name: userSignedUp
+      title: User Signed Up
+      summary: Inform about a new user signup
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/commonHeaders'
+      payload:
+        $ref: '#/components/schemas/UserSignedUpPayload'
+      examples:
+        - name: Example1
+          summary: Example of a new user signup
+          payload:
+            id: "123e4567-e89b-12d3-a456-426614174000"
+            email: "user@example.com"
+            username: "johndoe"
+            firstName: "John"
+            lastName: "Doe"
+            signupDate: "2023-01-01T00:00:00Z"
+
+    UserUpdated:
+      name: userUpdated
+      title: User Updated
+      summary: Inform about a user update
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/commonHeaders'
+      payload:
+        $ref: '#/components/schemas/UserUpdatedPayload'
+      examples:
+        - name: Example1
+          summary: Example of a user update
+          payload:
+            id: "123e4567-e89b-12d3-a456-426614174000"
+            email: "newemail@example.com"
+            username: "johndoe"
+            firstName: "John"
+            lastName: "Doe"
+            updatedFields: ["email"]
+            updateDate: "2023-01-02T00:00:00Z"
+
+    OrderCreated:
+      name: orderCreated
+      title: Order Created
+      summary: Inform about a new order
+      contentType: application/json
+      traits:
+        - $ref: '#/components/messageTraits/commonHeaders'
+      payload:
+        $ref: '#/components/schemas/OrderCreatedPayload'
+      examples:
+        - name: Example1
+          summary: Example of a new order
+          payload:
+            id: "order-123"
+            userId: "123e4567-e89b-12d3-a456-426614174000"
+            items:
+              - productId: "prod-1"
+                quantity: 2
+                price: 19.99
+              - productId: "prod-2"
+                quantity: 1
+                price: 29.99
+            totalAmount: 69.97
+            status: "created"
+            createdAt: "2023-01-03T00:00:00Z"
+
+  schemas:
+    UserSignedUpPayload:
+      type: object
+      required:
+        - id
+        - email
+        - username
+        - signupDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        username:
+          type: string
+          description: Username for the account
+        firstName:
+          type: string
+          description: First name of the user
+        lastName:
+          type: string
+          description: Last name of the user
+        signupDate:
+          type: string
+          format: date-time
+          description: Date and time when the user signed up
+
+    UserUpdatedPayload:
+      type: object
+      required:
+        - id
+        - updatedFields
+        - updateDate
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+        username:
+          type: string
+          description: Username for the account
+        firstName:
+          type: string
+          description: First name of the user
+        lastName:
+          type: string
+          description: Last name of the user
+        updatedFields:
+          type: array
+          items:
+            type: string
+          description: List of fields that were updated
+        updateDate:
+          type: string
+          format: date-time
+          description: Date and time when the user was updated
+
+    OrderCreatedPayload:
+      type: object
+      required:
+        - id
+        - userId
+        - items
+        - totalAmount
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the order
+        userId:
+          type: string
+          format: uuid
+          description: ID of the user who placed the order
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - productId
+              - quantity
+              - price
+            properties:
+              productId:
+                type: string
+                description: ID of the product
+              quantity:
+                type: integer
+                minimum: 1
+                description: Quantity of the product
+              price:
+                type: number
+                format: float
+                description: Price per unit
+        totalAmount:
+          type: number
+          format: float
+          description: Total amount of the order
+        status:
+          type: string
+          enum: [created, processing, shipped, delivered, cancelled]
+          description: Status of the order
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the order was created
+
+  messageTraits:
+    commonHeaders:
+      headers:
+        type: object
+        properties:
+          eventId:
+            type: string
+            format: uuid
+            description: Unique identifier for the event
+          eventType:
+            type: string
+            description: Type of the event
+          timestamp:
+            type: string
+            format: date-time
+            description: Date and time when the event was created
+          source:
+            type: string
+            description: Source of the event
+
+  securitySchemes:
+    userPassword:
+      type: userPassword
+      description: Provide your username and password for authentication

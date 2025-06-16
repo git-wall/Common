@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .title { font: bold 24px sans-serif; fill: #333; }
+    .section-title { font: bold 18px sans-serif; fill: #333; }
+    .box { stroke: #333; stroke-width: 2; rx: 5; ry: 5; }
+    .arrow { stroke: #666; stroke-width: 2; marker-end: url(#arrowhead); }
+    .tech-label { font: 12px sans-serif; fill: #333; }
+    .section-box { fill: #f0f0f0; stroke: #999; stroke-width: 1; rx: 10; ry: 10; }
+    .data-source { fill: #e1f5fe; }
+    .ingestion { fill: #e8f5e9; }
+    .processing { fill: #fff9c4; }
+    .storage { fill: #f3e5f5; }
+    .analytics { fill: #e0f2f1; }
+    .monitoring { fill: #ffebee; }
+    .note { font: italic 12px sans-serif; fill: #666; }
+    .legend { font: 12px sans-serif; fill: #333; }
+  </style>
+  
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+    </marker>
+  </defs>
+  
+  <!-- Title -->
+  <text x="600" y="30" text-anchor="middle" class="title">Data Lifecycle Flow</text>
+  
+  <!-- Section Boxes -->
+  <rect x="50" y="70" width="1100" height="100" class="section-box data-source" />
+  <rect x="50" y="200" width="1100" height="100" class="section-box ingestion" />
+  <rect x="50" y="330" width="1100" height="100" class="section-box processing" />
+  <rect x="50" y="460" width="1100" height="100" class="section-box storage" />
+  <rect x="50" y="590" width="1100" height="100" class="section-box analytics" />
+  <rect x="50" y="720" width="1100" height="50" class="section-box monitoring" />
+  
+  <!-- Section Titles -->
+  <text x="100" y="90" class="section-title">Data Sources</text>
+  <text x="100" y="220" class="section-title">Data Ingestion</text>
+  <text x="100" y="350" class="section-title">Data Processing</text>
+  <text x="100" y="480" class="section-title">Data Storage</text>
+  <text x="100" y="610" class="section-title">Data Analytics</text>
+  <text x="100" y="740" class="section-title">Monitoring &amp; Visualization</text>
+  
+  <!-- Data Sources -->
+  <rect x="200" y="100" width="120" height="40" class="box data-source" />
+  <text x="260" y="125" text-anchor="middle" class="tech-label">Application Logs</text>
+  
+  <rect x="400" y="100" width="120" height="40" class="box data-source" />
+  <text x="460" y="125" text-anchor="middle" class="tech-label">System Metrics</text>
+  
+  <rect x="600" y="100" width="120" height="40" class="box data-source" />
+  <text x="660" y="125" text-anchor="middle" class="tech-label">Event Streams</text>
+  
+  <rect x="800" y="100" width="120" height="40" class="box data-source" />
+  <text x="860" y="125" text-anchor="middle" class="tech-label">IoT Device Data</text>
+  
+  <!-- Data Ingestion -->
+  <rect x="150" y="230" width="120" height="40" class="box ingestion" />
+  <text x="210" y="255" text-anchor="middle" class="tech-label">Apache Kafka</text>
+  
+  <rect x="300" y="230" width="120" height="40" class="box ingestion" />
+  <text x="360" y="255" text-anchor="middle" class="tech-label">Apache Pulsar</text>
+  
+  <rect x="450" y="230" width="120" height="40" class="box ingestion" />
+  <text x="510" y="255" text-anchor="middle" class="tech-label">Apache NiFi</text>
+  
+  <rect x="600" y="230" width="120" height="40" class="box ingestion" />
+  <text x="660" y="255" text-anchor="middle" class="tech-label">Logstash</text>
+  
+  <rect x="750" y="230" width="120" height="40" class="box ingestion" />
+  <text x="810" y="255" text-anchor="middle" class="tech-label">Fluentd</text>
+  
+  <rect x="900" y="230" width="120" height="40" class="box ingestion" />
+  <text x="960" y="255" text-anchor="middle" class="tech-label">ZooKeeper</text>
+  
+  <!-- Data Processing -->
+  <rect x="150" y="360" width="120" height="40" class="box processing" />
+  <text x="210" y="385" text-anchor="middle" class="tech-label">Apache Flink</text>
+  
+  <rect x="300" y="360" width="120" height="40" class="box processing" />
+  <text x="360" y="385" text-anchor="middle" class="tech-label">Apache Spark</text>
+  
+  <rect x="450" y="360" width="120" height="40" class="box processing" />
+  <text x="510" y="385" text-anchor="middle" class="tech-label">Apache Storm</text>
+  
+  <rect x="600" y="360" width="120" height="40" class="box processing" />
+  <text x="660" y="385" text-anchor="middle" class="tech-label">Apache Samza</text>
+  
+  <rect x="750" y="360" width="120" height="40" class="box processing" />
+  <text x="810" y="385" text-anchor="middle" class="tech-label">Apache Tez</text>
+  
+  <!-- Data Storage -->
+  <rect x="100" y="490" width="120" height="40" class="box storage" />
+  <text x="160" y="515" text-anchor="middle" class="tech-label">Elasticsearch</text>
+  
+  <rect x="230" y="490" width="120" height="40" class="box storage" />
+  <text x="290" y="515" text-anchor="middle" class="tech-label">ClickHouse</text>
+  
+  <rect x="360" y="490" width="120" height="40" class="box storage" />
+  <text x="420" y="515" text-anchor="middle" class="tech-label">HDFS</text>
+  
+  <rect x="490" y="490" width="120" height="40" class="box storage" />
+  <text x="550" y="515" text-anchor="middle" class="tech-label">S3/MinIO</text>
+  
+  <rect x="620" y="490" width="120" height="40" class="box storage" />
+  <text x="680" y="515" text-anchor="middle" class="tech-label">Hudi/Iceberg/Delta</text>
+  
+  <rect x="750" y="490" width="120" height="40" class="box storage" />
+  <text x="810" y="515" text-anchor="middle" class="tech-label">Parquet/ORC</text>
+  
+  <rect x="880" y="490" width="120" height="40" class="box storage" />
+  <text x="940" y="515" text-anchor="middle" class="tech-label">Apache IoTDB</text>
+  
+  <!-- Data Analytics -->
+  <rect x="150" y="620" width="120" height="40" class="box analytics" />
+  <text x="210" y="645" text-anchor="middle" class="tech-label">Trino/Presto</text>
+  
+  <rect x="300" y="620" width="120" height="40" class="box analytics" />
+  <text x="360" y="645" text-anchor="middle" class="tech-label">Apache Druid</text>
+  
+  <rect x="450" y="620" width="120" height="40" class="box analytics" />
+  <text x="510" y="645" text-anchor="middle" class="tech-label">Dremio</text>
+  
+  <rect x="600" y="620" width="120" height="40" class="box analytics" />
+  <text x="660" y="645" text-anchor="middle" class="tech-label">Hive Metastore</text>
+  
+  <rect x="750" y="620" width="120" height="40" class="box analytics" />
+  <text x="810" y="645" text-anchor="middle" class="tech-label">Apache Ignite</text>
+  
+  <rect x="900" y="620" width="120" height="40" class="box analytics" />
+  <text x="960" y="645" text-anchor="middle" class="tech-label">Lucene</text>
+  
+  <!-- Monitoring & Visualization -->
+  <rect x="200" y="725" width="120" height="40" class="box monitoring" />
+  <text x="260" y="750" text-anchor="middle" class="tech-label">SkyWalking</text>
+  
+  <rect x="400" y="725" width="120" height="40" class="box monitoring" />
+  <text x="460" y="750" text-anchor="middle" class="tech-label">Graylog</text>
+  
+  <rect x="600" y="725" width="120" height="40" class="box monitoring" />
+  <text x="660" y="750" text-anchor="middle" class="tech-label">Kibana</text>
+  
+  <rect x="800" y="725" width="120" height="40" class="box monitoring" />
+  <text x="860" y="750" text-anchor="middle" class="tech-label">Grafana</text>
+  
+  <!-- Arrows connecting sections -->
+  <!-- Sources to Ingestion -->
+  <line x1="260" y1="140" x2="210" y2="230" class="arrow" />
+  <line x1="460" y1="140" x2="360" y2="230" class="arrow" />
+  <line x1="660" y1="140" x2="510" y2="230" class="arrow" />
+  <line x1="860" y1="140" x2="660" y2="230" class="arrow" />
+  
+  <!-- Ingestion to Processing -->
+  <line x1="210" y1="270" x2="210" y2="360" class="arrow" />
+  <line x1="360" y1="270" x2="360" y2="360" class="arrow" />
+  <line x1="510" y1="270" x2="510" y2="360" class="arrow" />
+  <line x1="660" y1="270" x2="660" y2="360" class="arrow" />
+  <line x1="810" y1="270" x2="810" y2="360" class="arrow" />
+  
+  <!-- Processing to Storage -->
+  <line x1="210" y1="400" x2="160" y2="490" class="arrow" />
+  <line x1="360" y1="400" x2="290" y2="490" class="arrow" />
+  <line x1="510" y1="400" x2="420" y2="490" class="arrow" />
+  <line x1="660" y1="400" x2="550" y2="490" class="arrow" />
+  <line x1="810" y1="400" x2="680" y2="490" class="arrow" />
+  
+  <!-- Storage to Analytics -->
+  <line x1="160" y1="530" x2="210" y2="620" class="arrow" />
+  <line x1="290" y1="530" x2="360" y2="620" class="arrow" />
+  <line x1="420" y1="530" x2="510" y2="620" class="arrow" />
+  <line x1="550" y1="530" x2="660" y2="620" class="arrow" />
+  <line x1="680" y1="530" x2="810" y2="620" class="arrow" />
+  <line x1="810" y1="530" x2="960" y2="620" class="arrow" />
+  
+  <!-- Analytics to Monitoring -->
+  <line x1="210" y1="660" x2="260" y2="725" class="arrow" />
+  <line x1="360" y1="660" x2="460" y2="725" class="arrow" />
+  <line x1="510" y1="660" x2="660" y2="725" class="arrow" />
+  <line x1="660" y1="660" x2="860" y2="725" class="arrow" />
+  
+  <!-- Notes -->
+  <text x="1000" y="120" class="note">Real-time and batch data sources</text>
+  <text x="1000" y="250" class="note">Message brokers and data collectors</text>
+  <text x="1000" y="380" class="note">Stream and batch processing engines</text>
+  <text x="1000" y="510" class="note">Hot, warm, and cold storage options</text>
+  <text x="1000" y="640" class="note">Query engines and analytics platforms</text>
+  <text x="1000" y="750" class="note">Observability and visualization tools</text>
+  
+  <!-- Log Lifecycle Annotation -->
+  <text x="600" y="780" text-anchor="middle" class="note">
+    Log Lifecycle: Collection → Processing → Hot Storage (recent) → Warm Storage (older) → Cold Storage (expired)
+  </text>
+</svg>

@@ -1,0 +1,12 @@
+#restart strategy
+restart-strategy: fixed-delay
+restart-strategy.fixed-delay.attempts: 3
+restart-strategy.fixed-delay.delay: 10 s
+
+#checkpoints
+#options: filesystem, jobmanager, rocksdb
+state.backend: filesystem
+state.backend.incremental: true
+state.checkpoints.dir: hdfs:///flink/checkpoints
+state.savepoints.dir: hdfs:///flink/savepoints
+

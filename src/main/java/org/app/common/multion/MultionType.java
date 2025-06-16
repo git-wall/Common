@@ -75,6 +75,7 @@ public class MultionType<K extends Enum<K>, V> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private V getInstance(Class<?> implClass) throws Exception {
         ApplicationContext context;
         if ((context = SpringContext.getContext()) != null) {
@@ -103,6 +104,7 @@ public class MultionType<K extends Enum<K>, V> {
     // because which class implement interface always service and init in here
     @SneakyThrows
     @Deprecated
+    @SuppressWarnings("unchecked")
     public V getNewValue(K key) {
         V v = multion.get(key);
         if (SpringContext.getContext() != null) return v;

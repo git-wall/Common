@@ -1,0 +1,90 @@
+# Default values - DON'T CHANGE THESE
+global:
+  imageRegistry: "your-registry.gitlab.com"
+  namespace: "default"
+  environment: "production"
+
+# Service Configuration - OVERRIDE in service-specific files
+service:
+  name: "generic-service"
+  port: 8080
+  targetPort: 8080
+  type: ClusterIP
+
+# Image Configuration
+image:
+  repository: "your-group/your-service"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Scaling Configuration
+replicaCount: 2
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Resource Configuration
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Environment Variables
+env:
+  - name: ENVIRONMENT
+    value: "production"
+  - name: LOG_LEVEL
+    value: "info"
+
+# Config and Secrets
+configMap:
+  enabled: false
+  data: {}
+
+secrets:
+  enabled: false
+  data: {}
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+    - host: "service.yourdomain.com"
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: "service-tls"
+      hosts:
+        - "service.yourdomain.com"
+
+# Health Checks - STANDARD FOR ALL SERVICES
+healthCheck:
+  enabled: true
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Service Monitor for Prometheus - STANDARD
+serviceMonitor:
+  enabled: true
+  path: /metrics
+  interval: 30s

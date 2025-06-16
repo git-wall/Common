@@ -1,6 +1,6 @@
 package org.app.common.config;
 
-import org.app.common.context.RequestIdInterceptor;
+import org.app.common.interceptor.RequestIdInterceptor;
 import org.app.common.context.SpringContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;

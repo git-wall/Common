@@ -8,15 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.app.common.context.AuthContext;
 import org.app.common.context.TracingContext;
+import org.app.common.design.revisited.PoisonPill;
 import org.app.common.entities.log.EntityUserLog;
 import org.app.common.entities.log.IEntity;
 import org.app.common.entities.log.TracingLog;
 import org.app.common.interceptor.Interceptor;
 import org.app.common.kafka.multi.BrokerManager;
-import org.app.common.pattern.revisited.PoisonPill;
 import org.app.common.support.Travel;
+import org.app.common.utils.AuthUtils;
 import org.app.common.utils.JacksonUtils;
 import org.app.common.utils.RequestUtils;
 import org.app.common.utils.TokenUtils;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Aspect
 @Component
 @Slf4j
-public class MonitorLog extends Interceptor<InterceptorLog> {
+public class MonitorLog extends Interceptor<LogMonitor> {
 
     private final Tracer tracer;
 
@@ -86,11 +86,11 @@ public class MonitorLog extends Interceptor<InterceptorLog> {
         );
     }
 
-    private static @NotNull Supplier<InterceptorLog> getDefaultInterceptorLog() {
-        return () -> new InterceptorLog() {
+    private static @NotNull Supplier<LogMonitor> getDefaultInterceptorLog() {
+        return () -> new LogMonitor() {
             @Override
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
-                return InterceptorLog.class;
+                return LogMonitor.class;
             }
 
             @Override
@@ -100,20 +100,23 @@ public class MonitorLog extends Interceptor<InterceptorLog> {
         };
     }
 
-    @Around("execution(@(@org.springframework.web.bind.annotation.RequestMapping *) * *(..)) || " +
+    @Around(
+//            "@within(org.springframework.web.bind.annotation.RestController) || " +
+            "execution(@(@org.springframework.web.bind.annotation.RequestMapping *) * *(..)) || " +
             "@annotation(org.springframework.web.bind.annotation.GetMapping) || " +
             "@annotation(org.springframework.web.bind.annotation.PostMapping) || " +
             "@annotation(org.springframework.web.bind.annotation.PutMapping) || " +
             "@annotation(org.springframework.web.bind.annotation.DeleteMapping) ||" +
-            "@annotation(org.app.common.interceptor.log.InterceptorLog)")
+            "@annotation(org.app.common.interceptor.log.LogMonitor)"
+    )
     public Object monitorApi(ProceedingJoinPoint joinPoint) {
-        InterceptorLog interceptorLog = getOrDefault(joinPoint, InterceptorLog.class, getDefaultInterceptorLog());
+        LogMonitor logMonitor = getOrDefault(joinPoint, LogMonitor.class, getDefaultInterceptorLog());
 
         HttpServletRequest request = RequestUtils.getHttpServletRequest();
         before(request);
 
         IEntity logEntity = null;
-        var tracingLog = getTracingLog(request, joinPoint, interceptorLog);
+        var tracingLog = getTracingLog(request, joinPoint, logMonitor);
         try {
             logEntity = startCollect(request, LogLevel.INFO.ordinal(), tracingLog);
 
@@ -131,13 +134,13 @@ public class MonitorLog extends Interceptor<InterceptorLog> {
     }
 
     private void before(HttpServletRequest httpServletRequest) {
-        if (TracingContext.get(RequestUtils.REQUEST_ID) != null) return;
+        if (TracingContext.getRequestId() != null) return;
 
         var requestId = Optional.ofNullable(httpServletRequest)
                 .map(RequestUtils::getRequestId)
                 .orElse(getSpan().context().traceIdString());
 
-        TracingContext.put(RequestUtils.REQUEST_ID, requestId);
+        TracingContext.putRequestId(requestId);
     }
 
     private void after(IEntity entity) {
@@ -156,7 +159,7 @@ public class MonitorLog extends Interceptor<InterceptorLog> {
         e.setId(TokenUtils.generateId("log_user", 12));
         e.setDeviceId(RequestUtils.getDeviceId(hsr));
         e.setAccessToken(RequestUtils.getToken(hsr));
-        e.setUsername(AuthContext.getUserName());
+        e.setUsername(AuthUtils.getCurrentUsername());
         e.setUserAddress(new String[]{tracingLog.getUserAddress()});
         e.setLevel(ordinal);
         e.setTime(new Date().getTime());
@@ -169,9 +172,9 @@ public class MonitorLog extends Interceptor<InterceptorLog> {
     }
 
     @NonNull
-    private TracingLog getTracingLog(HttpServletRequest hsr, ProceedingJoinPoint jp, InterceptorLog il) {
+    private TracingLog getTracingLog(HttpServletRequest hsr, ProceedingJoinPoint jp, LogMonitor il) {
         TracingLog tracingLog = new TracingLog();
-        tracingLog.setRequestId(TracingContext.get(RequestUtils.REQUEST_ID));
+        tracingLog.setRequestId(TracingContext.getRequestId());
         tracingLog.setTracID(getSpan().context().traceIdString());
         tracingLog.setRequest(getRequestAsString(jp));
         tracingLog.setUrl(RequestUtils.getUrlNoParams(hsr));
@@ -216,8 +219,8 @@ public class MonitorLog extends Interceptor<InterceptorLog> {
     }
 
     private static boolean hasKafka(IEntity entity) {
-        for (InterceptorLog.LogType lt : entity.getTracingLogType()) {
-            return lt == InterceptorLog.LogType.KAFKA;
+        for (LogMonitor.LogType lt : entity.getTracingLogType()) {
+            return lt == LogMonitor.LogType.KAFKA;
         }
         return false;
     }

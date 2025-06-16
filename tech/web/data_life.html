@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Lifecycle Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .flow-container {
+            position: relative;
+            height: 2000px;
+            margin: 40px 0;
+            overflow: hidden;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .layer {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .layer-title {
+            position: absolute;
+            left: 10px;
+            top: 5px;
+            font-weight: bold;
+            color: #333;
+            z-index: 5;
+        }
+        .source-layer {
+            top: 10px;
+            background-color: #e1f5fe;
+        }
+        .ingestion-layer {
+            top: 120px;
+            background-color: #e8f5e9;
+        }
+        .processing-layer {
+            top: 230px;
+            background-color: #fff9c4;
+        }
+        .storage-layer {
+            top: 340px;
+            background-color: #f3e5f5;
+            height: 110px; /* Increased height */
+        }
+        .hot-storage-group {
+            left: 120px;
+            top: 360px;
+            width: 350px;
+            background-color: rgba(255, 235, 238, 0.7); /* More visible background */
+            border: 2px solid rgba(219, 68, 55, 0.3); /* Stronger border */
+        }
+        .cold-storage-group {
+            left: 500px;
+            top: 360px;
+            width: 350px;
+            background-color: rgba(232, 234, 246, 0.7); /* More visible background */
+            border: 2px solid rgba(63, 81, 181, 0.3); /* Stronger border */
+        }
+        .analytics-layer {
+            top: 450px;
+            background-color: #e0f2f1;
+        }
+        .monitoring-layer {
+            top: 640px;
+            background-color: #ffebee;
+        }
+        .component {
+            position: absolute;
+            width: 120px;
+            height: 60px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        .component:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        .tech-group {
+            position: absolute;
+            width: auto;
+            min-width: 250px;
+            height: 80px;
+            border-radius: 8px;
+            border: 2px dashed rgba(0,0,0,0.1);
+            background-color: rgba(243, 70, 70, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        .tech-group-label {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background-color: white;
+            padding: 0 5px;
+            font-size: 12px;
+            color: #666;
+        }
+        .app-logs {
+            background-color: #4285F4;
+            left: 150px;
+            top: 40px;
+        }
+        .system-metrics {
+            background-color: #4285F4;
+            left: 300px;
+            top: 40px;
+        }
+        .event-streams {
+            background-color: #4285F4;
+            left: 450px;
+            top: 40px;
+        }
+        .iot-data {
+            background-color: #4285F4;
+            left: 600px;
+            top: 40px;
+        }
+        .kafka {
+            background-color: #0F9D58;
+            left: 150px;
+            top: 150px;
+        }
+        .pulsar {
+            background-color: #0F9D58;
+            left: 300px;
+            top: 150px;
+        }
+        .nifi {
+            background-color: #0F9D58;
+            left: 550px;
+            top: 150px;
+        }
+        .logstash {
+            background-color: #0F9D58;
+            left: 700px;
+            top: 150px;
+        }
+        .zookeeper {
+            background-color: #0F9D58;
+            left: 850px;
+            top: 150px;
+        }
+        .flink {
+            background-color: #F4B400;
+            left: 150px;
+            top: 260px;
+        }
+        .spark {
+            background-color: #F4B400;
+            left: 300px;
+            top: 260px;
+        }
+        .storm {
+            background-color: #F4B400;
+            left: 550px;
+            top: 260px;
+        }
+        .samza {
+            background-color: #F4B400;
+            left: 700px;
+            top: 260px;
+        }
+        .tez {
+            background-color: #F4B400;
+            left: 850px;
+            top: 260px;
+        }
+        .elasticsearch {
+            background-color: #DB4437;
+            left: 150px;
+            top: 380px; /* Adjusted position */
+        }
+        .clickhouse {
+            background-color: #DB4437;
+            left: 300px;
+            top: 380px; /* Adjusted position */
+        }
+        .hdfs {
+            background-color: #DB4437;
+            left: 550px;
+            top: 380px; /* Adjusted position */
+        }
+        .s3 {
+            background-color: #DB4437;
+            left: 700px;
+            top: 380px; /* Adjusted position */
+        }
+        .glacier {
+            background-color: #DB4437;
+            left: 850px;
+            top: 380px; /* Adjusted position */
+        }
+        .trino {
+            background-color: #4B0082;
+            left: 150px;
+            top: 480px;
+        }
+        .druid {
+            background-color: #4B0082;
+            left: 300px;
+            top: 480px;
+        }
+        .dremio {
+            background-color: #4B0082;
+            left: 550px;
+            top: 480px;
+        }
+        .hive {
+            background-color: #4B0082;
+            left: 700px;
+            top: 480px;
+        }
+        .ignite {
+            background-color: #4B0082;
+            left: 850px;
+            top: 480px;
+        }
+        .skywalking {
+            background-color: #795548;
+            left: 150px;
+            top: 590px;
+        }
+        .graylog {
+            background-color: #795548;
+            left: 300px;
+            top: 590px;
+        }
+        .kibana {
+            background-color: #795548;
+            left: 550px;
+            top: 590px;
+        }
+        .grafana {
+            background-color: #795548;
+            left: 700px;
+            top: 590px;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e9e9e9;
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 15px;
+            margin-right: 10px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3367D6;
+        }
+        .info-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e0f7fa;
+            border-radius: 5px;
+            border-left: 5px solid #00bcd4;
+        }
+        .search-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .search-result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: none;
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+        .source-group {
+            left: 120px;
+            top: 30px;
+            width: 650px;
+        }
+        .message-broker-group {
+            left: 120px;
+            top: 140px;
+            width: 350px;
+        }
+        .collector-group {
+            left: 500px;
+            top: 140px;
+            width: 550px;
+        }
+        .stream-group {
+            left: 120px;
+            top: 250px;
+            width: 350px;
+        }
+        .batch-group {
+            left: 500px;
+            top: 250px;
+            width: 550px;
+        }
+        .hot-storage-group {
+            left: 120px;
+            top: 370px;
+            width: 350px;
+        }
+        .cold-storage-group {
+            left: 500px;
+            top: 370px;
+            width: 550px;
+        }
+        .query-engine-group {
+            left: 120px;
+            top: 470px;
+            width: 350px;
+        }
+        .metadata-group {
+            left: 500px;
+            top: 470px;
+            width: 550px;
+        }
+        .observability-group {
+            left: 120px;
+            top: 580px;
+            width: 350px;
+        }
+        .dashboard-group {
+            left: 500px;
+            top: 580px;
+            width: 350px;
+        }
+        .data-dot {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #333;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data Lifecycle Flow: Layered Architecture</h1>
+        
+        <div class="controls">
+            <button id="start-flow">Start Data Flow</button>
+            <button id="show-expired">Show Expired Logs</button>
+            <button id="reset">Reset</button>
+            <span id="day-counter">Current Day: 1</span>
+        </div>
+        
+        <div class="flow-container" id="flow-container">
+            <!-- Layers -->
+            <div class="layer source-layer">
+                <div class="layer-title">Data Sources</div>
+                <div class="tech-group source-group">
+                    <div class="tech-group-label">Data Sources</div>
+                </div>
+                <div class="component app-logs">Application Logs</div>
+                <div class="component system-metrics">System Metrics</div>
+                <div class="component event-streams">Event Streams</div>
+                <div class="component iot-data">IoT Data</div>
+            </div>
+
+            <div class="layer ingestion-layer">
+                <div class="layer-title">Data Ingestion</div>
+                <div class="tech-group message-broker-group">
+                    <div class="tech-group-label">Message Brokers</div>
+                </div>
+                <div class="tech-group collector-group">
+                    <div class="tech-group-label">Data Collectors</div>
+                </div>
+                <div class="component kafka">Kafka</div>
+                <div class="component pulsar">Pulsar</div>
+                <div class="component nifi">NiFi</div>
+                <div class="component logstash">Logstash</div>
+                <div class="component zookeeper">ZooKeeper</div>
+            </div>
+
+            <div class="layer processing-layer">
+                <div class="layer-title">Data Processing</div>
+                <div class="tech-group stream-group">
+                    <div class="tech-group-label">Stream Processing</div>
+                </div>
+                <div class="tech-group batch-group">
+                    <div class="tech-group-label">Batch Processing</div>
+                </div>
+                <div class="component flink">Flink</div>
+                <div class="component spark">Spark</div>
+                <div class="component storm">Storm</div>
+                <div class="component samza">Samza</div>
+                <div class="component tez">Tez</div>
+            </div>
+
+            <div class="layer storage-layer">
+                <div class="layer-title">Data Storage</div>
+                <div class="tech-group hot-storage-group">
+                    <div class="tech-group-label">Hot Storage (1-7 days)</div>
+                </div>
+                <div class="tech-group cold-storage-group">
+                    <div class="tech-group-label">Warm/Cold Storage (8+ days)</div>
+                </div>
+                <div class="component elasticsearch">Elasticsearch</div>
+                <div class="component clickhouse">ClickHouse</div>
+                <div class="component hdfs">HDFS</div>
+                <div class="component s3">S3/MinIO</div>
+                <div class="component glacier">Glacier</div>
+            </div>
+
+            <div class="layer analytics-layer">
+                <div class="layer-title">Data Analytics</div>
+                <div class="tech-group query-engine-group">
+                    <div class="tech-group-label">Query Engines</div>
+                </div>
+                <div class="tech-group metadata-group">
+                    <div class="tech-group-label">Metadata Management</div>
+                </div>
+                <div class="component trino">Trino/Presto</div>
+                <div class="component druid">Druid</div>
+                <div class="component dremio">Dremio</div>
+                <div class="component hive">Hive Metastore</div>
+                <div class="component ignite">Ignite</div>
+            </div>
+
+            <div class="layer monitoring-layer">
+                <div class="layer-title">Monitoring & Visualization</div>
+                <div class="tech-group observability-group">
+                    <div class="tech-group-label">Observability</div>
+                </div>
+                <div class="tech-group dashboard-group">
+                    <div class="tech-group-label">Dashboards</div>
+                </div>
+                <div class="component skywalking">SkyWalking</div>
+                <div class="component graylog">Graylog</div>
+                <div class="component kibana">Kibana</div>
+                <div class="component grafana">Grafana</div>
+            </div>
+        </div>
+        
+        <div class="info-panel" id="info-panel">
+            <h3>Current Status: Ready</h3>
+            <p>Click "Start Data Flow" to see how data moves through the system.</p>
+        </div>
+        
+        <div class="search-panel">
+            <h3>Search for Expired Logs</h3>
+            <div>
+                <label for="search-date">Select Date Range:</label>
+                <select id="search-date">
+                    <option value="recent">Last 7 days (Elasticsearch/ClickHouse)</option>
+                    <option value="warm">8-30 days (HDFS/S3/MinIO)</option>
+                    <option value="cold">31-90 days (S3 with Lifecycle)</option>
+                    <option value="archive">90+ days (Glacier/Archive)</option>
+                </select>
+                <button id="search-btn">Search</button>
+            </div>
+            <div class="search-result" id="search-result">
+                <h4>Search Results</h4>
+                <div id="result-content"></div>
+            </div>
+        </div>
+        
+        <div class="legend">
+            <h3>Layer Legend:</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e1f5fe;"></div>
+                <span>Data Sources Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e8f5e9;"></div>
+                <span>Data Ingestion Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #fff9c4;"></div>
+                <span>Data Processing Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f3e5f5;"></div>
+                <span>Data Storage Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e0f2f1;"></div>
+                <span>Data Analytics Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #ffebee;"></div>
+                <span>Monitoring & Visualization Layer</span>
+            </div>
+        </div>
+        
+        <h2>Log Lifecycle Management</h2>
+        <p>This visualization demonstrates how logs flow through a layered data architecture:</p>
+        <ol>
+            <li><strong>Data Sources Layer:</strong> Services, applications, and devices generate data</li>
+            <li><strong>Data Ingestion Layer:</strong> Message brokers and collectors ingest and buffer data</li>
+            <li><strong>Data Processing Layer:</strong> Stream and batch processing engines transform data</li>
+            <li><strong>Data Storage Layer:</strong> Tiered storage systems manage data based on age and access patterns</li>
+            <li><strong>Data Analytics Layer:</strong> Query engines and metadata services enable analysis</li>
+            <li><strong>Monitoring & Visualization Layer:</strong> Observability tools and dashboards present insights</li>
+        </ol>
+        
+        <h2>Finding Expired Logs</h2>
+        <p>When logs expire from one tier, they're typically moved to a lower-cost storage tier:</p>
+        <ul>
+            <li><strong>For logs expired from hot storage (>7 days):</strong> Check warm storage (HDFS/S3/MinIO)</li>
+            <li><strong>For logs expired from message brokers:</strong> They should already be in storage if properly ingested</li>
+            <li><strong>For very old logs (>30 days):</strong> Check cold storage archives in Glacier or similar</li>
+        </ul>
+        
+        <h2>Implementation Considerations</h2>
+        <ul>
+            <li><strong>Retention Policies:</strong> Configure appropriate retention periods for each storage tier</li>
+            <li><strong>Lifecycle Rules:</strong> Set up S3 lifecycle rules to automatically transition objects between storage classes</li>
+            <li><strong>Index Management:</strong> Use tools like Elasticsearch Curator or ILM to manage indices</li>
+            <li><strong>Metadata Catalog:</strong> Maintain a catalog of archived logs for easy retrieval</li>
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const flowContainer = document.getElementById('flow-container');
+            const infoPanel = document.getElementById('info-panel');
+            const startBtn = document.getElementById('start-flow');
+            const showExpiredBtn = document.getElementById('show-expired');
+            const resetBtn = document.getElementById('reset');
+            const dayCounter = document.getElementById('day-counter');
+            const searchBtn = document.getElementById('search-btn');
+            const searchResult = document.getElementById('search-result');
+            const resultContent = document.getElementById('result-content');
+
+            let currentDay = 1;
+            let animationRunning = false;
+            let dots = [];
+
+            // Create a data dot
+            function createDot(startComponent) {
+                const dot = document.createElement('div');
+                dot.className = 'data-dot';
+
+                const startRect = startComponent.getBoundingClientRect();
+                const containerRect = flowContainer.getBoundingClientRect();
+
+                const startX = startRect.left - containerRect.left + startRect.width / 2;
+                const startY = startRect.top - containerRect.top + startRect.height / 2;
+
+                dot.style.left = startX + 'px';
+                dot.style.top = startY + 'px';
+                dot.style.opacity = '1';
+
+                flowContainer.appendChild(dot);
+                return dot;
+            }
+
+            // Animate dot movement
+            function animateDot(dot, targetComponent, duration, delay = 0) {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const targetRect = targetComponent.getBoundingClientRect();
+                        const containerRect = flowContainer.getBoundingClientRect();
+
+                        const targetX = targetRect.left - containerRect.left + targetRect.width / 2;
+                        const targetY = targetRect.top - containerRect.top + targetRect.height / 2;
+
+                        dot.style.transition = `left ${duration}ms ease, top ${duration}ms ease`;
+                        dot.style.left = targetX + 'px';
+                        dot.style.top = targetY + 'px';
+
+                        setTimeout(resolve, duration);
+                    }, delay);
+                });
+            }
+
+            // Update info panel
+            function updateInfo(message) {
+                infoPanel.innerHTML = `<h3>Current Status: Day ${currentDay}</h3><p>${message}</p>`;
+            }
+
+            // Start the data flow animation
+            async function startFlow() {
+                if (animationRunning) return;
+                animationRunning = true;
+
+                // Get components from each layer
+                const appLogs = document.querySelector('.app-logs');
+                const kafka = document.querySelector('.kafka');
+                const flink = document.querySelector('.flink');
+                const elasticsearch = document.querySelector('.elasticsearch');
+                const s3 = document.querySelector('.s3');
+                const glacier = document.querySelector('.glacier');
+                const trino = document.querySelector('.trino');
+                const kibana = document.querySelector('.kibana');
+
+                // Day 1-7: Normal flow through hot storage
+                for (let day = 1; day <= 7; day++) {
+                    currentDay = day;
+                    dayCounter.textContent = `Current Day: ${day}`;
+
+                    updateInfo(`Day ${day}: Application logs are collected, processed through the pipeline, and stored in hot storage (Elasticsearch).`);
+
+                    // Create new dot from app logs
+                    const dot = createDot(appLogs);
+                    dots.push(dot);
+
+                    // Animate through the pipeline
+                    await animateDot(dot, kafka, 800);
+                    await animateDot(dot, flink, 800);
+                    await animateDot(dot, elasticsearch, 800);
+
+                    // Some dots go to analytics/visualization
+                    if (day % 2 === 0) {
+                        const analyticsDot = createDot(elasticsearch);
+                        dots.push(analyticsDot);
+                        await animateDot(analyticsDot, trino, 800);
+
+                        const vizDot = createDot(trino);
+                        dots.push(vizDot);
+                        animateDot(vizDot, kibana, 800);
+                    }
+
+                    await new Promise(r => setTimeout(r, 500));
+                }
+
+                // Day 8-30: Move to warm storage
+                for (let day = 8; day <= 15; day += 7) {
+                    currentDay = day;
+                    dayCounter.textContent = `Current Day: ${day}`;
+
+                    updateInfo(`Day ${day}: Logs older than 7 days are moved from hot storage (Elasticsearch) to warm storage (S3/MinIO).`);
+
+                    // Move oldest dot from Elasticsearch to S3
+                    const oldDot = dots[0];
+                    await animateDot(oldDot, s3, 1500);
+
+                    // Create new dot from app logs
+                    const dot = createDot(appLogs);
+                    dots.push(dot);
+
+                    // Animate through the pipeline
+                    await animateDot(dot, kafka, 800);
+                    await animateDot(dot, flink, 800);
+                    await animateDot(dot, elasticsearch, 800);
+
+                    await new Promise(r => setTimeout(r, 500));
+                }
+
+                // Day 31+: Move to cold storage
+                currentDay = 31;
+                dayCounter.textContent = `Current Day: ${currentDay}`;
+                updateInfo(`Day ${currentDay}: Logs older than 30 days are moved from warm storage (S3/MinIO) to cold storage (Glacier).`);
+
+                // Move oldest dot from S3 to Glacier
+                const oldestDot = dots[0];
+                await animateDot(oldestDot, glacier, 2000);
+
+                currentDay = 90;
+                dayCounter.textContent = `Current Day: ${currentDay}`;
+                updateInfo(`Day ${currentDay}: Logs have completed their lifecycle through hot, warm, and cold storage tiers based on retention policies.`);
+
+                animationRunning = false;
+            }
+
+            // Show expired logs animation
+            function showExpired() {
+                searchResult.style.display = 'block';
+                const searchDate = document.getElementById('search-date').value;
+
+                switch(searchDate) {
+                    case 'recent':
+                        resultContent.innerHTML = `
+                            <p><strong>Found logs in Elasticsearch/ClickHouse (Hot Storage)</strong></p>
+                            <p>Logs from the last 7 days are available in hot storage for immediate querying.</p>
+                            <p>Access method: Elasticsearch API, Kibana interface, or ClickHouse SQL</p>
+                            <p>Query example: <code>GET /logs-*/_search { "query": { "range": { "@timestamp": { "gte": "now-7d" } } } }</code></p>
+                        `;
+                        break;
+                    case 'warm':
+                        resultContent.innerHTML = `
+                            <p><strong>Found logs in HDFS/S3/MinIO (Warm Storage)</strong></p>
+                            <p>Logs between 8-30 days old are stored in warm storage systems.</p>
+                            <p>Access methods:</p>
+                            <ul>
+                                <li>S3 API or direct download</li>
+                                <li>HDFS commands or Hadoop interfaces</li>
+                                <li>Query engines like Trino/Presto or Spark SQL</li>
+                            </ul>
+                            <p>Path example: <code>s3://logs-archive/YYYY-MM-DD/</code> or <code>hdfs:///logs/archive/YYYY-MM-DD/</code></p>
+                        `;
+                        break;
+                    case 'cold':
+                        resultContent.innerHTML = `
+                            <p><strong>Found logs in S3 with Infrequent Access tier</strong></p>
+                            <p>Logs between 31-90 days old are in S3 Infrequent Access storage class.</p>
+                            <p>Access method: S3 API (slightly higher retrieval cost)</p>
+                            <p>Path example: <code>s3://logs-archive-cold/YYYY-MM/</code></p>
+                            <p>Retrieval may take a few minutes and incur additional costs.</p>
+                            <p>Query options:</p>
+                            <ul>
+                                <li>S3 Select for simple filtering</li>
+                                <li>Athena/Presto for SQL queries against archived data</li>
+                            </ul>
+                        `;
+                        break;
+                    case 'archive':
+                        resultContent.innerHTML = `
+                            <p><strong>Found logs in Glacier/Archive Storage</strong></p>
+                            <p>Logs older than 90 days are archived in Glacier or similar cold storage.</p>
+                            <p>Access method: Initiate a restore request first, then access via S3 API</p>
+                            <p>Path example: <code>s3://logs-archive-glacier/YYYY/</code></p>
+                            <p>Retrieval may take hours to days depending on the restore option selected.</p>
+                            <p>Restore command: <code>aws s3api restore-object --bucket logs-archive-glacier --key YYYY/MM/DD/logfile.gz --restore-request '{"Days":5,"GlacierJobParameters":{"Tier":"Standard"}}'</code></p>
+                            <p>Consider maintaining a metadata catalog for archived logs to facilitate discovery and retrieval.</p>
+                        `;
+                        break;
+                }
+            }
+
+            // Reset the animation
+            function reset() {
+                // Remove all dots
+                dots.forEach(dot => {
+                    if (dot.parentNode) {
+                        dot.parentNode.removeChild(dot);
+                    }
+                });
+                dots = [];
+
+                // Reset day counter
+                currentDay = 1;
+                dayCounter.textContent = `Current Day: ${currentDay}`;
+
+                // Reset info panel
+                infoPanel.innerHTML = `<h3>Current Status: Ready</h3><p>Click "Start Data Flow" to see how data moves through the system.</p>`;
+
+                // Hide search results
+                searchResult.style.display = 'none';
+
+                animationRunning = false;
+            }
+
+            // Event listeners
+            startBtn.addEventListener('click', startFlow);
+            showExpiredBtn.addEventListener('click', showExpired);
+            resetBtn.addEventListener('click', reset);
+            searchBtn.addEventListener('click', showExpired);
+        });
+    </script>

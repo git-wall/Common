@@ -1,0 +1,159 @@
+{
+  "rabbit_version": "3.9.13",
+  "rabbitmq_version": "3.9.13",
+  "product_name": "RabbitMQ",
+  "product_version": "3.9.13",
+  "users": [
+    {
+      "name": "app-user",
+      "password_hash": "app-password-hash",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    },
+    {
+      "name": "app-vhost"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "app-user",
+      "vhost": "app-vhost",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "parameters": [],
+  "policies": [
+    {
+      "vhost": "app-vhost",
+      "name": "ha-policy",
+      "pattern": "^ha\\.",
+      "apply-to": "queues",
+      "definition": {
+        "ha-mode": "all",
+        "ha-sync-mode": "automatic"
+      },
+      "priority": 0
+    }
+  ],
+  "queues": [
+    {
+      "name": "user-events",
+      "vhost": "app-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "order-events",
+      "vhost": "app-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "notification-events",
+      "vhost": "app-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 86400000
+      }
+    },
+    {
+      "name": "dead-letter-queue",
+      "vhost": "app-vhost",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-queue-type": "classic",
+        "x-message-ttl": 604800000
+      }
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "user-exchange",
+      "vhost": "app-vhost",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "order-exchange",
+      "vhost": "app-vhost",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "notification-exchange",
+      "vhost": "app-vhost",
+      "type": "fanout",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "dead-letter-exchange",
+      "vhost": "app-vhost",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "user-exchange",
+      "vhost": "app-vhost",
+      "destination": "user-events",
+      "destination_type": "queue",
+      "routing_key": "user.#",
+      "arguments": {}
+    },
+    {
+      "source": "order-exchange",
+      "vhost": "app-vhost",
+      "destination": "order-events",
+      "destination_type": "queue",
+      "routing_key": "order.#",
+      "arguments": {}
+    },
+    {
+      "source": "notification-exchange",
+      "vhost": "app-vhost",
+      "destination": "notification-events",
+      "destination_type": "queue",
+      "routing_key": "",
+      "arguments": {}
+    },
+    {
+      "source": "dead-letter-exchange",
+      "vhost": "app-vhost",
+      "destination": "dead-letter-queue",
+      "destination_type": "queue",
+      "routing_key": "dead-letter",
+      "arguments": {}
+    }
+  ]
+}

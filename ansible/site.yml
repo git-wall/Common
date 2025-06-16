@@ -1,0 +1,50 @@
+---
+# Main Ansible Playbook
+# This is the entry point for your Ansible automation
+
+# Name of the playbook
+- name: Common setup for all servers
+  # Hosts to target (all servers in this case)
+  hosts: all
+  # Whether to gather facts about the servers
+  gather_facts: yes
+  # Variables to use in the playbook
+  vars:
+    # Common packages to install on all servers
+    common_packages:
+      - vim
+      - curl
+      - wget
+      - htop
+      - net-tools
+    # Timezone to set on all servers
+    timezone: "UTC"
+  
+  # Tasks to execute on all servers
+  tasks:
+    # Update package cache
+    - name: Update package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+    
+    # Install common packages
+    - name: Install common packages
+      package:
+        name: "{{ common_packages }}"
+        state: present
+    
+    # Set timezone
+    - name: Set timezone
+      timezone:
+        name: "{{ timezone }}"
+
+# Include other playbooks
+- import_playbook: webservers.yml
+- import_playbook: dbservers.yml
+- import_playbook: appservers.yml
+# Backup configuration
+- name: Configure backups
+  # Import the backup playbook
+  import_playbook: playbooks/backups.yml

@@ -1,0 +1,67 @@
+# Helm Values for Envoy
+envoy:
+  name: envoy-proxy
+  namespace: default
+  replicas: 2
+  version: v1.22.0
+  
+  # Resource limits
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      http: 80
+      admin: 9901
+  
+  # Upstream service configuration
+  upstream:
+    service: backend-service
+    host: backend-service.default.svc.cluster.local
+    port: 8080
+  
+  # TLS configuration
+  tls:
+    enabled: false
+    certificateSecretName: envoy-certs
+    sni: backend.example.com
+  
+  # Rate limiting configuration
+  rateLimit:
+    enabled: false
+    domain: envoy
+    serviceHost: ratelimit.default.svc.cluster.local
+    servicePort: 8081
+  
+  # JWT authentication
+  jwt:
+    enabled: false
+    issuer: https://auth.example.com
+    audience: api-gateway
+    jwksUri: https://auth.example.com/.well-known/jwks.json
+    jwksHost: auth.example.com
+    jwksPort: 443
+  
+  # API Gateway configuration
+  apiGateway:
+    enabled: false
+    services:
+      - name: user-service
+        host: user-service.default.svc.cluster.local
+        port: 8080
+        prefix: /users
+      - name: product-service
+        host: product-service.default.svc.cluster.local
+        port: 8080
+        prefix: /products
+      - name: order-service
+        host: order-service.default.svc.cluster.local
+        port: 8080
+        prefix: /orders

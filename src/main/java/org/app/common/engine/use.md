@@ -1,9 +1,9 @@
 ```java
 String json = "{\n" +
-                 "            \"PRODUCTID\": \"435432\",\n" +
+                 "            \"PRODUCTID\": \"21321\",\n" +
                  "            \"OUTPUTTYPEID\": 3,\n" +
                  "            \"SUBGROUPID\": 3024,\n" +
-                 "            \"PRICE\": 200000,\n" +
+                 "            \"PRICE\": 200_000.,\n" +
                  "            \"QUANTITY\": 1,\n" +
                  "            \"INVENTORYSTATUSID\": 1,\n" +
                  "            \"MAINGROUPID\": 16,\n" +
@@ -15,7 +15,7 @@ String json = "{\n" +
          // enable case-insensitive mapping (optional)
 //         mapper.configure(com.fasterxml.jackson.databind.MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
-         ProductRequest product = mapper.readValue(json, ProductRequest.class);
+         ProductRequest request = mapper.readValue(json, ProductRequest.class);
 
          List  rules = List.of(
                  new Rule(1L, "tinh diem 1", RuleType.POINT, BigDecimal.valueOf(1000),
@@ -24,5 +24,5 @@ String json = "{\n" +
                          "MUL(RULE_1, RULEVALUE)", Set.of(1L)
                  )
          );
-   evaluateRules(rules, product);
+    RuleEngine.evaluateRules(rules, request);
 ```

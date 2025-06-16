@@ -1,0 +1,37 @@
+# Chaos Monkey for Spring Boot Configuration
+
+spring:
+  profiles:
+    include: chaos-monkey
+
+chaos:
+  monkey:
+    enabled: true
+    watcher:
+      component: false
+      controller: true
+      repository: true
+      rest-controller: true
+      service: true
+    assaults:
+      level: 3
+      latencyActive: true
+      latencyRangeStart: 1000
+      latencyRangeEnd: 3000
+      exceptionsActive: true
+      killApplicationActive: false
+      memoryActive: true
+      memoryMillisecondsHoldFilledMemory: 90000
+      memoryMillisecondsWaitNextIncrease: 1000
+      memoryFillIncrementFraction: 0.15
+      memoryFillTargetFraction: 0.25
+      runtimeAssaultCronExpression: "*/1 * * * * ?"
+    
+management:
+  endpoint:
+    chaosmonkey:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,chaosmonkey

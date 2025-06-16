@@ -1,6 +1,5 @@
 package org.app.common.client.rest;
 
-import org.app.common.utils.RequestUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
@@ -21,8 +20,12 @@ public class HttpHeaderUtils {
         HttpHeaders headers = createHeaders();
 
         if (StringUtils.hasText(authorization))
-            headers.set(RequestUtils.TOKEN_HEADER, authorization);
+            headers.set(HttpHeaders.AUTHORIZATION, authorization);
 
         return headers;
+    }
+
+    public static String token(String token) {
+        return String.format("Bearer %s", token);
     }
 }

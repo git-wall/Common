@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-specific-traffic
+  namespace: {{namespace}}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{app_name}}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{allowed_app}}
+    ports:
+    - protocol: TCP
+      port: {{app_port}}
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: {{destination_app}}
+    ports:
+    - protocol: TCP
+      port: {{destination_port}}
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53

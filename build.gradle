@@ -1,9 +1,21 @@
+buildscript {
+    ext.kotlin_version = '2.1.20'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
 plugins {
+    id 'java-library'
     id 'java'
     id 'org.springframework.boot' version '2.7.18'
     id 'io.spring.dependency-management' version '1.1.6'
     id 'me.champeau.jmh' version '0.7.2'
     id 'jacoco'
+    id 'maven-publish'
 }
 
 ext {
@@ -11,9 +23,9 @@ ext {
 }
 
 apply plugin: 'java'
+apply plugin: 'kotlin'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
-apply plugin: 'maven-publish'
 // import this to use 'api' in dependencies
 apply plugin: 'java-library'
 
@@ -47,9 +59,40 @@ jar {
     archiveFileName = "Common-${version}.jar"
 }
 
+// Only include Java source files in the main build
+sourceSets {
+    main {
+        java {
+            srcDirs "src/main/java", "src/main/kotlin", "src/main/scala"
+        }
+        resources.srcDirs("src/main/resources")
+    }
+}
+
 dependencies {
-    
-       // ========================================================\\
+
+    // Kotlin Standard Library
+    api("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")
+    api("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    api("org.slf4j:slf4j-simple:2.0.12")
+
+    // Scala Library
+//    api "org.scala-lang:scala-library:2.13.13"
+//    api "com.typesafe.akka:akka-actor_2.13:2.6.18"
+//    api "com.typesafe.akka:akka-stream_2.13:2.6.18"
+//    api "com.typesafe.akka:akka-http_2.13:10.2.7"
+//    api "com.typesafe.akka:akka-slf4j_2.13:2.6.18"
+
+    api "org.scala-lang:scala3-library_3:3.3.1"
+    api "com.typesafe.akka:akka-actor-typed_3:2.8.5"
+    api "com.typesafe.akka:akka-stream_3:2.8.5"
+    api "com.typesafe.akka:akka-http_3:10.5.2"
+    api "com.typesafe.akka:akka-slf4j_3:2.8.5"
+    api "com.typesafe.akka:akka-stream-kafka_2.13:2.1.1"
+    api("com.github.pureconfig:pureconfig-core_3:0.17.4")
+    api("com.github.pureconfig:pureconfig-generic_3:0.17.4")
+
+    // ========================================================\\
       //                    Fix dependencies                       \\
      // ============================================================\\
     // warning: unknown enum constant XmlAccessType.FIELD
@@ -71,6 +114,8 @@ dependencies {
     // 1. jmh analyze what func is good
     api 'org.openjdk.jmh:jmh-core:1.37'
     api 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+    implementation 'org.springframework.boot:spring-boot-starter-graphql'
+    testImplementation 'org.springframework.graphql:spring-graphql-test'
     annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
     // 2. jol analyze the cost of class
     api 'org.openjdk.jol:jol-core:0.17'
@@ -92,13 +137,13 @@ dependencies {
     api 'org.jooq:jooq-codegen:3.16.18'
     api 'org.jooq:jooq-meta:3.16.18'
     // 6 nebula graph database
-    //    api 'com.vesoft:client:5.0.0-rc2'
+    // api 'com.vesoft:client:5.0.0-rc2'
     // 7 elasticsearch for server
     api 'org.elasticsearch:elasticsearch:7.10.2'
     // 8 elasticsearch for client
     api 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.10.2'
     // 9 opensearch
-    api 'org.opensearch.client:opensearch-rest-high-level-client:3.0.0-beta1'
+    api 'org.opensearch.client:opensearch-rest-high-level-client:1.3.20'
     // 10 mybatis
     api 'org.mybatis:mybatis:3.5.6'
     api 'org.mybatis:mybatis-spring:2.0.7'
@@ -150,7 +195,7 @@ dependencies {
      //=========================================================================\\
     // 1. lombok
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
-    compileOnlyApi 'org.projectlombok:lombok:1.18.34'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
     // 2. reflections
     api 'org.reflections:reflections:0.10.2'
     // 3. vavr support fluent pattern with monad transformer framework
@@ -208,12 +253,20 @@ dependencies {
     // 21. google code
     //    api 'com.google.guava:guava:33.4.5-jre'
     // 22. flink
-    //    api 'org.apache.flink:flink-core:2.0.0'
-    //    api 'org.apache.flink:flink-java:2.0.0'
-    //    api 'org.apache.flink:flink-streaming-java:2.0.0'
-    //    api 'org.apache.flink:flink-connector-kafka:3.4.0-1.20'
-    //    api 'org.apache.flink:flink-clients:2.0.0'
-    //    api 'org.apache.flink:flink-connector-base:2.0.0'
+    api 'org.apache.flink:flink-streaming-java:2.0.0'
+    api 'org.apache.flink:flink-core:2.0.0'
+    api 'org.apache.flink:flink-clients:2.0.0'
+    api 'org.apache.flink:flink-table-common:2.0.0'
+    api 'org.apache.flink:flink-java:1.20.1'
+    api 'org.apache.flink:flink-table-api-java-bridge:2.0.0'
+    api 'org.apache.flink:flink-statebackend-rocksdb:2.0.0'
+    api 'org.apache.flink:flink-connector-kafka:4.0.0-2.0'
+    api 'org.apache.flink:flink-queryable-state-client-java:2.0.0'
+    api 'org.apache.flink:flink-state-processor-api:2.0.0'
+    api 'org.apache.flink:flink-connector-elasticsearch7:4.0.0-2.0'
+    api 'org.apache.flink:flink-parquet:2.0.0'
+    api 'org.apache.flink:flink-avro:2.0.0'
+    api 'org.apache.flink:flink-shaded-hadoop-2-uber:2.10.1-2.0'
     // 23. jasperreports
     api 'net.sf.jasperreports:jasperreports:7.0.1'
     // 24. Yahoo / Clearspring
@@ -222,6 +275,16 @@ dependencies {
     api 'org.apache.datasketches:datasketches-java:7.0.1'
     // 26. toml4j easy to use for config file
     api 'com.moandjiezana.toml:toml4j:0.7.2'
+    // 27. datastax java-driver-core
+    api 'com.datastax.oss:java-driver-core:4.17.0'
+    // 28 parquet
+    api 'org.apache.parquet:parquet-avro:1.15.2'
+    // 29. hadoop
+    api 'org.apache.hadoop:hadoop-common:3.4.1'
+    // 30. vertx
+    api 'io.vertx:vertx-web:4.5.1'
+    // 31. graphql
+    api 'com.graphql-java:graphql-java:21.3'
 
     // ===================================================================
     // Spring dependencies
@@ -242,6 +305,12 @@ dependencies {
     api 'org.springframework.boot:spring-boot-starter-mail'
     api 'org.springframework.boot:spring-boot-starter-batch'
     api 'org.springframework.boot:spring-boot-starter-test'
+//    api 'org.springframework.boot:spring-boot-starter-graphql'
+
+    // ===================================================================
+    // Spring AI dependencies
+    // ===================================================================
+    api 'org.springframework.ai:spring-ai-vertex-ai-embedding-spring-boot-starter:1.0.0-M6'
 
     // ===================================================================
     // Spring machine
@@ -291,6 +360,7 @@ dependencies {
     api 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-discovery'
     // 2. nacos config better than spring config by manager all in 1 place is (NACOS SERVER)
     implementation 'com.alibaba.cloud:spring-cloud-starter-alibaba-nacos-config'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
 }
 
 // ===================================================================

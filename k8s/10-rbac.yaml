@@ -1,0 +1,37 @@
+# 10-rbac.yaml
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{service-account-name}}
+  namespace: {{namespace}}
+  labels:
+    app: {{service-name}}
+
+---
+# Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{role-name}}
+  namespace: {{namespace}}
+rules:
+  - apiGroups: ["{{api-group}}"]
+    resources: ["{{resource}}"]
+    verbs: ["{{verb}}"]
+
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{role-binding-name}}
+  namespace: {{namespace}}
+subjects:
+  - kind: ServiceAccount
+    name: {{service-account-name}}
+    namespace: {{namespace}}
+roleRef:
+  kind: Role
+  name: {{role-name}}
+  apiGroup: rbac.authorization.k8s.io

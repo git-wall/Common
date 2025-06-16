@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableConfigurationProperties(IgniteProperties.class)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class IgniteAutoConfiguration {
 
     private final IgniteProperties properties;

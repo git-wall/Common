@@ -1,0 +1,42 @@
+# Default Site Configuration Template
+# This template generates the default Nginx site configuration
+
+# Server block for HTTP
+server {
+    # Listen on port {{ http_port }} (default: 80)
+    listen {{ http_port }} default_server;
+    # Listen on IPv6 port {{ http_port }}
+    listen [::]:{{ http_port }} default_server;
+    
+    # Server name (domain)
+    server_name _;
+    
+    # Document root
+    root {{ document_root }};
+    
+    # Default index files
+    index index.html index.htm;
+    
+    # Location block for root path
+    location / {
+        # Try serving files, then directories, then 404
+        try_files $uri $uri/ =404;
+    }
+    
+    # Location block for .ht files
+    location ~ /\.ht {
+        # Deny access to .htaccess files
+        deny all;
+    }
+    
+    # Error pages
+    # 404 error page
+    error_page 404 /404.html;
+    # 50x error pages
+    error_page 500 502 503 504 /50x.html;
+    # Location block for 50x error page
+    location = /50x.html {
+        # Root directory for error pages
+        root /usr/share/nginx/html;
+    }
+}

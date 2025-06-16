@@ -1,7 +1,7 @@
 package org.app.common.entities.log;
 
-import org.app.common.interceptor.log.InterceptorLog;
+import org.app.common.interceptor.log.LogMonitor;
 
 public interface IEntity {
-    InterceptorLog.LogType[] getTracingLogType();
+    LogMonitor.LogType[] getTracingLogType();
 }

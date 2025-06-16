@@ -1,6 +1,6 @@
 package org.app.common.utils;
 
-import org.app.common.pattern.revisited.LazyLoader;
+import org.app.common.design.revisited.LazyLoader;
 
 import java.lang.reflect.Proxy;
 import java.util.function.BiConsumer;

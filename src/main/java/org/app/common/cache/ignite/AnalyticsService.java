@@ -1,32 +1,38 @@
 package org.app.common.cache.ignite;
 
+import lombok.Getter;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.IgniteDataStreamer;
-import org.apache.ignite.binary.BinaryObject;
-import org.apache.ignite.cache.ContinuousQuery;
+import org.apache.ignite.cache.query.ContinuousQuery;
 import org.apache.ignite.cache.query.QueryCursor;
 import org.apache.ignite.cache.query.ScanQuery;
 import org.apache.ignite.cache.query.SqlFieldsQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
+import org.apache.ignite.lang.IgniteBiPredicate;
+import org.apache.ignite.lang.IgniteRunnable;
 import org.apache.ignite.stream.StreamTransformer;
 
 import javax.cache.Cache;
-import javax.cache.event.CacheEntryEvent;
 import javax.cache.event.CacheEntryEventFilter;
 import javax.cache.event.CacheEntryUpdatedListener;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 /**
  * Service for real-time analytics and Hybrid Transactional/Analytical Processing (HTAP)
  * capabilities using Apache Ignite.
  */
+@Getter
 public class AnalyticsService {
 
+    /**
+     * -- GETTER --
+     *  Gets the underlying Ignite instance.
+     *
+     */
     private final Ignite ignite;
 
     public AnalyticsService(Ignite ignite) {
@@ -80,7 +86,7 @@ public class AnalyticsService {
      */
     public <K, V> void registerStreamTransformer(
             String cacheName,
-            StreamTransformer<K, V, K, V> transformer) {
+            StreamTransformer<K, V> transformer) {
 
         try (IgniteDataStreamer<K, V> streamer = createDataStreamer(cacheName)) {
             streamer.receiver(transformer);
@@ -95,6 +101,18 @@ public class AnalyticsService {
      * @return The query results
      */
     public List<List<?>> executeSqlQuery(String query, Object... args) {
+        return executeSqlQuery("default", query, args);
+    }
+
+    /**
+     * Executes a SQL query for analytics purposes on a specific cache.
+     *
+     * @param cacheName The name of the cache to query
+     * @param query The SQL query string
+     * @param args The query arguments
+     * @return The query results
+     */
+    public List<List<?>> executeSqlQuery(String cacheName, String query, Object... args) {
         SqlFieldsQuery sqlQuery = new SqlFieldsQuery(query);
 
         if (args != null && args.length > 0) {
@@ -108,9 +126,10 @@ public class AnalyticsService {
         sqlQuery.setDistributedJoins(true);
 
         // Set query timeout
-        sqlQuery.setTimeout(60000); // 1 minute timeout
+        sqlQuery.setTimeout(60000, TimeUnit.MILLISECONDS); // 1 minute timeout
 
-        return ignite.context().query().querySqlFields(sqlQuery, true).getAll();
+        IgniteCache<?, ?> cache = ignite.cache(cacheName);
+        return cache.query(sqlQuery).getAll();
     }
 
     /**
@@ -124,7 +143,7 @@ public class AnalyticsService {
      */
     public <K, V> QueryCursor<Cache.Entry<K, V>> executeScanQuery(
             String cacheName,
-            Predicate<Cache.Entry<K, V>> filter) {
+            IgniteBiPredicate<K, V> filter) {
 
         IgniteCache<K, V> cache = ignite.cache(cacheName);
         ScanQuery<K, V> scanQuery = new ScanQuery<>(filter);
@@ -155,7 +174,7 @@ public class AnalyticsService {
 
         // Set the optional filter
         if (filter != null) {
-            query.setRemoteFilter(filter);
+            query.setRemoteFilterFactory(() -> filter);
         }
 
         // Execute the continuous query
@@ -197,20 +216,15 @@ public class AnalyticsService {
 
         IgniteCache<K, V> cache = ignite.cache(cacheName);
 
-        ignite.compute().run(() -> {
-            ScanQuery<K, V> scanQuery = new ScanQuery<>();
-            scanQuery.setLocal(true);
+        ignite.compute().run(new IgniteRunnable() {
+            @Override
+            public void run() {
+                ScanQuery<K, V> scanQuery = new ScanQuery<>();
+                scanQuery.setLocal(true);
 
-            cache.query(scanQuery).forEach(processor);
+                cache.query(scanQuery).forEach(processor);
+            }
         });
     }
 
-    /**
-     * Gets the underlying Ignite instance.
-     *
-     * @return The Ignite instance
-     */
-    public Ignite getIgnite() {
-        return ignite;
-    }
 }

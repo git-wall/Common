@@ -58,7 +58,7 @@ public class ThreadUtils {
             );
         }
 
-        public static ExecutorService scheduledPool() {
+        public static ScheduledThreadPoolExecutor scheduledPool() {
             return new ScheduledThreadPoolExecutor(CORE_AVAILABLE);
         }
     }
@@ -96,7 +96,7 @@ public class ThreadUtils {
             return Executors.newFixedThreadPool(getProcessors() << 1);
         }
 
-        public static ExecutorService ioPool(long keepAliveTime, TimeUnit unit) {
+        public static ThreadPoolExecutor ioPool(long keepAliveTime, TimeUnit unit) {
             int availableProcessors = getProcessors();
             return new ThreadPoolExecutor(
                     availableProcessors << 1,                // More threads for I/O
@@ -109,11 +109,11 @@ public class ThreadUtils {
             );
         }
 
-        public static ExecutorService scheduledPool() {
+        public static ScheduledThreadPoolExecutor scheduledPool() {
             return new ScheduledThreadPoolExecutor(getProcessors());
         }
 
-        public static ExecutorService scheduledSmallPool() {
+        public static ScheduledThreadPoolExecutor scheduledSmallPool() {
             return new ScheduledThreadPoolExecutor(2);
         }
 
@@ -125,7 +125,7 @@ public class ThreadUtils {
             return Runtime.getRuntime().availableProcessors();
         }
 
-        public static void shutDownHook(Runnable runnable) {
+        public static void addShutdownHook(Runnable runnable) {
             Runtime.getRuntime().addShutdownHook(new Thread(runnable));
         }
     }

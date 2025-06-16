@@ -1,0 +1,17 @@
+services:
+  # MinIO service for upload files equal vs S3
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"   # API (S3-compatible)
+      - "9001:9001"   # Web Console
+    environment:
+      MINIO_ROOT_USER: admin          # Username
+      MINIO_ROOT_PASSWORD: admin123   # Password (ít nhất 8 ký tự)
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+volumes:
+  minio-data:

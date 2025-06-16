@@ -1,0 +1,109 @@
+---
+# Application Servers Playbook
+# This playbook configures application servers
+
+# Name of the playbook
+- name: Configure application servers
+  # Target the appservers group
+  hosts: appservers
+  # Whether to gather facts about the servers
+  gather_facts: yes
+  # Variables to use in the playbook
+  vars:
+    # Java package to install
+    java_package: openjdk-11-jdk
+    # Application user
+    app_user: myapp
+    # Application group
+    app_group: myapp
+    # Application directory
+    app_dir: /opt/myapp
+    # Application configuration directory
+    app_config_dir: /etc/myapp
+    # Application log directory
+    app_log_dir: /var/log/myapp
+    # Application JAR file name
+    app_jar_file: myapp.jar
+    # Application service name
+    app_service_name: myapp
+    # Database connection URL
+    db_url: "jdbc:mysql://{{ hostvars[groups['dbservers'][0]]['ansible_host'] }}:3306/{{ db_name }}"
+    # Database user
+    db_user: myapp
+    # Database password
+    db_password: "{{ vault_db_password }}"
+  
+  # Tasks to execute on application servers
+  tasks:
+    # Install Java
+    - name: Install Java
+      package:
+        name: "{{ java_package }}"
+        state: present
+    
+    # Create application user
+    - name: Create application user
+      user:
+        name: "{{ app_user }}"
+        group: "{{ app_group }}"
+        system: yes
+        createhome: no
+        shell: /bin/false
+    
+    # Create application directories
+    - name: Create application directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0755'
+      loop:
+        - "{{ app_dir }}"
+        - "{{ app_config_dir }}"
+        - "{{ app_log_dir }}"
+    
+    # Deploy application configuration
+    - name: Deploy application configuration
+      template:
+        src: templates/application.properties.j2
+        dest: "{{ app_config_dir }}/application.properties"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0644'
+      notify: Restart application
+    
+    # Deploy application JAR
+    - name: Deploy application JAR
+      copy:
+        src: files/{{ app_jar_file }}
+        dest: "{{ app_dir }}/{{ app_jar_file }}"
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        mode: '0644'
+      notify: Restart application
+    
+    # Deploy systemd service file
+    - name: Deploy systemd service file
+      template:
+        src: templates/myapp.service.j2
+        dest: /etc/systemd/system/{{ app_service_name }}.service
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart application
+    
+    # Ensure application is running
+    - name: Ensure application is running
+      service:
+        name: "{{ app_service_name }}"
+        state: started
+        enabled: yes
+  
+  # Handlers to run when notified by tasks
+  handlers:
+    # Restart application handler
+    - name: Restart application
+      service:
+        name: "{{ app_service_name }}"
+        state: restarted

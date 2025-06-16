@@ -1,0 +1,14 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: ${EXTERNAL_SERVICE_NAME}
+  namespace: ${NAMESPACE}
+spec:
+  hosts:
+  - "${EXTERNAL_HOST}"
+  ports:
+  - number: ${PORT_NUMBER}
+    name: ${PORT_NAME}
+    protocol: ${PROTOCOL}
+  resolution: DNS
+  location: MESH_EXTERNAL

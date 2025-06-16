@@ -1,0 +1,74 @@
+---
+# Database Servers Playbook
+# This playbook configures database servers
+
+# Name of the playbook
+- name: Configure database servers
+  # Target the dbservers group
+  hosts: dbservers
+  # Whether to gather facts about the servers
+  gather_facts: yes
+  # Variables to use in the playbook
+  vars:
+    # Database server package to install
+    db_server_package: mysql-server
+    # Database server service name
+    db_server_service: mysql
+    # Database name to create
+    db_name: myapp
+    # Database user to create
+    db_user: myapp
+    # Database user password
+    db_password: "{{ vault_db_password }}"
+    # Database server bind address
+    db_bind_address: "0.0.0.0"
+  
+  # Tasks to execute on database servers
+  tasks:
+    # Install database server package
+    - name: Install database server
+      package:
+        name: "{{ db_server_package }}"
+        state: present
+    
+    # Deploy database server configuration
+    - name: Deploy database server configuration
+      template:
+        src: templates/mysql.conf.j2
+        dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart database server
+    
+    # Create database
+    - name: Create database
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+    
+    # Create database user
+    - name: Create database user
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: "{{ db_name }}.*:ALL"
+        host: '%'
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+    
+    # Ensure database server is running
+    - name: Ensure database server is running
+      service:
+        name: "{{ db_server_service }}"
+        state: started
+        enabled: yes
+  
+  # Handlers to run when notified by tasks
+  handlers:
+    # Restart database server handler
+    - name: Restart database server
+      service:
+        name: "{{ db_server_service }}"
+        state: restarted

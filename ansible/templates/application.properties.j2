@@ -1,0 +1,61 @@
+# Spring Boot Application Properties Template
+# This template generates the Spring Boot application.properties file
+
+# Server configuration
+# Server port
+server.port={{ app_port }}
+# Active profile
+spring.profiles.active={{ app_profile }}
+
+# Application name
+spring.application.name=spring-boot-app
+
+# Database configuration
+# Database URL
+spring.datasource.url={{ db_url }}
+# Database username
+spring.datasource.username={{ db_user }}
+# Database password
+spring.datasource.password={{ db_password }}
+# Database driver
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA/Hibernate configuration
+# Hibernate dialect
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+# Hibernate DDL auto
+spring.jpa.hibernate.ddl-auto=update
+# Show SQL statements
+spring.jpa.show-sql=false
+# Format SQL statements
+spring.jpa.properties.hibernate.format_sql=false
+
+# Logging configuration
+# Log level for root
+logging.level.root=INFO
+# Log level for application
+logging.level.com.example=INFO
+# Log file
+logging.file.name={{ app_log_dir }}/application.log
+# Log pattern
+logging.pattern.file=%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
+
+# Actuator configuration
+# Actuator endpoints
+management.endpoints.web.exposure.include=health,info,metrics
+# Actuator info endpoint
+management.endpoint.health.show-details=when_authorized
+# Actuator base path
+management.endpoints.web.base-path=/actuator
+
+# Security configuration
+# CSRF protection
+spring.security.csrf.enabled=true
+# Session timeout
+server.servlet.session.timeout=30m
+
+# Cache configuration
+# Cache type
+spring.cache.type=caffeine
+# Cache names
+spring.cache.cache-names=users,products

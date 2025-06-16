@@ -1,0 +1,8 @@
+# 01-Namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: namespace
+  labels:
+    name: namespace
+    environment: environment

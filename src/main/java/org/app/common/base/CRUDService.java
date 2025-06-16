@@ -2,19 +2,15 @@ package org.app.common.base;
 
 import org.springframework.data.domain.Page;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
-public interface CRUDService<DTO, E, ID> {
-    E add(DTO dto);
+public interface CRUDService<E, ID> {
+    E add(E dto);
+    
+    void addAll(Collection<E> entities, int batchSize);
 
-    void addAll(List<E> entities, int batchSize);
-
-    void addBatch_SkipError(List<E> entities, int batchSize);
-
-    void addBatch_RollbackError(List<E> entities, int batchSize);
-
-    E update(DTO dto);
+    E update(E dto);
 
     void delete(ID id);
 
