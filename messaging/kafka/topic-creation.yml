@@ -1,0 +1,55 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: user-events
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 604800000  # 7 days
+    segment.bytes: 1073741824
+    cleanup.policy: delete
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: order-events
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  partitions: 6
+  replicas: 1
+  config:
+    retention.ms: 604800000  # 7 days
+    segment.bytes: 1073741824
+    cleanup.policy: delete
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: notification-events
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 259200000  # 3 days
+    segment.bytes: 536870912
+    cleanup.policy: delete
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: dead-letter-queue
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  partitions: 1
+  replicas: 1
+  config:
+    retention.ms: 1209600000  # 14 days
+    segment.bytes: 1073741824
+    cleanup.policy: compact,delete

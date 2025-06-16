@@ -1,0 +1,32 @@
+# 09-network-policy.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{service-name}}-network-policy
+  namespace: {{namespace}}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{service-name}}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{allowed-ingress-app}}
+        - namespaceSelector:
+            matchLabels:
+              name: {{allowed-ingress-namespace}}
+      ports:
+        - protocol: TCP
+          port: {{ingress-port}}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{allowed-egress-app}}
+      ports:
+        - protocol: TCP
+          port: {{egress-port}}

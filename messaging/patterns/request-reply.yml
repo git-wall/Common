@@ -1,0 +1,78 @@
+# Request-Reply Pattern Configuration
+
+# Spring Cloud Stream Configuration
+spring:
+  cloud:
+    stream:
+      function:
+        definition: requestSender;requestProcessor
+      bindings:
+        requestSender-out-0:
+          destination: request-topic
+          content-type: application/json
+        requestProcessor-in-0:
+          destination: request-topic
+          content-type: application/json
+          group: request-processor-group
+        requestProcessor-out-0:
+          destination: reply-topic
+          content-type: application/json
+      
+      # Kafka Binder Configuration
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
+          required-acks: 1
+        bindings:
+          requestSender-out-0:
+            producer:
+              configuration:
+                key.serializer: org.apache.kafka.common.serialization.StringSerializer
+                value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          requestProcessor-in-0:
+            consumer:
+              configuration:
+                key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+                value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+                auto.offset.reset: earliest
+              concurrency: 3
+          requestProcessor-out-0:
+            producer:
+              configuration:
+                key.serializer: org.apache.kafka.common.serialization.StringSerializer
+                value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      
+      # RabbitMQ Binder Configuration (Alternative)
+      rabbit:
+        binder:
+          connection-name-prefix: req-reply-pattern
+          nodes: ${RABBITMQ_NODES:localhost:5672}
+          virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+          username: ${RABBITMQ_USERNAME:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
+        bindings:
+          requestSender-out-0:
+            producer:
+              exchange-type: direct
+              routing-key-expression: headers['routingKey'] ?: 'default'
+          requestProcessor-in-0:
+            consumer:
+              binding-routing-key: '#'
+              prefetch: 250
+              acknowledge-mode: AUTO
+              recovery-interval: 5000
+              requeue-rejected: true
+          requestProcessor-out-0:
+            producer:
+              exchange-type: direct
+              routing-key-expression: headers['replyTo'] ?: 'default'
+
+# Application Configuration
+app:
+  messaging:
+    request-reply:
+      request-topic: request-topic
+      reply-topic: reply-topic
+      processor-group: request-processor-group
+      reply-timeout-ms: 30000
+      concurrency: 3

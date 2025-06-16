@@ -1,0 +1,23 @@
+plugins {
+    id 'org.openrewrite.rewrite' version '5.40.0'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    rewrite 'org.openrewrite.recipe:rewrite-java:4.40.0'
+    rewrite 'org.openrewrite.recipe:rewrite-java-21:1.5.0'
+}
+
+rewrite {
+    activeRecipe('org.openrewrite.java.migrate.Java17toJava21')
+}
+
+tasks.named('rewriteRun').configure {
+    dependsOn tasks.named('rewriteDryRun')
+    doFirst {
+        println "Running Java 17 to 21 migration recipes"
+    }
+}

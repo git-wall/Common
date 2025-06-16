@@ -1,0 +1,18 @@
+services:
+  kylin:
+    image: apachekylin/apache-kylin-standalone:4.0.3
+    container_name: apache-kylin
+    ports:
+      - "7070:7070"    # Kylin Web UI
+      - "8088:8088"    # Hadoop YARN ResourceManager UI
+      - "50070:50070"  # Hadoop NameNode UI
+    environment:
+      - KYLIN_USERNAME=ADMIN
+      - KYLIN_PASSWORD=KYLIN
+    volumes:
+      - kylin_data:/opt/apache-kylin-4.0.3/data
+    tty: true
+    stdin_open: true
+
+volumes:
+  kylin_data:

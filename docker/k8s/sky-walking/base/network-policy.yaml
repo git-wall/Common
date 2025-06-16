@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: skywalking-network-policy
+  namespace: monitoring
+spec:
+  podSelector:
+    matchLabels:
+      app: skywalking-oap
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: skywalking-ui
+      ports:
+        - protocol: TCP
+          port: 12800
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 11800

@@ -1,0 +1,106 @@
+# Web Servers Playbook
+# This playbook configures web servers with Nginx
+
+---
+# Playbook name and target hosts
+- name: Configure web servers
+  # Target web servers group
+  hosts: webservers
+  # Become root for privileged operations
+  become: true
+  # Variables used in this playbook
+  vars:
+    # Nginx version to install
+    nginx_version: stable
+    # HTTP port
+    http_port: 80
+    # HTTPS port
+    https_port: 443
+    # Document root
+    document_root: /var/www/html
+
+  # Tasks to execute
+  tasks:
+    # Install Nginx
+    - name: Install Nginx
+      # Use apt module to install Nginx
+      apt:
+        # Package name
+        name: nginx
+        # Ensure package is installed
+        state: present
+        # Update cache
+        update_cache: yes
+
+    # Create document root directory
+    - name: Create document root
+      # Use file module to create directory
+      file:
+        # Directory path
+        path: "{{ document_root }}"
+        # Directory state
+        state: directory
+        # Directory owner
+        owner: www-data
+        # Directory group
+        group: www-data
+        # Directory permissions
+        mode: '0755'
+
+    # Configure Nginx
+    - name: Configure Nginx
+      # Use template module to create config from template
+      template:
+        # Source template file
+        src: templates/nginx.conf.j2
+        # Destination file
+        dest: /etc/nginx/nginx.conf
+        # File owner
+        owner: root
+        # File group
+        group: root
+        # File permissions
+        mode: '0644'
+      # Notify handler when config changes
+      notify: restart nginx
+
+    # Create default site config
+    - name: Configure default site
+      # Use template module to create config from template
+      template:
+        # Source template file
+        src: templates/default-site.conf.j2
+        # Destination file
+        dest: /etc/nginx/sites-available/default
+        # File owner
+        owner: root
+        # File group
+        group: root
+        # File permissions
+        mode: '0644'
+      # Notify handler when config changes
+      notify: restart nginx
+
+    # Enable default site
+    - name: Enable default site
+      # Use file module to create symlink
+      file:
+        # Source file
+        src: /etc/nginx/sites-available/default
+        # Destination symlink
+        dest: /etc/nginx/sites-enabled/default
+        # File state
+        state: link
+      # Notify handler when symlink changes
+      notify: restart nginx
+
+  # Handlers to run on notifications
+  handlers:
+    # Restart Nginx handler
+    - name: restart nginx
+      # Use service module to restart service
+      service:
+        # Service name
+        name: nginx
+        # Service state
+        state: restarted

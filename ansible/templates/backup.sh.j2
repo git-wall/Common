@@ -1,0 +1,61 @@
+#!/bin/bash
+# Backup Script Template
+# This template generates the backup script
+
+# Exit on error
+set -e
+
+# Variables
+# Date format for backup files
+DATE=$(date +%Y-%m-%d_%H-%M-%S)
+# Hostname
+HOST=$(hostname)
+# Backup directory
+BACKUP_DIR="{{ backup_dir }}"
+# Remote backup server
+BACKUP_SERVER="{{ backup_server }}"
+# Remote backup path
+BACKUP_SERVER_PATH="{{ backup_server_path }}"
+
+# Log start of backup
+echo "Starting backup at $(date)"
+
+# Create backup directory if it doesn't exist
+mkdir -p $BACKUP_DIR
+
+# Backup directories based on server type
+if [[ "$(hostname)" =~ ^web ]]; then
+    # Web server backup
+    echo "Backing up web server files"
+    # Backup Nginx configuration
+    tar -czf $BACKUP_DIR/nginx-config-$DATE.tar.gz /etc/nginx
+    # Backup web content
+    tar -czf $BACKUP_DIR/web-content-$DATE.tar.gz /var/www
+elif [[ "$(hostname)" =~ ^db ]]; then
+    # Database server backup
+    echo "Backing up database server files"
+    # PostgreSQL backup
+    sudo -u postgres pg_dumpall | gzip > $BACKUP_DIR/postgres-all-$DATE.sql.gz
+elif [[ "$(hostname)" =~ ^app ]]; then
+    # Application server backup
+    echo "Backing up application server files"
+    # Backup application files
+    tar -czf $BACKUP_DIR/app-files-$DATE.tar.gz {{ app_home }}
+    # Backup application config
+    tar -czf $BACKUP_DIR/app-config-$DATE.tar.gz {{ app_config_dir }}
+    # Backup application logs
+    tar -czf $BACKUP_DIR/app-logs-$DATE.tar.gz {{ app_log_dir }}
+fi
+
+# Common backups for all servers
+# Backup system configuration
+tar -czf $BACKUP_DIR/etc-$DATE.tar.gz /etc
+
+# Sync to remote backup server if configured
+if [ -n "$BACKUP_SERVER" ]; then
+    echo "Syncing backups to remote server"
+    rsync -avz --delete $BACKUP_DIR/ $BACKUP_SERVER:$BACKUP_SERVER_PATH/$HOST/
+fi
+
+# Log end of backup
+echo "Backup completed at $(date)"

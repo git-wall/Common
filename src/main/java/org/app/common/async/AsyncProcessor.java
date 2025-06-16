@@ -65,6 +65,7 @@ public class AsyncProcessor {
      * @return A CompletableFuture with the final result
      */
     @SafeVarargs
+    @SuppressWarnings("unchecked")
     public final <T, R> CompletableFuture<R> chain(T initial, Function<Object, ?>... transformations) {
         CompletableFuture<Object> future = CompletableFuture.completedFuture(initial);
 
@@ -85,12 +86,13 @@ public class AsyncProcessor {
      * @return A CompletableFuture with the final result
      */
     @SafeVarargs
+    @SuppressWarnings("unchecked")
     public final <T, R> CompletableFuture<R> chain(CompletableFuture<T> initialFuture,
                                                    Function<Object, ?>... transformations) {
         CompletableFuture<Object> future = (CompletableFuture<Object>) initialFuture;
 
         for (Function<Object, ?> transformation : transformations) {
-            future = future.thenApplyAsync(transformation::apply, executorService);
+            future = future.thenApplyAsync(transformation, executorService);
         }
 
         return (CompletableFuture<R>) future;

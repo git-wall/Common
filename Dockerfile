@@ -50,6 +50,10 @@ COPY --from=builder /app/build/image /opt/java/openjdk
 ENV PATH="/opt/java/openjdk/bin:${PATH}"
 # ENV JAVA_OPTS=""
 # EXPOSE 8080
+
+RUN useradd -u 1000 -m thanh && chown -R thanh /app
+USER thanh
+
 # Configure JVM with ZGC and NUMA awareness
 # - '-XX:+UnlockExperimentalVMOptions': Required to enable ZGC in Java 11 (experimental)
 # - '-XX:+UseZGC': Enables Z Garbage Collector for low-latency GC

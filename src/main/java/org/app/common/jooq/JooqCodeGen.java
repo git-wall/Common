@@ -21,7 +21,7 @@ public class JooqCodeGen {
 
     private static final String OUTPUT_DIRECTORY = "../jooq/src/main/java";
 
-    private static final String PACKAGE_NAME = "org.app.jooq.entities";
+    private static final String PACKAGE_NAME = "org.app.jooq.entitiesJooq";
 
     public JooqCodeGen(Environment environment) {
         this.environment = environment;
@@ -30,7 +30,9 @@ public class JooqCodeGen {
     @EventListener(ApplicationStartedEvent.class)
     public void generateJooqClasses() {
         if (shouldSkipGeneration()) {
-            System.out.println("Skipping JOOQ code generation due to property setting");
+
+            System.out.println("Skipping JOOQ code generation," +
+                    "if you want to generation go to application properties set (jooq.generator.skip=false)");
             return;
         }
 

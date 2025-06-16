@@ -1,0 +1,58 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: pod-failure-example
+  namespace: app
+spec:
+  action: pod-failure
+  mode: one
+  duration: "30s"
+  selector:
+    namespaces:
+      - app
+    labelSelectors:
+      app: spring-boot-service
+  scheduler:
+    cron: "@every 5m"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-delay-example
+  namespace: app
+spec:
+  action: delay
+  mode: one
+  selector:
+    namespaces:
+      - app
+    labelSelectors:
+      app: spring-boot-service
+  delay:
+    latency: "200ms"
+    correlation: "25"
+    jitter: "50ms"
+  duration: "60s"
+  scheduler:
+    cron: "@every 10m"
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: cpu-stress-example
+  namespace: app
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - app
+    labelSelectors:
+      app: spring-boot-service
+  stressors:
+    cpu:
+      workers: 2
+      load: 75
+      options: ["--cpu-method", "all"]
+  duration: "120s"
+  scheduler:
+    cron: "@every 15m"

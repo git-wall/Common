@@ -1,0 +1,140 @@
+# Database Servers Playbook
+# This playbook configures database servers with PostgreSQL
+
+---
+# Playbook name and target hosts
+- name: Configure database servers
+  # Target database servers group
+  hosts: dbservers
+  # Become root for privileged operations
+  become: true
+  # Variables used in this playbook
+  vars:
+    # PostgreSQL version
+    postgresql_version: 14
+    # PostgreSQL port
+    postgresql_port: 5432
+    # PostgreSQL data directory
+    postgresql_data_dir: /var/lib/postgresql/{{ postgresql_version }}/main
+    # PostgreSQL admin user
+    postgresql_admin_user: postgres
+    # PostgreSQL database name
+    postgresql_db_name: appdb
+    # PostgreSQL application user
+    postgresql_app_user: appuser
+    # PostgreSQL application user password
+    postgresql_app_password: "{{ vault_postgresql_app_password }}"
+
+  # Tasks to execute
+  tasks:
+    # Add PostgreSQL repository
+    - name: Add PostgreSQL repository key
+      # Use apt_key module to add repository key
+      apt_key:
+        # URL to key
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        # Key state
+        state: present
+
+    # Add PostgreSQL repository
+    - name: Add PostgreSQL repository
+      # Use apt_repository module to add repository
+      apt_repository:
+        # Repository definition
+        repo: deb http://apt.postgresql.org/pub/repos/apt/ {{ ansible_distribution_release }}-pgdg main
+        # Repository state
+        state: present
+        # Update cache
+        update_cache: yes
+
+    # Install PostgreSQL
+    - name: Install PostgreSQL
+      # Use apt module to install packages
+      apt:
+        # Package names
+        name:
+          - postgresql-{{ postgresql_version }}
+          - postgresql-contrib-{{ postgresql_version }}
+          - libpq-dev
+          - python3-psycopg2
+        # Package state
+        state: present
+
+    # Configure PostgreSQL to listen on all addresses
+    - name: Configure PostgreSQL to listen on all addresses
+      # Use lineinfile module to modify config
+      lineinfile:
+        # File path
+        path: "{{ postgresql_data_dir }}/postgresql.conf"
+        # Regular expression to match
+        regexp: "^#?listen_addresses\\s*="
+        # Line to insert
+        line: "listen_addresses = '*'"
+        # File state
+        state: present
+      # Notify handler when config changes
+      notify: restart postgresql
+
+    # Configure PostgreSQL client authentication
+    - name: Configure PostgreSQL client authentication
+      # Use template module to create config from template
+      template:
+        # Source template file
+        src: templates/pg_hba.conf.j2
+        # Destination file
+        dest: "{{ postgresql_data_dir }}/pg_hba.conf"
+        # File owner
+        owner: "{{ postgresql_admin_user }}"
+        # File group
+        group: "{{ postgresql_admin_user }}"
+        # File permissions
+        mode: '0640'
+      # Notify handler when config changes
+      notify: restart postgresql
+
+    # Create application database
+    - name: Create application database
+      # Use postgresql_db module to create database
+      postgresql_db:
+        # Database name
+        name: "{{ postgresql_db_name }}"
+        # Connection parameters
+        login_user: "{{ postgresql_admin_user }}"
+        # Database state
+        state: present
+      # Become PostgreSQL admin user
+      become: true
+      # User to become
+      become_user: "{{ postgresql_admin_user }}"
+
+    # Create application user
+    - name: Create application user
+      # Use postgresql_user module to create user
+      postgresql_user:
+        # User name
+        name: "{{ postgresql_app_user }}"
+        # User password
+        password: "{{ postgresql_app_password }}"
+        # Database privileges
+        db: "{{ postgresql_db_name }}"
+        # User privileges
+        priv: ALL
+        # Connection parameters
+        login_user: "{{ postgresql_admin_user }}"
+        # User state
+        state: present
+      # Become PostgreSQL admin user
+      become: true
+      # User to become
+      become_user: "{{ postgresql_admin_user }}"
+
+  # Handlers to run on notifications
+  handlers:
+    # Restart PostgreSQL handler
+    - name: restart postgresql
+      # Use service module to restart service
+      service:
+        # Service name
+        name: postgresql
+        # Service state
+        state: restarted

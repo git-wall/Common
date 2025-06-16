@@ -1,6 +1,6 @@
 package org.app.common.flow;
 
-import org.app.common.pattern.legacy.FluentApi;
+import org.app.common.design.legacy.FluentApi;
 
 import java.util.ArrayList;
 import java.util.List;

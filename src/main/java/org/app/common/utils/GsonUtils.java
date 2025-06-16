@@ -1,12 +1,13 @@
 package org.app.common.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class GsonUtils {
     private static final Gson GSON;
 
     static {
-        GSON = new Gson();
+        GSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
     }
 
     public static Gson gson() {

@@ -1,0 +1,33 @@
+
+service:
+  name: "order-service"
+
+image:
+  repository: "your-group/order-service"
+  tag: "v2.1.0"
+
+# WANT MORE REPLICAS? CHANGE THIS NUMBER
+replicaCount: 10
+
+# WANT AUTO-SCALING? CHANGE THESE NUMBERS
+autoscaling:
+  enabled: true
+  minReplicas: 5      # MINIMUM PODS
+  maxReplicas: 50     # MAXIMUM PODS
+  targetCPUUtilizationPercentage: 70    # SCALE WHEN CPU > 70%
+
+# NEED MORE RESOURCES? CHANGE THESE
+resources:
+  limits:
+    cpu: 2000m      # 2 CPU cores
+    memory: 2Gi     # 2GB RAM
+  requests:
+    cpu: 1000m      # 1 CPU core
+    memory: 1Gi     # 1GB RAM
+
+# ENVIRONMENT-SPECIFIC CONFIGS
+env:
+  - name: DATABASE_POOL_SIZE
+    value: "20"     # INCREASE FOR HIGHER LOAD
+  - name: WORKER_THREADS
+    value: "10"     # INCREASE FOR HIGHER LOAD

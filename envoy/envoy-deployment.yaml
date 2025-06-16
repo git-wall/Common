@@ -1,0 +1,54 @@
+# Kubernetes Deployment for Envoy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{envoy_name}}
+  namespace: {{namespace}}
+  labels:
+    app: {{envoy_name}}
+    tier: proxy
+spec:
+  replicas: {{replicas}}
+  selector:
+    matchLabels:
+      app: {{envoy_name}}
+  template:
+    metadata:
+      labels:
+        app: {{envoy_name}}
+    spec:
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:{{envoy_version}}
+          ports:
+            - containerPort: 10000
+              name: http
+            - containerPort: 9901
+              name: admin
+          resources:
+            limits:
+              cpu: {{cpu_limit}}
+              memory: {{memory_limit}}
+            requests:
+              cpu: {{cpu_request}}
+              memory: {{memory_request}}
+          volumeMounts:
+            - name: envoy-config
+              mountPath: /etc/envoy
+              readOnly: true
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 9901
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 9901
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: envoy-config
+          configMap:
+            name: {{envoy_config_map}}

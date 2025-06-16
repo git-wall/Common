@@ -1,0 +1,35 @@
+services:
+
+  # may be not good in community edition
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server 
+      --requirepass (password)
+      --bind 0.0.0.0
+      --protected-mode no
+    restart: always
+
+  redis-stack:
+    image: 	redis/redis-stack:7.2.0
+    container_name: redis-stack
+    ports:
+      - "6379:6379"    # Redis
+      - "8001:8001"    # RedisInsight UI (optional)
+    restart: unless-stopped
+
+  # Valkey is a Redis-compatible fork and it open-sources so it free
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey
+    ports:
+      - "6379:6379"
+    command: >
+      valkey-server
+      --requirepass (password)
+      --bind 0.0.0.0
+      --protected-mode no
+    restart: always

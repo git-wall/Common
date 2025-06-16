@@ -11,6 +11,7 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,7 +34,7 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     private String password;
 
     @Override
-    public ClientConfiguration clientConfiguration() {
+    public @NotNull ClientConfiguration clientConfiguration() {
         ClientConfiguration.MaybeSecureClientConfigurationBuilder builder = 
             ClientConfiguration.builder()
                 .connectedTo(host + ":" + port);

@@ -18,7 +18,7 @@ public class ArrayUtils {
     }
 
     @SneakyThrows
-    public static <T extends Comparable<T>> List<T> sort(Collection<T> c) {
+    public static <T extends Comparable<T>> List<T> mergeSort(Collection<T> c) {
         T[] array = c.toArray((T[]) new Comparable[c.size()]);
         T[] clone = array.clone();
         merge(clone, array, 0, array.length, 0);
@@ -29,7 +29,7 @@ public class ArrayUtils {
         int length = high - low;
 
         if (length <= INSERTION_SORT_SIZE) {
-            insert(dest, low, high);
+            insertSort(dest, low, high);
             return;
         }
 
@@ -63,7 +63,7 @@ public class ArrayUtils {
      * @param low  min size
      * @param high max size
      */
-    public static <T extends Comparable<T>> void insert(T[] dest, int low, int high) {
+    public static <T extends Comparable<T>> void insertSort(T[] dest, int low, int high) {
         for (int i = low; i < high; ++i)
             for (int j = i; j > low && (dest[j - 1]).compareTo(dest[j]) > 0; j--)
                 swap(dest, i, j - 1);

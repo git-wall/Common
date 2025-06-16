@@ -1,0 +1,26 @@
+# 08-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{service-name}}-ingress
+  namespace: {{namespace}}
+  annotations:
+    kubernetes.io/ingress.class: {{ingress-class}}
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    cert-manager.io/cluster-issuer: {{cluster-issuer}}
+spec:
+  tls:
+    - hosts:
+        - {{host-name}}
+      secretName: {{tls-secret-name}}
+  rules:
+    - host: {{host-name}}
+      http:
+        paths:
+          - path: {{ingress-path}}
+            pathType: Prefix # or Exact
+            backend:
+              service:
+                name: {{service-name}}
+                port:
+                  number: 8888

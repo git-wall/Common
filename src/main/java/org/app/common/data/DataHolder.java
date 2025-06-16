@@ -1,6 +1,6 @@
 package org.app.common.data;
 
-import org.app.common.pattern.legacy.FluentApi;
+import org.app.common.design.legacy.FluentApi;
 
 import java.util.HashMap;
 import java.util.Map;

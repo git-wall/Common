@@ -1,0 +1,79 @@
+{
+  "namespace": "com.example.events",
+  "type": "record",
+  "name": "UserEvent",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "string"
+    },
+    {
+      "name": "eventType",
+      "type": {
+        "type": "enum",
+        "name": "UserEventType",
+        "symbols": ["CREATED", "UPDATED", "DELETED", "LOGIN", "LOGOUT"]
+      }
+    },
+    {
+      "name": "timestamp",
+      "type": "long",
+      "logicalType": "timestamp-millis"
+    },
+    {
+      "name": "userId",
+      "type": "string"
+    },
+    {
+      "name": "username",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "email",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "userDetails",
+      "type": ["null", {
+        "type": "record",
+        "name": "UserDetails",
+        "fields": [
+          {
+            "name": "firstName",
+            "type": ["null", "string"],
+            "default": null
+          },
+          {
+            "name": "lastName",
+            "type": ["null", "string"],
+            "default": null
+          },
+          {
+            "name": "roles",
+            "type": {
+              "type": "array",
+              "items": "string"
+            },
+            "default": []
+          }
+        ]
+      }],
+      "default": null
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "default": "user-service"
+    },
+    {
+      "name": "metadata",
+      "type": {
+        "type": "map",
+        "values": "string"
+      },
+      "default": {}
+    }
+  ]
+}

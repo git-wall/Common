@@ -1,0 +1,79 @@
+# Nginx Configuration Template
+# This template generates the main Nginx configuration file
+
+# User to run Nginx as
+user www-data;
+# Number of worker processes (auto = number of CPU cores)
+worker_processes auto;
+# Process ID file
+pid /run/nginx.pid;
+# Include additional module configurations
+include /etc/nginx/modules-enabled/*.conf;
+
+# Events block configuration
+events {
+    # Maximum connections per worker
+    worker_connections 1024;
+    # Accept multiple connections at once
+    multi_accept on;
+}
+
+# HTTP block configuration
+http {
+    # Basic settings
+    # MIME types definition file
+    include /etc/nginx/mime.types;
+    # Default MIME type
+    default_type application/octet-stream;
+    
+    # Logging settings
+    # Access log format
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+    # Access log file
+    access_log /var/log/nginx/access.log main;
+    # Error log file
+    error_log /var/log/nginx/error.log;
+
+    # SSL settings
+    # SSL protocols to use
+    ssl_protocols TLSv1.2 TLSv1.3;
+    # Ciphers to use
+    ssl_prefer_server_ciphers on;
+    # SSL session cache
+    ssl_session_cache shared:SSL:10m;
+    # SSL session timeout
+    ssl_session_timeout 1h;
+
+    # Performance settings
+    # Enable sendfile for better performance
+    sendfile on;
+    # TCP_NOPUSH option
+    tcp_nopush on;
+    # TCP_NODELAY option
+    tcp_nodelay on;
+    # Keep-alive timeout
+    keepalive_timeout 65;
+    # Connection timeout
+    client_body_timeout 12;
+    # Header timeout
+    client_header_timeout 12;
+    # Send timeout
+    send_timeout 10;
+
+    # Gzip compression
+    # Enable gzip compression
+    gzip on;
+    # Minimum length to compress
+    gzip_min_length 1000;
+    # Compression level
+    gzip_comp_level 5;
+    # MIME types to compress
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+    # Virtual host configurations
+    # Include site configurations
+    include /etc/nginx/conf.d/*.conf;
+    include /etc/nginx/sites-enabled/*;
+}

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skywalking-oap
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: skywalking-oap
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+          env:
+            - name: SW_TELEMETRY
+              value: prometheus
+            - name: SW_CLUSTER
+              value: kubernetes

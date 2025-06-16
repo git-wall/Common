@@ -1,0 +1,20 @@
+# Ansible Vault File
+# This file contains encrypted sensitive variables
+# To edit this file, use: ansible-vault edit vault.yml
+
+---
+# PostgreSQL application user password
+vault_postgresql_app_password: securepassword123
+
+# Application database password
+vault_app_db_password: anothersecurepassword456
+
+# API keys
+vault_api_key: api_key_value_here
+
+# SSH private key passphrase
+vault_ssh_passphrase: ssh_passphrase_here
+
+# SMTP credentials
+vault_smtp_username: smtp_user
+vault_smtp_password: smtp_password_here

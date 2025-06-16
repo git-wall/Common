@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="1" author="developer">
+        <comment>Create users table</comment>
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="email" type="varchar(100)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="password_hash" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(50)"/>
+            <column name="last_name" type="varchar(50)"/>
+            <column name="created_at" type="timestamp" defaultValueDate="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueDate="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="boolean" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <createIndex indexName="idx_users_email" tableName="users">
+            <column name="email"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="2" author="developer">
+        <comment>Create roles table</comment>
+        <createTable tableName="roles">
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="developer">
+        <comment>Create user_roles table</comment>
+        <createTable tableName="user_roles">
+            <column name="user_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        
+        <addPrimaryKey tableName="user_roles" columnNames="user_id, role_id"/>
+        
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_user_roles_user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+                                 
+        <addForeignKeyConstraint baseTableName="user_roles"
+                                 baseColumnNames="role_id"
+                                 constraintName="fk_user_roles_role_id"
+                                 referencedTableName="roles"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="4" author="developer">
+        <comment>Insert default roles</comment>
+        <insert tableName="roles">
+            <column name="name" value="ROLE_ADMIN"/>
+            <column name="description" value="Administrator role with full access"/>
+        </insert>
+        <insert tableName="roles">
+            <column name="name" value="ROLE_USER"/>
+            <column name="description" value="Regular user role with limited access"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="5" author="developer">
+        <comment>Create products table</comment>
+        <createTable tableName="products">
+            <column name="id" type="bigint" autoIncrement="${autoIncrement}">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="text"/>
+            <column name="price" type="decimal(10, 2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sku" type="varchar(50)">
+                <constraints unique="true"/>
+            </column>
+            <column name="inventory_count" type="int" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp" defaultValueDate="${now}">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="timestamp" defaultValueDate="${now}">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

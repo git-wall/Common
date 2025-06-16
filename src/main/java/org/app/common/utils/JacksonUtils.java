@@ -68,13 +68,18 @@ public class JacksonUtils {
     }
 
     @SneakyThrows
-    public static <T> T readValue(String json) {
-        return readValue(json, Type.refer());
+    public static <T> T readValue(Object json) {
+        return readValue(json.toString(), Type.refer());
     }
 
     @SneakyThrows
-    public static <T> T readValue(Object json) {
-        return readValue(json.toString(), Type.refer());
+    public static <T> T convert(Object json, Class<T> clazz) {
+        return MAPPER.convertValue(json, clazz);
+    }
+
+    @SneakyThrows
+    public static <T> T convert(Object json) {
+        return MAPPER.convertValue(json, Type.refer());
     }
 
     /**
@@ -112,7 +117,7 @@ public class JacksonUtils {
         if (data == null)
             return "";
 
-        return WRITER_PRETTY.writeValueAsString(data).replace("%", "%%");
+        return WRITER_PRETTY.writeValueAsString(data);
     }
 
     @SneakyThrows
@@ -123,7 +128,7 @@ public class JacksonUtils {
             return data.toString();
         } catch (JsonProcessingException e) {
             log.error("Error occurred while parsing json", e);
-            // handler more case have special char that make json invalid and not parseable and error
+            // handler more case has special char that make json invalid and not parseable and error
             return WRITER_PRETTY.writeValueAsString(e).replace('%', ' ');
         }
     }

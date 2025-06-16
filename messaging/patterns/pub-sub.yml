@@ -1,0 +1,68 @@
+# Publish-Subscribe Pattern Configuration
+
+# Spring Cloud Stream Configuration
+spring:
+  cloud:
+    stream:
+      function:
+        definition: eventPublisher;eventSubscriber
+      bindings:
+        eventPublisher-out-0:
+          destination: event-topic
+          content-type: application/json
+        eventSubscriber-in-0:
+          destination: event-topic
+          content-type: application/json
+          group: event-consumer-group
+      
+      # Kafka Binder Configuration
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
+          required-acks: 1
+        bindings:
+          eventPublisher-out-0:
+            producer:
+              configuration:
+                key.serializer: org.apache.kafka.common.serialization.StringSerializer
+                value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          eventSubscriber-in-0:
+            consumer:
+              configuration:
+                key.deserializer: org.apache.kafka.common.serialization.StringDeserializer
+                value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+                auto.offset.reset: earliest
+                max.poll.records: 500
+              concurrency: 3
+      
+      # RabbitMQ Binder Configuration (Alternative)
+      rabbit:
+        binder:
+          connection-name-prefix: pub-sub-pattern
+          nodes: ${RABBITMQ_NODES:localhost:5672}
+          virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+          username: ${RABBITMQ_USERNAME:guest}
+          password: ${RABBITMQ_PASSWORD:guest}
+        bindings:
+          eventPublisher-out-0:
+            producer:
+              exchange-type: topic
+              routing-key-expression: headers['routingKey'] ?: 'default'
+          eventSubscriber-in-0:
+            consumer:
+              binding-routing-key: '#'
+              prefetch: 250
+              acknowledge-mode: AUTO
+              recovery-interval: 5000
+              requeue-rejected: true
+
+# Application Configuration
+app:
+  messaging:
+    pub-sub:
+      topic-name: event-topic
+      consumer-group: event-consumer-group
+      dead-letter-topic: event-dlq
+      retry-attempts: 3
+      retry-backoff-ms: 1000
+      concurrency: 3

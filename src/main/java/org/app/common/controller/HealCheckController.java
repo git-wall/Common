@@ -5,7 +5,7 @@ import org.app.common.contain.TagURL;
 import org.app.common.health.CacheHealthCheck;
 import org.app.common.health.DbHealthCheck;
 import org.app.common.health.SystemHealthCheck;
-import org.app.common.interceptor.log.InterceptorLog;
+import org.app.common.interceptor.log.LogMonitor;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +21,7 @@ public class HealCheckController {
     private final SystemHealthCheck systemHealthCheck;
 
     @GetMapping(TagURL.HEALTH)
-    @InterceptorLog
+    @LogMonitor
     public Health health() {
         return Health.up()
                 .withDetail("heap", Runtime.getRuntime().freeMemory())
@@ -30,7 +30,7 @@ public class HealCheckController {
     }
 
     @GetMapping(TagURL.HEALTH_LIVE)
-    @InterceptorLog
+    @LogMonitor
     public Health liveness() {
         return Health.up().build();  // Basic health check
     }
@@ -44,7 +44,7 @@ public class HealCheckController {
     }
 
     @GetMapping(TagURL.HEALTH_SYSTEM)
-    @InterceptorLog
+    @LogMonitor
     public Health system() {
         return systemHealthCheck.health();
     }

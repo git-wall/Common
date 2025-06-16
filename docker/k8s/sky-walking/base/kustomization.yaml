@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - elasticsearch.yaml
+  - skywalking-oap.yaml
+  - skywalking-ui.yaml
+  - network-policy.yaml
+
+labels:
+  - pairs:
+      app: skywalking
+      component: monitoring
+    includeSelectors: true

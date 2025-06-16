@@ -41,8 +41,8 @@ public class CacheManagerUtils {
     }
 
     public static CacheManager redisCacheManager(RedisConnectionFactory connectionFactory,
-                                                       Duration ttl,
-                                                       String... cacheNames) {
+                                                 Duration ttl,
+                                                 String... cacheNames) {
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(ttl)

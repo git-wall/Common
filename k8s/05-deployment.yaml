@@ -1,0 +1,127 @@
+# 05-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{service-name}}
+  namespace: {{namespace}}
+  labels:
+    app: {{service-name}}
+    tier: {{service-tier}}
+  annotations:
+    app.kubernetes.io/name: {{service-name}}
+    app.kubernetes.io/part-of: {{application-group}}
+    app.kubernetes.io/version: {{version}}
+spec:
+  replicas: {{number-replicas}}
+  strategy:
+    type: {{strategy-type}} # RollingUpdate or Recreate
+    rollingUpdate:
+      maxSurge: {{max-surge}}
+      maxUnavailable: {{max-unavailable}}
+  selector:
+    matchLabels:
+      app: {{service-name}}
+      tier: {{service-tier}}
+  template:
+    metadata:
+      labels:
+        app: {{service-name}}
+        tier: {{service-tier}}
+      annotations:
+        prometheus.io/scrape: "{{prometheus-scrape}}"
+        checksum/config: {{config-checksum}}
+    spec:
+      serviceAccountName: {{service-account-name}} # Optional
+      terminationGracePeriodSeconds: {{termination-period}}
+      securityContext:
+        runAsUser: {{run-as-user}}
+        runAsGroup: {{run-as-group}}
+        fsGroup: {{fs-group}}
+      # Node selection
+      nodeSelector:
+        kubernetes.io/os: {{node-os}}
+        node-type: {{node-type}}
+      # Optional tolerations
+      tolerations:
+        - key: {{taint-key}}
+          operator: {{taint-operator}}
+          value: {{taint-value}}
+          effect: {{taint-effect}}
+      # Main containers
+      containers:
+        - name: {{container-name}}
+          image: {{container-image}}:{{container-tag}}
+          imagePullPolicy: {{image-pull-policy}}
+          securityContext:
+            allowPrivilegeEscalation: {{allow-privilege-escalation}}
+            readOnlyRootFilesystem: {{read-only-root}}
+          ports:
+            - containerPort: {{container-port}}
+              name: {{port-name}}
+              protocol: {{port-protocol}}
+          # Health checks
+          livenessProbe:
+            httpGet:
+              path: {{health-check-path}}
+              port: {{health-check-port}}
+            initialDelaySeconds: {{liveness-initial-delay}}
+            periodSeconds: {{liveness-period}}
+            timeoutSeconds: {{liveness-timeout}}
+            successThreshold: {{liveness-success-threshold}}
+            failureThreshold: {{liveness-failure-threshold}}
+          readinessProbe:
+            httpGet:
+              path: {{readiness-check-path}}
+              port: {{readiness-check-port}}
+            initialDelaySeconds: {{readiness-initial-delay}}
+            periodSeconds: {{readiness-period}}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            # Reference from ConfigMap
+            - name: APP_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{service-name}}-config
+                  key: APP_ENV
+            # Reference from Secret
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{service-name}}-secrets
+                  key: DB_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: {{service-name}}-config
+            - secretRef:
+                name: {{service-name}}-secrets
+          resources:
+            limits:
+              cpu: {{cpu-limit}}
+              memory: {{memory-limit}}
+            requests:
+              cpu: {{cpu-request}}
+              memory: {{memory-request}}
+          volumeMounts:
+            - name: {{volume-name}}
+              mountPath: {{volume-mount-path}}
+              readOnly: {{volume-read-only}}
+            - name: config-volume
+              mountPath: /app/config
+      # Volume definitions
+      volumes:
+        - name: {{volume-name}}
+          persistentVolumeClaim:
+            claimName: {{pvc-name}}
+        - name: config-volume
+          configMap:
+            name: {{service-name}}-config
+      imagePullSecrets:
+        - name: {{image-pull-secret}}
+      restartPolicy: {{restart-policy}}

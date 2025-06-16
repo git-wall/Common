@@ -1,6 +1,6 @@
 package org.app.common.thread;
 
-import org.app.common.pattern.legacy.TemplateMethod;
+import org.app.common.design.legacy.TemplateMethod;
 
 public abstract class RunnableProvider extends TemplateMethod implements Runnable {
 

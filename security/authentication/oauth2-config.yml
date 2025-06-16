@@ -1,0 +1,18 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: ${OAUTH2_CLIENT_ID:app-client}
+            client-secret: ${OAUTH2_CLIENT_SECRET:client-secret}
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            issuer-uri: ${OAUTH2_ISSUER_URI:http://keycloak:8080/auth/realms/app-realm}
+            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          issuer-uri: ${OAUTH2_ISSUER_URI:http://keycloak:8080/auth/realms/app-realm}

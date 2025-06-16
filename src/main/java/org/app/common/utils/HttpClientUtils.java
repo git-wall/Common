@@ -18,6 +18,14 @@ import java.util.concurrent.ExecutorService;
 
 public class HttpClientUtils {
 
+    public static void send(Object request, String url) {
+        noBody(requestPost(request, url));
+    }
+
+    public static void sendAsync(Object request, String url) {
+        noBodyAsync(requestPost(request, url));
+    }
+
     public static <T> T read(T obj, String url) {
         return decode(body(requestPost(obj, url)));
     }
@@ -58,6 +66,18 @@ public class HttpClientUtils {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public static void noBody(HttpRequest request) {
+        try {
+            HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.discarding());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void noBodyAsync(HttpRequest request) {
+        HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.discarding());
     }
 
     public static String body(HttpRequest request) {

@@ -1,0 +1,235 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36" version="27.0.1">
+  <diagram name="Data Lifecycle Architecture" id="data-lifecycle">
+    <mxGraphModel dx="1303" dy="659" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2339" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="source-layer" value="Data Sources Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#B3E5FC;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="40" width="1200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ingestion-layer" value="Data Ingestion Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#C8E6C9;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="180" width="1200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="processing-layer" value="Data Processing Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF9C4;strokeColor=#F0F4C3;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="320" width="1200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="storage-layer" value="Data Storage Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#E1BEE7;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="460" width="1200" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="analytics-layer" value="Data Analytics Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#B2DFDB;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="680" width="1200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="monitoring-layer" value="Monitoring and Visualization Layer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#FFCDD2;fontStyle=1;fontSize=14;verticalAlign=top;spacingTop=10;" parent="1" vertex="1">
+          <mxGeometry x="40" y="820" width="1200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="source-group" value="Data Sources" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="80" y="50" width="1120" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="message-broker-group" value="Message Brokers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="80" y="200" width="350" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="collector-group" value="Data Collectors" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="450" y="190" width="750" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="stream-group" value="Stream Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="80" y="330" width="350" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="batch-group" value="Batch Processing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="450" y="330" width="750" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="hot-storage-group" value="Hot Storage (1-7 days)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#F44336;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="80" y="480" width="350" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="cold-storage-group" value="Warm/Cold Storage (8+ days)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="450" y="480" width="750" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="query-engine-group" value="Query Engines" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="80" y="690" width="350" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="metadata-group" value="Metadata Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="450" y="690" width="750" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="observability-group" value="Observability" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="80" y="830" width="350" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="dashboard-group" value="Dashboards" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;strokeWidth=2;dashed=1;fontStyle=2;verticalAlign=bottom;" parent="1" vertex="1">
+          <mxGeometry x="450" y="830" width="350" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="app-logs" value="Application Logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4285F4;strokeColor=#1976D2;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="120" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="system-metrics" value="System Metrics" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4285F4;strokeColor=#1976D2;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="280" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="event-streams" value="Event Streams" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4285F4;strokeColor=#1976D2;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="440" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="iot-data" value="IoT Data" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4285F4;strokeColor=#1976D2;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="600" y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="kafka" value="Kafka" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F9D58;strokeColor=#0D7A44;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="120" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pulsar" value="Pulsar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F9D58;strokeColor=#0D7A44;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="280" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="nifi" value="NiFi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F9D58;strokeColor=#0D7A44;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="480" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="logstash" value="Logstash" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F9D58;strokeColor=#0D7A44;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="640" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="zookeeper" value="ZooKeeper" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0F9D58;strokeColor=#0D7A44;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="800" y="220" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="flink" value="Flink" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B400;strokeColor=#E69900;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="120" y="360" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="spark" value="Spark" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B400;strokeColor=#E69900;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="280" y="360" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="storm" value="Storm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B400;strokeColor=#E69900;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="480" y="360" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="samza" value="Samza" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B400;strokeColor=#E69900;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="640" y="360" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="tez" value="Tez" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4B400;strokeColor=#E69900;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="800" y="360" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="elasticsearch" value="Elasticsearch" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DB4437;strokeColor=#B71C1C;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="120" y="520" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="clickhouse" value="ClickHouse" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DB4437;strokeColor=#B71C1C;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="280" y="570" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="hdfs" value="HDFS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DB4437;strokeColor=#B71C1C;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="480" y="520" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="S3/MinIO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DB4437;strokeColor=#B71C1C;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="805" y="570" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="glacier" value="Glacier" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DB4437;strokeColor=#B71C1C;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="1030" y="570" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="trino" value="Trino/Presto" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4B0082;strokeColor=#311B92;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="120" y="720" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="druid" value="Druid" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4B0082;strokeColor=#311B92;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="280" y="720" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="dremio" value="Dremio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4B0082;strokeColor=#311B92;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="480" y="720" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="hive" value="Hive Metastore" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4B0082;strokeColor=#311B92;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="640" y="720" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ignite" value="Ignite" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4B0082;strokeColor=#311B92;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="800" y="720" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="skywalking" value="SkyWalking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#795548;strokeColor=#5D4037;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="120" y="860" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="graylog" value="Graylog" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#795548;strokeColor=#5D4037;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="280" y="860" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="kibana" value="Kibana" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#795548;strokeColor=#5D4037;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="480" y="860" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="grafana" value="Grafana" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#795548;strokeColor=#5D4037;fontColor=white;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="640" y="860" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="flow1" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="app-logs" target="kafka" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow2" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="system-metrics" target="pulsar" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow3" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="event-streams" target="nifi" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow4" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="iot-data" target="logstash" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow5" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="kafka" target="flink" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow6" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="pulsar" target="spark" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow7" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="nifi" target="storm" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow8" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="logstash" target="samza" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow9" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="flink" target="elasticsearch" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow10" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="spark" target="clickhouse" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow11" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="storm" target="hdfs" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow12" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="samza" target="s3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lifecycle1" style="endArrow=classic;html=1;strokeWidth=3;strokeColor=#FF6B6B;curved=1;flowAnimation=1;shadow=0;dashed=1;dashPattern=1 4;" parent="1" source="elasticsearch" target="hdfs" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="540" as="sourcePoint" />
+            <mxPoint x="500" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lifecycle2" style="endArrow=classic;html=1;strokeWidth=3;strokeColor=#FF6B6B;curved=1;flowAnimation=1;dashed=1;dashPattern=1 4;" parent="1" source="clickhouse" target="s3" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="540" as="sourcePoint" />
+            <mxPoint x="640" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lifecycle3" style="endArrow=classic;html=1;strokeWidth=3;strokeColor=#4ECDC4;curved=1;flowAnimation=1;dashed=1;dashPattern=1 4;" parent="1" source="s3" target="glacier" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="540" as="sourcePoint" />
+            <mxPoint x="800" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow13" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="elasticsearch" target="trino" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow14" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="hdfs" target="dremio" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow15" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="trino" target="kibana" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow16" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#333333;flowAnimation=1;" parent="1" source="druid" target="grafana" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="Data Lifecycle Legend" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="1300" y="40" width="200" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-hot" value="Hot Storage → Warm Storage (7 days)" style="text;html=1;strokeColor=#FF6B6B;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1300" y="80" width="250" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-cold" value="Warm Storage → Cold Storage (30+ days)" style="text;html=1;strokeColor=#4ECDC4;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;strokeWidth=3;" parent="1" vertex="1">
+          <mxGeometry x="1300" y="110" width="250" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-normal" value="Normal Data Flow" style="text;html=1;strokeColor=#333333;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;strokeWidth=2;" parent="1" vertex="1">
+          <mxGeometry x="1300" y="140" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="title" value="Data Lifecycle Flow: Layered Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=20;" parent="1" vertex="1">
+          <mxGeometry x="40" y="10" width="600" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hot-label" value="7 days retention" style="text;html=1;strokeColor=none;fillColor=#FFEBEE;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=2;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="90" y="490" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="warm-label" value="30+ days retention" style="text;html=1;strokeColor=none;fillColor=#E8EAF6;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=2;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="460" y="490" width="120" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="cold-label" value="90+ days (Archive)" style="text;html=1;strokeColor=none;fillColor=#E8EAF6;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontStyle=2;fontSize=10;" parent="1" vertex="1">
+          <mxGeometry x="810" y="490" width="110" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

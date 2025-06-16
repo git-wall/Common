@@ -1,0 +1,13 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ${SERVICE_NAME}-timeout
+  namespace: ${NAMESPACE}
+spec:
+  hosts:
+  - ${SERVICE_NAME}
+  http:
+  - route:
+    - destination:
+        host: ${SERVICE_NAME}
+    timeout: 10s

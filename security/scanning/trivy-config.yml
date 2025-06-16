@@ -1,0 +1,14 @@
+# Trivy scanner configuration
+severity: "CRITICAL,HIGH"
+exit-code: 1
+format: "table"
+output: "trivy-results.txt"
+timeout: "10m"
+ignore-unfixed: true
+vuln-type: "os,library"
+security-checks: "vuln,config,secret"
+skip-dirs:
+  - node_modules
+  - .git
+  - .vscode
+cache-dir: ".trivycache"

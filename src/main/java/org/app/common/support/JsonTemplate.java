@@ -3,7 +3,7 @@ package org.app.common.support;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.app.common.pattern.legacy.FluentApi;
+import org.app.common.design.legacy.FluentApi;
 import org.app.common.utils.JacksonUtils;
 import org.springframework.util.Assert;
 

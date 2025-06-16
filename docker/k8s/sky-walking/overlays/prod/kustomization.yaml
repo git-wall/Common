@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - ingress.yaml
+  - pvc.yaml
+
+namespace: monitoring-prod
+
+labels:
+  - pairs:
+      environment: prod
+    includeSelectors: true
+
+patches:
+  - path: elasticsearch-patch.yaml
+  - path: skywalking-oap-patch.yaml
+  - path: skywalking-ui-patch.yaml
+
+configMapGenerator:
+  - name: skywalking-config
+    literals:
+      - ENVIRONMENT=production

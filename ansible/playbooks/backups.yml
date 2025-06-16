@@ -1,0 +1,138 @@
+# Backup Playbook
+# This playbook configures backup jobs for servers
+
+---
+# Playbook name and target hosts
+- name: Configure backups
+  # Target all servers
+  hosts: servers
+  # Become root for privileged operations
+  become: true
+  # Variables used in this playbook
+  vars:
+    # Backup user
+    backup_user: backupuser
+    # Backup directory
+    backup_dir: /var/backups/ansible
+    # Backup retention days
+    backup_retention_days: 7
+    # Backup schedule (cron format)
+    backup_schedule: "0 2 * * *"
+    # Backup script path
+    backup_script: /usr/local/bin/backup.sh
+    # Remote backup server
+    backup_server: backup.example.com
+    # Remote backup path
+    backup_server_path: /backups
+
+  # Tasks to execute
+  tasks:
+    # Install backup tools
+    - name: Install backup tools
+      # Use apt module to install packages
+      apt:
+        # Package names
+        name:
+          - rsync
+          - cron
+          - gzip
+        # Package state
+        state: present
+
+    # Create backup user
+    - name: Create backup user
+      # Use user module to create user
+      user:
+        # User name
+        name: "{{ backup_user }}"
+        # System user
+        system: yes
+        # Create home directory
+        create_home: no
+        # User shell
+        shell: /bin/bash
+        # User state
+        state: present
+
+    # Create backup directory
+    - name: Create backup directory
+      # Use file module to create directory
+      file:
+        # Directory path
+        path: "{{ backup_dir }}"
+        # Directory state
+        state: directory
+        # Directory owner
+        owner: "{{ backup_user }}"
+        # Directory group
+        group: "{{ backup_user }}"
+        # Directory permissions
+        mode: '0750'
+
+    # Create backup script
+    - name: Create backup script
+      # Use template module to create script from template
+      template:
+        # Source template file
+        src: templates/backup.sh.j2
+        # Destination file
+        dest: "{{ backup_script }}"
+        # File owner
+        owner: root
+        # File group
+        group: root
+        # File permissions
+        mode: '0755'
+
+    # Create backup cron job
+    - name: Create backup cron job
+      # Use cron module to create cron job
+      cron:
+        # Cron job name
+        name: "Ansible managed backup"
+        # User to run as
+        user: "{{ backup_user }}"
+        # Cron job schedule
+        minute: "{{ backup_schedule.split(' ')[0] }}"
+        hour: "{{ backup_schedule.split(' ')[1] }}"
+        day: "{{ backup_schedule.split(' ')[2] }}"
+        month: "{{ backup_schedule.split(' ')[3] }}"
+        weekday: "{{ backup_schedule.split(' ')[4] }}"
+        # Cron job command
+        job: "{{ backup_script }} >> {{ backup_dir }}/backup.log 2>&1"
+        # Cron job state
+        state: present
+
+    # Create cleanup script for old backups
+    - name: Create cleanup script
+      # Use template module to create script from template
+      template:
+        # Source template file
+        src: templates/cleanup.sh.j2
+        # Destination file
+        dest: /usr/local/bin/cleanup-backups.sh
+        # File owner
+        owner: root
+        # File group
+        group: root
+        # File permissions
+        mode: '0755'
+
+    # Create cleanup cron job
+    - name: Create cleanup cron job
+      # Use cron module to create cron job
+      cron:
+        # Cron job name
+        name: "Ansible managed backup cleanup"
+        # User to run as
+        user: "{{ backup_user }}"
+        # Cron job schedule
+        minute: "0"
+        hour: "3"
+        day: "*"
+        month: "*"
+        weekday: "*"
+        # Cron job command
+        job: "/usr/local/bin/cleanup-backups.sh >> {{ backup_dir }}/cleanup.log 2>&1"
+        # Cron job state
+        state: present

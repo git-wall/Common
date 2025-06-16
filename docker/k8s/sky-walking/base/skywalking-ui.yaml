@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: skywalking-ui
+  namespace: monitoring
+spec:
+  selector:
+    app: skywalking-ui
+  ports:
+    - port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: skywalking-ui
+  namespace: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: skywalking-ui
+  template:
+    metadata:
+      labels:
+        app: skywalking-ui
+    spec:
+      containers:
+        - name: skywalking-ui
+          image: apache/skywalking-ui:10.0.1
+          env:
+            - name: SW_OAP_ADDRESS
+              value: http://skywalking-oap:12800
+            - name: SW_UI_ENABLE
+              value: "true"
+            - name: SW_ENABLE_UPDATE_UI_TEMPLATE
+              value: "true"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"

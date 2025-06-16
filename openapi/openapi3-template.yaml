@@ -1,0 +1,292 @@
+openapi: 3.0.3
+info:
+  title: API Title
+  description: |
+    A detailed description of your API.
+    You can use Markdown here.
+  version: 1.0.0
+  termsOfService: https://example.com/terms/
+  contact:
+    name: API Support
+    url: https://example.com/support
+    email: support@example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: https://api.example.com/v1
+    description: Production server
+  - url: https://staging-api.example.com/v1
+    description: Staging server
+  - url: http://localhost:8080/v1
+    description: Local development server
+
+tags:
+  - name: users
+    description: Operations about users
+  - name: products
+    description: Operations about products
+
+paths:
+  /users:
+    get:
+      summary: Returns a list of users
+      description: Optional extended description in Markdown
+      operationId: getUsers
+      tags:
+        - users
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of users to return
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: A JSON array of user objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      security:
+        - bearerAuth: []
+    post:
+      summary: Creates a new user
+      description: Creates a new user in the system
+      operationId: createUser
+      tags:
+        - users
+      requestBody:
+        description: User object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInput'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      security:
+        - bearerAuth: []
+
+  /users/{userId}:
+    get:
+      summary: Returns a user by ID
+      description: Get detailed information about a specific user
+      operationId: getUserById
+      tags:
+        - users
+      parameters:
+        - name: userId
+          in: path
+          description: ID of the user to retrieve
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      security:
+        - bearerAuth: []
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - username
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+          example: 123e4567-e89b-12d3-a456-426614174000
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+          example: user@example.com
+        username:
+          type: string
+          description: Username for the account
+          example: johndoe
+        firstName:
+          type: string
+          description: First name of the user
+          example: John
+        lastName:
+          type: string
+          description: Last name of the user
+          example: Doe
+        createdAt:
+          type: string
+          format: date-time
+          description: Date and time when the user was created
+          example: 2023-01-01T00:00:00Z
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+          description: Status of the user account
+          example: active
+
+    UserInput:
+      type: object
+      required:
+        - email
+        - username
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+          example: user@example.com
+        username:
+          type: string
+          description: Username for the account
+          example: johndoe
+        password:
+          type: string
+          format: password
+          description: Password for the account
+          minLength: 8
+          example: password123
+        firstName:
+          type: string
+          description: First name of the user
+          example: John
+        lastName:
+          type: string
+          description: Last name of the user
+          example: Doe
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: Field with error
+              message:
+                type: string
+                description: Specific error message for this field
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 400
+            message: Bad request
+            details:
+              - field: email
+                message: must be a valid email address
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 401
+            message: Authentication required
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 403
+            message: Insufficient permissions
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Resource not found
+
+    ServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 500
+            message: Internal server error
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Authorization header using the Bearer scheme

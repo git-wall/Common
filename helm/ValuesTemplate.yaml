@@ -1,0 +1,12 @@
+image:
+  repository: {{link}}-{{service}}
+  tag: latest
+
+nameOverride: {{service}}
+fullnameOverride: {{service}}
+databaseName: {{service}}
+
+ingress:
+  enabled: true
+  host: {{host}}
+  path: /{{service}}

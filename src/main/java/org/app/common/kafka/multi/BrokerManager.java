@@ -34,7 +34,7 @@ public class BrokerManager {
 
     @PostConstruct
     public void init() {
-        ThreadUtils.RuntimeBuilder.shutDownHook(this::shutdown);
+        ThreadUtils.RuntimeBuilder.addShutdownHook(this::shutdown);
     }
 
     public boolean hasBroker(String brokerId) {

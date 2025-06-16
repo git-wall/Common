@@ -17,12 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CacheService {
 
-    /**
-     * -- GETTER --
-     *  Returns the reference to the underlying Ignite instance.
-     *
-     * @return The Ignite instance
-     */
     @Getter
     private final Ignite ignite;
     private final Map<String, IgniteProperties.CacheConfig> cacheConfigs;

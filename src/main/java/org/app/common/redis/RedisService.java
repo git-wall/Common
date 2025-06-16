@@ -1,11 +1,14 @@
 package org.app.common.redis;
 
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -40,6 +43,14 @@ public class RedisService {
      */
     public void setWithTimeout(String key, Object value, long timeout, TimeUnit timeUnit) {
         redisTemplate.opsForValue().set(key, value, timeout, timeUnit);
+    }
+
+    public void setWithTimeoutMinute(String key, Object value, long timeout) {
+        redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.MINUTES);
+    }
+
+    public void setWithTimeoutDay(String key, Object value, long timeout) {
+        redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.DAYS);
     }
 
     /**
@@ -108,6 +119,12 @@ public class RedisService {
         });
     }
 
+    public <T> void setIfAbsentWithTimeout(Map<String, T> map,
+                                           long timeout,
+                                           TimeUnit timeUnit) {
+        map.forEach((k, v) -> setIfAbsentWithTimeout(k, v, timeout, timeUnit));
+    }
+
     /**
      * Retrieves a value from Redis by its key or loads it using the provided loader if the key does not exist.
      *
@@ -116,12 +133,83 @@ public class RedisService {
      * @param loader A supplier function to load the value if the key does not exist in Redis.
      * @return The value associated with the key if it exists, or the value provided by the loader.
      */
+    @SuppressWarnings("unchecked")
     public <R> R getOrLoad(String key, Supplier<R> loader) {
         if (hasKey(key)) {
-            return (R) get(key);
-        } else {
-            return loader.get();
+            var r = get(key);
+            if (r != null) {
+                return (R) r;
+            }
         }
+        return loader.get();
+    }
+
+    /**
+     * Retrieves a value from Redis by its key or loads it using the provided callable if the key does not exist.
+     *
+     * @param <R>      The type of the value to be returned.
+     * @param key      The key to retrieve from Redis.
+     * @param callable A callable function to load the value if the key does not exist in Redis.
+     * @return The value associated with the key if it exists, or the value provided by the callable.
+     */
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public <R> R getOrLoad(String key, Callable<R> callable) {
+        if (hasKey(key)) {
+            var r = get(key);
+            if (r != null) {
+                return (R) r;
+            }
+        }
+        return callable.call();
+    }
+
+
+    /**
+     * Retrieves a value from Redis by its key or loads it using the provided loader if the key does not exist.
+     * If the value is loaded, it is also saved in the Redis cache.
+     *
+     * @param <R>    The type of the value to be returned.
+     * @param key    The key to retrieve from Redis.
+     * @param loader A supplier function to load the value if the key does not exist in Redis.
+     * @return The value associated with the key if it exists, or the value provided by the loader.
+     */
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public <R> R getOrLoadAndSaveInCache(String key, Supplier<R> loader) {
+        if (hasKey(key)) {
+            var r = get(key);
+            if (r != null) {
+                return (R) r;
+            }
+        }
+        R r = loader.get();
+        set(key, r);
+        return r;
+    }
+
+
+    /**
+     * Retrieves a value from Redis by its key or loads it using the provided callable if the key does not exist.
+     * If the value is loaded, it is also saved in the Redis cache.
+     *
+     * @param <R>      The type of the value to be returned.
+     * @param key      The key to retrieve from Redis.
+     * @param callable A callable function to load the value if the key does not exist in Redis.
+     * @return The value associated with the key if it exists, or the value provided by the callable.
+     */
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public <R> R getOrLoadAndSaveInCache(String key, Callable<R> callable) {
+        if (hasKey(key)) {
+            var r = get(key);
+            if (r != null) {
+                return (R) r;
+            }
+        }
+        R r = callable.call();
+        set(key, r);
+        return r;
     }
 
     // ===================================================================

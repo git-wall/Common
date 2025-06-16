@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 public class ExceptionUtils {
+
     private ExceptionUtils() {
         throw new IllegalStateException("Utility class");
     }

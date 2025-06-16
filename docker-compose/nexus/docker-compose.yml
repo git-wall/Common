@@ -1,9 +1,0 @@
-services:
-
-  nexus:
-    image: sonatype/nexus3
-    expose:
-      - 8081
-    ports:
-      - "8381:8081"
-    restart: always

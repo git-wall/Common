@@ -1,0 +1,157 @@
+# Application Servers Playbook
+# This playbook configures application servers with Java and Spring Boot
+
+---
+# Playbook name and target hosts
+- name: Configure application servers
+  # Target application servers group
+  hosts: appservers
+  # Become root for privileged operations
+  become: true
+  # Variables used in this playbook
+  vars:
+    # Java version
+    java_version: 17
+    # Application user
+    app_user: springapp
+    # Application group
+    app_group: springapp
+    # Application home directory
+    app_home: /opt/springapp
+    # Application JAR file
+    app_jar: spring-boot-app.jar
+    # Application configuration directory
+    app_config_dir: /etc/springapp
+    # Application log directory
+    app_log_dir: /var/log/springapp
+    # Application port
+    app_port: 8080
+    # Application profile
+    app_profile: prod
+    # Database URL
+    db_url: "jdbc:postgresql://db1:5432/{{ postgresql_db_name }}"
+    # Database user
+    db_user: "{{ postgresql_app_user }}"
+    # Database password
+    db_password: "{{ postgresql_app_password }}"
+
+  # Tasks to execute
+  tasks:
+    # Install Java
+    - name: Install Java
+      # Use apt module to install Java
+      apt:
+        # Package name
+        name: openjdk-{{ java_version }}-jdk
+        # Package state
+        state: present
+        # Update cache
+        update_cache: yes
+
+    # Create application user
+    - name: Create application user
+      # Use user module to create user
+      user:
+        # User name
+        name: "{{ app_user }}"
+        # User group
+        group: "{{ app_group }}"
+        # Create home directory
+        create_home: no
+        # System user
+        system: yes
+        # User state
+        state: present
+
+    # Create application directories
+    - name: Create application directories
+      # Use file module to create directories
+      file:
+        # Directory path
+        path: "{{ item }}"
+        # Directory state
+        state: directory
+        # Directory owner
+        owner: "{{ app_user }}"
+        # Directory group
+        group: "{{ app_group }}"
+        # Directory permissions
+        mode: '0755'
+      # Loop through directories
+      loop:
+        - "{{ app_home }}"
+        - "{{ app_config_dir }}"
+        - "{{ app_log_dir }}"
+
+    # Copy application JAR
+    - name: Copy application JAR
+      # Use copy module to copy file
+      copy:
+        # Source file
+        src: files/{{ app_jar }}
+        # Destination file
+        dest: "{{ app_home }}/{{ app_jar }}"
+        # File owner
+        owner: "{{ app_user }}"
+        # File group
+        group: "{{ app_group }}"
+        # File permissions
+        mode: '0644'
+      # Notify handler when JAR changes
+      notify: restart application
+
+    # Create application configuration
+    - name: Create application configuration
+      # Use template module to create config from template
+      template:
+        # Source template file
+        src: templates/application.properties.j2
+        # Destination file
+        dest: "{{ app_config_dir }}/application.properties"
+        # File owner
+        owner: "{{ app_user }}"
+        # File group
+        group: "{{ app_group }}"
+        # File permissions
+        mode: '0644'
+      # Notify handler when config changes
+      notify: restart application
+
+    # Create systemd service
+    - name: Create systemd service
+      # Use template module to create service from template
+      template:
+        # Source template file
+        src: templates/springapp.service.j2
+        # Destination file
+        dest: /etc/systemd/system/springapp.service
+        # File owner
+        owner: root
+        # File group
+        group: root
+        # File permissions
+        mode: '0644'
+      # Notify handler when service changes
+      notify: restart application
+
+    # Start and enable application service
+    - name: Start and enable application service
+      # Use service module to manage service
+      service:
+        # Service name
+        name: springapp
+        # Service state
+        state: started
+        # Enable service at boot
+        enabled: yes
+
+  # Handlers to run on notifications
+  handlers:
+    # Restart application handler
+    - name: restart application
+      # Use service module to restart service
+      service:
+        # Service name
+        name: springapp
+        # Service state
+        state: restarted

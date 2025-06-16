@@ -1,6 +1,7 @@
 package org.app.common.context;
 
 import org.app.common.utils.RequestUtils;
+import org.slf4j.MDC;
 
 import javax.annotation.PreDestroy;
 import java.util.HashMap;
@@ -27,6 +28,10 @@ public class TracingContext {
     }
 
     public static void clear() {
+        var x = CONTEXT.get();
+        if (x != null && !x.isEmpty()) {
+            x.clear();
+        }
         CONTEXT.remove();
     }
 

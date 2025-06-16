@@ -1,0 +1,14 @@
+
+
+
+services:
+  my-bundle-server:
+    url: http://host.docker.internal:8888
+
+bundles:
+  my-policy-bundle:
+    service: my-bundle-server
+    resource: /bundle.tar.gz
+    polling:
+      min_delay_seconds: 10
+      max_delay_seconds: 30

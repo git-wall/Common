@@ -1,0 +1,15 @@
+# 07-pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{pvc-name}}
+  namespace: {{namespace}}
+  labels:
+    app: {{service-name}}
+spec:
+  accessModes:
+    - ReadWriteOnce # or ReadOnlyMany, ReadWriteMany
+  storageClassName: {{storage-class}}
+  resources:
+    requests:
+      storage: {{storage-size}}
