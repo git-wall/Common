@@ -1,14 +1,21 @@
 package org.app.common.utils;
 
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.ReadListener;
+import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
@@ -61,6 +68,13 @@ public class RequestUtils {
                 .filter(token -> StringUtils.hasText(token) && token.startsWith(TOKEN_PREFIX))
                 .map(token -> token.replace(TOKEN_PREFIX, ""))
                 .orElse(null);
+    }
+
+    public static Optional<String> getTokenBy(HttpServletRequest request) {
+        return Optional.of(request.getHeader(HttpHeaders.AUTHORIZATION))
+                .filter(token -> StringUtils.hasText(token) && token.startsWith(TOKEN_PREFIX))
+                .map(token -> token.replace(TOKEN_PREFIX, ""))
+                .or(Optional::empty);
     }
 
     public static String getToken() {
@@ -153,10 +167,6 @@ public class RequestUtils {
         return request.getRequestURL().toString() + "?" + request.getQueryString();
     }
 
-//    public static String getRemoteAddress(WebAuthenticationDetails webDetails) {
-//        return (webDetails != null) ? webDetails.getRemoteAddress() : null;
-//    }
-
     public static String getDomain() {
         return getDomain(getHttpServletRequest());
     }
@@ -197,5 +207,142 @@ public class RequestUtils {
                 }
             }
         };
+    }
+
+    public static void authEntryPointHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    public static void accessDeniedHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+    }
+
+    public static String getCurl() {
+        return toCurl(getHttpServletRequest());
+    }
+
+    public static String toCurl(HttpServletRequest request) {
+        if (request == null) return "";
+
+        StringBuilder curl = new StringBuilder("curl");
+
+        // Add method
+        curl.append(" -X ").append(request.getMethod());
+
+        // Add headers
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            String headerValue = request.getHeader(headerName);
+            // Skip common headers that might contain sensitive information
+            if (!headerName.equalsIgnoreCase("cookie") &&
+                !headerName.equalsIgnoreCase("authorization")) {
+                curl.append(" -H '").append(headerName).append(": ").append(headerValue).append("'");
+            }
+        }
+
+        // Add request parameters if it's a GET request
+        if ("GET".equalsIgnoreCase(request.getMethod())) {
+            String queryString = request.getQueryString();
+            if (queryString != null && !queryString.isEmpty()) {
+                curl.append(" '").append(getFullURL(request)).append("'");
+            } else {
+                curl.append(" '").append(request.getRequestURL()).append("'");
+            }
+            return curl.toString();
+        }
+
+        // For POST/PUT/PATCH requests, add the body
+        try {
+            // Add URL
+            curl.append(" '").append(request.getRequestURL()).append("'");
+
+            // Get the request body
+            String body = getRequestBody(request);
+            if (body != null && !body.isEmpty()) {
+                String contentType = request.getContentType();
+                if (contentType != null && contentType.contains("application/json")) {
+                    curl.append(" -H 'Content-Type: application/json'");
+                    curl.append(" -d '").append(body).append("'");
+                } else {
+                    curl.append(" --data '").append(body).append("'");
+                }
+            }
+        } catch (Exception e) {
+            curl.append(" # Error reading request body: ").append(e.getMessage());
+        }
+
+        return curl.toString();
+    }
+
+    private static String getFullURL(HttpServletRequest request) {
+        StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            requestURL.append('?').append(queryString);
+        }
+        return requestURL.toString();
+    }
+
+    private static String getRequestBody(HttpServletRequest request) {
+        try {
+            WrapBodyHttpServletRequest cachedRequest = new WrapBodyHttpServletRequest(request);
+            return cachedRequest.getBody();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @Getter
+    private static class WrapBodyHttpServletRequest extends HttpServletRequestWrapper {
+        private final String body;
+
+        public WrapBodyHttpServletRequest(HttpServletRequest request) throws IOException {
+            super(request);
+            StringBuilder stringBuilder = new StringBuilder();
+            BufferedReader bufferedReader = null;
+            try {
+                InputStream inputStream = request.getInputStream();
+                if (inputStream != null) {
+                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                    char[] charBuffer = new char[128];
+                    int bytesRead;
+                    while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+                        stringBuilder.append(charBuffer, 0, bytesRead);
+                    }
+                }
+            } finally {
+                if (bufferedReader != null) {
+                    bufferedReader.close();
+                }
+            }
+            body = stringBuilder.toString();
+        }
+
+        @Override
+        public ServletInputStream getInputStream() {
+            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes());
+            return new ServletInputStream() {
+                @Override
+                public boolean isFinished() {
+                    return false;
+                }
+
+                @Override
+                public boolean isReady() {
+                    return true;
+                }
+
+                @Override
+                public void setReadListener(ReadListener readListener) {
+                    throw new UnsupportedOperationException();
+                }
+
+                @Override
+                public int read() {
+                    return byteArrayInputStream.read();
+                }
+            };
+        }
     }
 }

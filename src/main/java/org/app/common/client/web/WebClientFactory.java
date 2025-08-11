@@ -89,14 +89,14 @@ public class WebClientFactory {
     }
 
     public static ExchangeFilterFunction logResponse() {
-        return ExchangeFilterFunction.ofResponseProcessor(clientResponse -> {
-            log.info(
-                    "{} - Status: {}, Response Body: {}",
-                    TracingContext.getRequestId(),
-                    clientResponse.statusCode(),
-                    clientResponse.bodyToMono(Object.class).block()
-            );
-            return Mono.just(clientResponse);
-        });
+        return ExchangeFilterFunction.ofResponseProcessor(clientResponse ->
+                clientResponse.bodyToMono(Object.class)
+                        .doOnNext(body -> log.info(
+                                "{} - Status: {}, Response Body: {}",
+                                TracingContext.getRequestId(),
+                                clientResponse.statusCode(),
+                                body
+                        ))
+                        .then(Mono.just(clientResponse)));
     }
 }

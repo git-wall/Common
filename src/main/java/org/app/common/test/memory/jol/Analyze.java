@@ -14,7 +14,7 @@ import org.openjdk.jol.vm.VM;
  *     </tr>
  *     <tr>
  *         <td><b>Java Developer</b></td>
- *         <td>Analyze memory usage of objects & collections.</td>
+ *         <td>Analyze memory usage of objects and collections.</td>
  *     </tr>
  *     <tr>
  *         <td><b>Performance Engineer</b></td>
@@ -22,7 +22,7 @@ import org.openjdk.jol.vm.VM;
  *     </tr>
  *     <tr>
  *         <td><b>Debugging Expert</b></td>
- *         <td>Detect memory leaks & analyze object bloat.</td>
+ *         <td>Detect memory leaks and analyze object bloat.</td>
  *     </tr>
  *     <tr>
  *         <td><b>Embedded Developer</b></td>

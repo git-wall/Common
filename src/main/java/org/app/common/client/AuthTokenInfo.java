@@ -1,7 +1,7 @@
 package org.app.common.client;
 
-import org.app.common.client.rest.HttpHeaderUtils;
-import org.app.common.support.Type;
+import org.app.common.client.rest.HeaderUtils;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +60,12 @@ public interface AuthTokenInfo {
      * @return The new token
      */
     default String refreshToken() {
-        var header = HttpHeaderUtils.createHeaders(getToken());
+        var header = HeaderUtils.createHeaders(getToken());
         var entity = new HttpEntity<>(getBody(), header);
         var restTemplate = new RestTemplate();
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                getURI(), getHttpMethod(), entity, Type.paramRefer()
+            getURI(), getHttpMethod(), entity, new ParameterizedTypeReference<Map<String, Object>>() {
+            }
         );
 
         var body = response.getBody();

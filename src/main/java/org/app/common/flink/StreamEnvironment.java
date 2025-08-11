@@ -2,15 +2,15 @@ package org.app.common.flink;
 
 import lombok.SneakyThrows;
 import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.app.common.annotation.Description;
-import org.apache.flink.configuration.Configuration;
 
 public class StreamEnvironment {
 
     @Description(detail = "Builds a Flink StreamExecutionEnvironment with checkpointing enabled for env production.")
     @SneakyThrows
-    public static StreamExecutionEnvironment buildEnvironment(String jobName, String jobVersion) {
+    public static StreamExecutionEnvironment buildEnv(String jobName, String jobVersion) {
         String checkpointPath = String.format(System.getProperty("checkpointPath"), jobName, jobVersion);
         String template = System.getProperty("java.io.tmpdir");
 
@@ -36,9 +36,16 @@ public class StreamEnvironment {
 
     @Description(detail = "Builds a Flink StreamExecutionEnvironment with checkpointing disabled for env test.")
     @SneakyThrows
-    public static StreamExecutionEnvironment buildEnvironment() {
+    public static StreamExecutionEnvironment buildEnv() {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.getCheckpointConfig().disableCheckpointing();
         return env;
+    }
+
+    public static StreamExecutionEnvironment buildEnv(Env env, String jobName, String jobVersion) {
+        if (env == Env.PROD) {
+            return buildEnv(jobName, jobVersion);
+        }
+        return buildEnv();
     }
 }

@@ -2,6 +2,7 @@ package org.app.common.utils;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.function.Failable;
+import org.app.common.provider.Provider;
 import org.thymeleaf.util.ListUtils;
 
 import java.lang.reflect.Method;
@@ -37,8 +38,8 @@ public class StreamUtils {
     public static <T, R> String innerJoin(Collection<T> list, Function<T, R> mapper, CharSequence delimiter) {
         if (CollectionUtils.isEmpty(list)) return "";
         return list.stream()
-                .map(mapper.andThen(Object::toString))
-                .collect(Collectors.joining(delimiter));
+            .map(Provider.thenToString(mapper))
+            .collect(Collectors.joining(delimiter));
     }
 
     public static <T> List<T> innerFilter(Collection<T> list, Predicate<T> filter) {
@@ -57,7 +58,12 @@ public class StreamUtils {
 
     public static <T> List<T> failStream(Collection<T> list, Method m, Object... args) {
         return Failable.stream(list.stream())
-                .map((o) -> (T) m.invoke(o, args))
-                .collect(Collectors.toList());
+            .map((o) -> (T) m.invoke(o, args))
+            .collect(Collectors.toList());
+    }
+
+    public static <K, V> Map<K, V> asMap(Collection<V> list, Function<V, K> mapper) {
+        if (CollectionUtils.isEmpty(list)) return Collections.emptyMap();
+        return list.stream().collect(Collectors.toMap(mapper, Function.identity()));
     }
 }

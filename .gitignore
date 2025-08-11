@@ -45,3 +45,8 @@ hello
 .gradle/
 .idea/
 *.lock
+local.properties
+
+./devop/node_modules/
+/node_modules/
+/.vscode/

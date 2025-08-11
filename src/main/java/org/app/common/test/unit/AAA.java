@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-// UNIT TEST
+// Arrange/Act/Assert pattern implementation for unit testing.
 public class AAA<T, R> {
     private T arrange;
     private Function<T, R> action;

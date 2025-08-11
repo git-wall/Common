@@ -48,13 +48,13 @@ public class ObjUtils {
     }
 
     public static <T, R> Map<T, R> isMap(Object obj) {
-        String errorMessage = String.format("Error when converting %s to Set", obj.getClass().getSimpleName());
+        String errorMessage = String.format("Error when converting %s to Map", obj.getClass().getSimpleName());
         Assert.isInstanceOf(Map.class, obj, errorMessage);
         return convert(Map.class, obj);
     }
 
     public static <T> List<T> isList(Object obj) {
-        String errorMessage = String.format("Error when converting %s to Set", obj.getClass().getSimpleName());
+        String errorMessage = String.format("Error when converting %s to List", obj.getClass().getSimpleName());
         Assert.isInstanceOf(List.class, obj, errorMessage);
         return convert(List.class, obj);
     }

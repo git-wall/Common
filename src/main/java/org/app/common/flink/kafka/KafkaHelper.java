@@ -9,7 +9,6 @@ import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
-import org.apache.flink.streaming.util.serialization.JSONKeyValueDeserializationSchema;
 
 import java.util.List;
 import java.util.Properties;
@@ -142,6 +141,21 @@ public class KafkaHelper {
                 .setGroupId(groupId)
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(deserializationSchema)
+                .build();
+    }
+
+    public static <T> KafkaSource<T> buildKafkaSource(
+            String bootstrapServers,
+            String topic,
+            String groupId,
+            KafkaRecordDeserializationSchema<T> kafkaRecordDeserializationSchema) {
+
+        return KafkaSource.<T>builder()
+                .setBootstrapServers(bootstrapServers)
+                .setTopics(topic)
+                .setGroupId(groupId)
+                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setDeserializer(kafkaRecordDeserializationSchema)
                 .build();
     }
 

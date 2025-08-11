@@ -1,18 +1,19 @@
 package org.app.common.client.web;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.app.common.utils.JacksonUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 
@@ -75,41 +76,39 @@ public class WebClientTemplate {
     }
 
     private ExchangeFilterFunction refreshTokenFilter(WebClient authWebClient) {
-        return ExchangeFilterFunction.ofRequestProcessor(clientRequest ->
-                        Mono.just(ClientRequest.from(clientRequest)
-                                .header(HttpHeaders.AUTHORIZATION, "Bearer " + getOrFetchAccessToken(authWebClient).accessToken)
-                                .build())
-                )
+        String accessToken = getOrFetchAccessToken(authWebClient).accessToken;
+        return ExchangeFilterFunction
+                .ofRequestProcessor(clientRequest -> Mono.just(ClientRequestUtils.createWithAuth(clientRequest, accessToken)))
                 .andThen((request, next) ->
-                        next.exchange(request).flatMap(clientResponse -> {
-                            if (clientResponse.statusCode() == HttpStatus.UNAUTHORIZED) {
-                                return clientResponse.bodyToMono(String.class)
-                                        .flatMap(errorBody -> {
-                                            // Force refresh token
-                                            TokenInfo newToken = refreshToken(authWebClient);
-
-                                            if (newToken.accessToken != null) {
-                                                // Retry the request with the new token
-                                                ClientRequest newRequest = ClientRequest.from(request)
-                                                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + newToken.accessToken)
-                                                        .build();
-                                                return next.exchange(newRequest);
-                                            }
-
-                                            // If token refresh failed, return original response
-                                            return Mono.just(clientResponse);
-                                        });
-                            }
-                            return Mono.just(clientResponse);
-                        })
+                        next.exchange(request).flatMap(clientResponse -> retryIf401(authWebClient, request, next, clientResponse))
                 );
     }
 
-    // Helper method to get current token or fetch a new one if not present
+    private @NotNull Mono<ClientResponse> retryIf401(WebClient authWebClient, ClientRequest request, ExchangeFunction next, ClientResponse clientResponse) {
+        if (clientResponse.statusCode() == HttpStatus.UNAUTHORIZED) {
+            return clientResponse.bodyToMono(String.class)
+                    .flatMap(errorBody -> {
+                        // Force refresh token
+                        TokenInfo newToken = refreshToken(authWebClient);
+
+                        if (newToken.accessToken != null) {
+                            // Retry the request with the new token
+                            ClientRequest newRequest = ClientRequestUtils.createWithAuth(request, newToken.accessToken);
+                            return next.exchange(newRequest);
+                        }
+
+                        // If token refresh failed, return the original response
+                        return Mono.just(clientResponse);
+                    });
+        }
+        return Mono.just(clientResponse);
+    }
+
+    // Helper method to get the current token or fetch a new one if not present
     private TokenInfo getOrFetchAccessToken(WebClient authWebClient) {
         TokenInfo current = tokenInfo.get();
 
-        // Check if access token exists and is not expired
+        // Check if the access token exists and is not expired
         if (current.accessToken != null && current.expiresAt > System.currentTimeMillis()) {
             return current;
         }
@@ -134,7 +133,7 @@ public class WebClientTemplate {
 
         try {
             if (current.refreshToken != null) {
-                // Try to use refresh token
+                // Try to use a refresh token
                 newTokenInfo = authWebClient.post()
                         .uri("/oauth/token")
                         .body(BodyInserters.fromFormData("grant_type", "refresh_token")
@@ -148,7 +147,7 @@ public class WebClientTemplate {
                         .orElse(new TokenInfo());
             }
 
-            // If refresh token approach failed, try client credentials
+            // If the refresh token approach failed, try client credentials
             if (newTokenInfo.accessToken == null) {
                 newTokenInfo = authWebClient.post()
                         .uri("/oauth/token")
@@ -176,14 +175,10 @@ public class WebClientTemplate {
 
     // Convert API response to TokenInfo
     private TokenInfo convertToTokenInfo(Map<String, Object> response) {
-        TokenInfo info = new TokenInfo();
-        info.accessToken = (String) response.get("access_token");
-        info.refreshToken = (String) response.get("refresh_token");
-
-        Integer expiresIn = (Integer) response.get("expires_in");
-        if (expiresIn != null) {
+        TokenInfo info = JacksonUtils.convert(response, TokenInfo.class);
+        if (info.expiresAt != null) {
             // Calculate expiration time with a small buffer (5 seconds)
-            info.expiresAt = System.currentTimeMillis() + (long) (expiresIn * 1000) - 5000L;
+            info.expiresAt = System.currentTimeMillis() + (long) (info.expiresAt * 1000) - 5000L;
         }
 
         return info;
@@ -206,8 +201,11 @@ public class WebClientTemplate {
 
     // Class to store token information
     private static class TokenInfo {
+        @JsonAlias({"access_token", "token", "accessToken", "accesstoken", "ACCESSTOKEN"})
         String accessToken;
+        @JsonAlias({"refresh_token", "refreshToken", "REFRESHTOKEN", "refreshtoken"})
         String refreshToken;
-        long expiresAt;
+        @JsonAlias({"expires_in", "expiresIn", "expiresAt", "expiresat", "EXPIRESAT", "EXPIRES_IN", "expires_in_seconds"})
+        Long expiresAt;
     }
 }

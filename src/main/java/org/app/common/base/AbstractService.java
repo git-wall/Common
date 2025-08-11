@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,13 +24,11 @@ public abstract class AbstractService<E extends IDEntity<ID>, ID> implements CRU
     @PersistenceContext
     protected EntityManager entityManager;
 
-    protected final TransactionTemplate transactionTemplate;
-
     @Override
     public E add(E e) {
         return repository.save(e);
     }
-    
+
     @Override
     @Transactional
     public void addAll(Collection<E> entities, int batchSize) {
@@ -50,9 +47,9 @@ public abstract class AbstractService<E extends IDEntity<ID>, ID> implements CRU
     public E update(E e) {
         return findById(e.getId())
                 .map(repository::save)
-                .orElseThrow(IllegalArgumentException::new;
-                        String.format("Entity with id %s not found for update", e.getId())
-                ))
+                .orElseThrow(() ->
+                        new IllegalArgumentException(String.format("Entity with id %s not found for update", e.getId()))
+                );
     }
 
     @Override

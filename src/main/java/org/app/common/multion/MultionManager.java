@@ -74,7 +74,7 @@ public class MultionManager {
     /**
      * Register a custom MultionType instance
      *
-     * @param multionTypes      The map have class and interface defines for many multion type
+     * @param multionTypes      The map has class and interface defines for many multion type
      */
     public void registerMultionTypes(Map<Class<?>, Class<?>> multionTypes) {
         multionTypes.forEach((key,value) -> multionInstances.put(key, new MultionType(key, value)));
@@ -98,7 +98,7 @@ public class MultionManager {
      * @param interfaceClass The interface class that defines the values
      * @param <K>            The enum type
      * @param <V>            The interface type
-     * @return The removed MultionType instance, or null if none existed
+     * @return They removed MultionType instance, or null if none existed
      */
     @SuppressWarnings("unchecked")
     public <K extends Enum<K>, V> MultionType<K, V> removeMultionType(Class<K> enumClass, Class<V> interfaceClass) {

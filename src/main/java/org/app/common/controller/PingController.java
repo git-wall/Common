@@ -5,8 +5,8 @@ import brave.Tracer;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import lombok.RequiredArgsConstructor;
-import org.app.common.contain.TagURL;
-import org.app.common.interceptor.log.LogMonitor;
+import org.app.common.constant.TagURL;
+import org.app.common.interceptor.log.InterceptorLog;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.netflix.hystrix.EnableHystrix;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +26,7 @@ public class PingController {
 
     private static final String ERROR_MESSAGE = "Request fails. It takes long time to response";
 
-    @LogMonitor(type = LogMonitor.LogType.GRAYLOG)
+    @InterceptorLog(type = InterceptorLog.LogType.GRAYLOG)
     @GetMapping(TagURL.PING)
     @HystrixCommand(fallbackMethod = "fallback",
             commandProperties = {

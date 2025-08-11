@@ -16,7 +16,7 @@ import co.elastic.clients.json.JsonData;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import co.elastic.clients.util.ObjectBuilder;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,14 +27,10 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ElasticsearchService {
 
     private final ElasticsearchClient elasticsearchClient;
-
-    @Autowired
-    public ElasticsearchService(ElasticsearchClient elasticsearchClient) {
-        this.elasticsearchClient = elasticsearchClient;
-    }
 
     /**
      * Creates an index in Elasticsearch.
@@ -155,7 +151,7 @@ public class ElasticsearchService {
             int from,
             int size,
             Function<SortOptions.Builder, ObjectBuilder<SortOptions>> sortFn) throws IOException {
-        
+
         SearchRequest request = SearchRequest.of(s -> s
                 .index(indexName)
                 .query(queryFn)
@@ -163,15 +159,15 @@ public class ElasticsearchService {
                 .size(size)
                 .sort(sortFn)
         );
-        
+
         SearchResponse<T> response = elasticsearchClient.search(request, clazz);
         List<T> documents = response.hits().hits().stream()
                 .map(Hit::source)
                 .collect(Collectors.toList());
-        
+
         TotalHits totalHits = response.hits().total();
         long total = totalHits != null ? totalHits.value() : 0L;
-        
+
         return new SearchResult<>(documents, total, from, size);
     }
 
@@ -189,16 +185,15 @@ public class ElasticsearchService {
             Class<T> clazz,
             Function<Query.Builder, ObjectBuilder<Query>> queryFn,
             Map<String, Function<Aggregation.Builder, ObjectBuilder<Aggregation>>> aggregations) throws IOException {
-        
+
         SearchRequest.Builder requestBuilder = new SearchRequest.Builder()
                 .index(indexName)
                 .query(queryFn)
                 .size(0); // We don't need documents, just aggregations
-        
+
         // Add all aggregations to the request
-        aggregations.forEach(requestBuilder::aggregations
-        );
-        
+        aggregations.forEach(requestBuilder::aggregations);
+
         SearchResponse<T> response = elasticsearchClient.search(requestBuilder.build(), clazz);
         return response.aggregations();
     }
@@ -217,7 +212,7 @@ public class ElasticsearchService {
             Class<T> clazz,
             String text,
             String... fields) throws IOException {
-        
+
         SearchRequest request = SearchRequest.of(s -> s
                 .index(indexName)
                 .query(q -> q
@@ -227,7 +222,7 @@ public class ElasticsearchService {
                         )
                 )
         );
-        
+
         SearchResponse<T> response = elasticsearchClient.search(request, clazz);
         return response.hits().hits().stream()
                 .map(Hit::source)
@@ -248,7 +243,7 @@ public class ElasticsearchService {
             Class<T> clazz,
             String field,
             Object value) throws IOException {
-        
+
         SearchRequest request = SearchRequest.of(s -> s
                 .index(indexName)
                 .query(q -> q
@@ -258,7 +253,7 @@ public class ElasticsearchService {
                         )
                 )
         );
-        
+
         SearchResponse<T> response = elasticsearchClient.search(request, clazz);
         return response.hits().hits().stream()
                 .map(Hit::source)
@@ -281,7 +276,7 @@ public class ElasticsearchService {
             String field,
             Object from,
             Object to) throws IOException {
-        
+
         SearchRequest request = SearchRequest.of(s -> s
                 .index(indexName)
                 .query(q -> q
@@ -292,7 +287,7 @@ public class ElasticsearchService {
                         )
                 )
         );
-        
+
         SearchResponse<T> response = elasticsearchClient.search(request, clazz);
         return response.hits().hits().stream()
                 .map(Hit::source)
@@ -315,7 +310,7 @@ public class ElasticsearchService {
             String field,
             String value,
             String fuzziness) throws IOException {
-        
+
         SearchRequest request = SearchRequest.of(s -> s
                 .index(indexName)
                 .query(q -> q
@@ -326,7 +321,7 @@ public class ElasticsearchService {
                         )
                 )
         );
-        
+
         SearchResponse<T> response = elasticsearchClient.search(request, clazz);
         return response.hits().hits().stream()
                 .map(Hit::source)

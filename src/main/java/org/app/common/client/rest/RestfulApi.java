@@ -3,6 +3,7 @@ package org.app.common.client.rest;
 import org.app.common.client.AuthTokenInfo;
 import org.app.common.client.ClientBasicAuthInfo;
 import org.app.common.utils.JacksonUtils;
+import org.app.common.utils.RestTemplateUtils;
 import org.slf4j.Logger;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -55,7 +56,7 @@ public class RestfulApi<T> {
     }
 
     /**
-     * Creates a RestfulApi instance with default configuration
+     * Creates a RestfulApi instance with the default configuration
      * 
      * @param restTemplate RestTemplate to use, or null to create a new one
      * @return RestfulApi instance
@@ -65,7 +66,7 @@ public class RestfulApi<T> {
                 ? RestTemplateUtils.build(5000)
                 : restTemplate;
         return new RestfulApi<>(
-                HttpHeaderUtils.createHeaders(),
+                HeaderUtils.createHeaders(),
                 client
         );
     }
@@ -83,7 +84,7 @@ public class RestfulApi<T> {
                 : restTemplate;
 
         return new RestfulApi<>(
-                HttpHeaderUtils.createHeaders(authToken),
+                HeaderUtils.createHeaders(authToken),
                 client
         );
     }
@@ -99,13 +100,13 @@ public class RestfulApi<T> {
         RestTemplate client = RestTemplateUtils.buildWithTokenRefresh(authTokenInfo, clientInfo);
 
         return new RestfulApi<>(
-                HttpHeaderUtils.createHeaders(),  // Headers will be added by the interceptor
+                HeaderUtils.createHeaders(),  // Headers will be added by the interceptor
                 client
         );
     }
 
     public RestfulApi<T> header(HttpHeaders headers) {
-        this.headers = headers == null ? HttpHeaderUtils.createHeaders() : headers;
+        this.headers = headers == null ? HeaderUtils.createHeaders() : headers;
         return this;
     }
 
@@ -185,8 +186,8 @@ public class RestfulApi<T> {
         return JacksonUtils.readValue(response.toString(), clazz);
     }
 
-    public <R> R sink() {
-        return JacksonUtils.readValue(response);
+    public <R> R sinkToList(Class<R> clazz) {
+        return JacksonUtils.fromObjectToList(response.toString(), clazz);
     }
 
     public Optional<T> getOptional() {

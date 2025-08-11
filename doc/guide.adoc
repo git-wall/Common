@@ -1,0 +1,729 @@
+= Common Library Feature Guide
+:toc:
+:toclevels: 3
+:sectnums:
+:source-highlighter: highlight.js
+
+== Overview
+
+This comprehensive guide covers all features and components available in the Common library. The library provides a wide range of utilities, patterns, and integrations for Spring Boot applications.
+
+== Core Components
+
+=== Base Classes and Abstractions
+
+==== AbstractService
+Provides CRUD operations with JPA repository integration.
+
+[source,java]
+----
+@Service
+public class UserService extends AbstractService<User, Long> {
+    public UserService(UserRepository repository) {
+        super(repository);
+    }
+}
+----
+
+==== AbstractController
+Base REST controller with standard CRUD endpoints.
+
+[source,java]
+----
+@RestController
+@RequestMapping("/api/users")
+public class UserController extends AbstractController<UserDTO, User, Long> {
+    public UserController(UserService service, UserMapper mapper) {
+        super(service, mapper);
+    }
+}
+----
+
+==== CDC (Change Data Capture)
+Interface for tracking data changes with versioning.
+
+[source,java]
+----
+public class UserEntity implements CDC {
+    @Override
+    public Integer getCdcVersion() {
+        return this.version;
+    }
+}
+----
+
+=== Testing Framework
+
+==== AAA Pattern
+Arrange/Act/Assert pattern implementation for unit testing.
+
+[source,java]
+----
+boolean result = AAA.<String, Integer>of()
+    .arrange("test input")
+    .action(input -> input.length())
+    .assertThat(length -> length == 10)
+    .execute();
+----
+
+== Data Structures and Algorithms
+
+=== Advanced Data Structures
+
+==== CRDT (Conflict-free Replicated Data Types)
+Distributed data structures for eventual consistency.
+
+[source,java]
+----
+EasyCRDT crdt = new EasyCRDT("node1");
+CounterWrapper counter = crdt.createGrowCounter("pageViews");
+counter.increment(5);
+----
+
+==== CompactSet
+Memory-efficient alternative to HashSet.
+
+[source,java]
+----
+CompactSet<String> compactSet = new CompactSet<>(List.of("a", "b", "c"));
+----
+
+==== HashDag
+Directed Acyclic Graph implementation with hash-based storage.
+
+[source,java]
+----
+Dag<String> dag = new HashDag<>();
+Deque<String> roots = dag.getRoots();
+while (!roots.isEmpty()) {
+    String node = roots.pollLast();
+    Set<String> edges = dag.getEdges(node);
+}
+----
+
+==== Trie
+Prefix tree for efficient string operations.
+
+[source,java]
+----
+Trie<String> trie = new HashTrie<>();
+trie.put("hello", "world");
+Optional<String> value = trie.get("hello");
+----
+
+=== Probabilistic Data Structures
+
+==== Bloom Filter
+Space-efficient probabilistic data structure for membership testing.
+
+[source,java]
+----
+@Component
+public class BloomFilterService {
+    private final BloomAction bloomAction;
+    
+    public boolean mightContain(String item) {
+        return bloomAction.test(item);
+    }
+}
+----
+
+==== HyperLogLog
+Cardinality estimation for large datasets.
+
+[source,java]
+----
+@Service
+public class AnalyticsService {
+    private final HybridHyperLogLog hll;
+    
+    public long getUniqueVisitors() {
+        return hll.cardinality();
+    }
+}
+----
+
+== Database Integration
+
+=== JPA Extensions
+
+==== Auditing
+Automatic entity auditing with creation and modification tracking.
+
+[source,java]
+----
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+public class User extends BaseEntity {
+    // Automatically tracked: createdDate, lastModifiedDate, createdBy, lastModifiedBy
+}
+----
+
+==== Specification Builder
+Dynamic query building with JPA Criteria API.
+
+[source,java]
+----
+Specification<User> spec = new ConditionSpecification<User>()
+    .equal("status", UserStatus.ACTIVE)
+    .like("name", "%john%")
+    .build();
+----
+
+=== Database Integrations
+
+==== Cassandra
+NoSQL database integration with custom template.
+
+[source,java]
+----
+@Service
+public class UserService {
+    private final CassandraTemplate cassandraTemplate;
+    
+    public User findById(String id) {
+        return cassandraTemplate.queryForObject(
+            "SELECT * FROM users WHERE id = ?", 
+            User.class, id
+        );
+    }
+}
+----
+
+==== ScyllaDB
+High-performance Cassandra-compatible database.
+
+[source,java]
+----
+@Service
+public class ScyllaUserService {
+    private final ScyllaTemplate scyllaTemplate;
+    
+    public CompletableFuture<User> findByIdAsync(String id) {
+        return scyllaTemplate.executeAsync(
+            "SELECT * FROM users WHERE id = ?",
+            User.class, id
+        );
+    }
+}
+----
+
+==== MapDB
+Embedded database engine.
+
+[source,java]
+----
+@Service
+public class MapDbService {
+    private final MapDb mapDb;
+    
+    public void storeData(String key, Object value) {
+        mapDb.put(key, value);
+    }
+}
+----
+
+== Caching Solutions
+
+=== Multi-Level Caching
+
+==== Two-Level Cache
+Combines local and distributed caching.
+
+[source,java]
+----
+@Configuration
+public class CacheConfig {
+    @Bean
+    public TwoLevelCacheOperations<String, User> userCache(
+            RedisTemplate<String, User> redisTemplate) {
+        return CacheManagerUtils.createUnifiedTwoLevelCache(
+            redisTemplate,
+            Duration.ofMinutes(10),
+            Duration.ofHours(1)
+        );
+    }
+}
+----
+
+=== Cache Providers
+
+==== Redis Integration
+Distributed caching with Redis.
+
+[source,java]
+----
+@Service
+public class RedisService {
+    private final RedisTemplate<String, Object> redisTemplate;
+    
+    public void cacheUser(String key, User user) {
+        redisTemplate.opsForValue().set(key, user, Duration.ofHours(1));
+    }
+}
+----
+
+==== Hazelcast
+In-memory data grid for distributed caching.
+
+[source,java]
+----
+@Service
+public class HazelcastService {
+    private final HazelcastInstance hazelcastInstance;
+    
+    public IMap<String, Object> getDistributedMap(String mapName) {
+        return hazelcastInstance.getMap(mapName);
+    }
+}
+----
+
+==== Apache Ignite
+Distributed computing platform.
+
+[source,java]
+----
+@EnableApacheIgnite
+@Configuration
+public class IgniteConfig {
+    // Auto-configuration for Ignite services
+}
+----
+
+== Messaging and Streaming
+
+=== Kafka Integration
+
+==== Single Broker
+Simple Kafka producer/consumer setup.
+
+[source,java]
+----
+@Component
+public class KafkaMessageProducer {
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    
+    public void sendMessage(String topic, Object message) {
+        kafkaTemplate.send(topic, message);
+    }
+}
+----
+
+==== Multi-Broker
+Multiple Kafka cluster management.
+
+[source,java]
+----
+@Service
+public class MultiKafkaService {
+    public void sendToCluster(String cluster, String topic, Object message) {
+        // Route to specific cluster
+    }
+}
+----
+
+=== Apache Flink
+Stream processing integration.
+
+[source,java]
+----
+public class HttpApiSink<T> implements Sink<T> {
+    // Custom Flink sink for HTTP API calls
+}
+----
+
+== Security Features
+
+=== Authentication and Authorization
+
+==== JWT Provider
+JSON Web Token generation and validation.
+
+[source,java]
+----
+@Component
+public class JwtProvider {
+    public String generateToken(UserDetails userDetails) {
+        // JWT token generation
+    }
+    
+    public boolean validateToken(String token) {
+        // Token validation
+    }
+}
+----
+
+==== Two-Factor Authentication
+Multi-factor authentication support.
+
+[source,java]
+----
+@Service
+public class TwoFactorAuthService {
+    public String generateTOTP(String secret) {
+        // Generate time-based OTP
+    }
+}
+----
+
+=== Security Filters
+
+==== Rate Limiting
+Request rate limiting with Redis backend.
+
+[source,java]
+----
+@Component
+public class RateLimitFilter {
+    // Configurable rate limiting per endpoint
+}
+----
+
+==== CORS Configuration
+Cross-Origin Resource Sharing setup.
+
+[source,java]
+----
+@Configuration
+public class CorsConfig {
+    // CORS policy configuration
+}
+----
+
+== Communication Protocols
+
+=== gRPC Integration
+
+==== Server Configuration
+Auto-configured gRPC server.
+
+[source,java]
+----
+@Configuration
+public class GrpcServerConfiguration {
+    // Auto-configuration for gRPC services
+}
+----
+
+==== Client Configuration
+Managed gRPC client connections.
+
+[source,java]
+----
+@Configuration
+public class GrpcClientConfiguration {
+    // Client connection management
+}
+----
+
+==== Interceptors
+Logging, validation, security, and metrics interceptors.
+
+[source,java]
+----
+@Component
+public class LoggingInterceptor implements ServerInterceptor {
+    // Request/response logging
+}
+----
+
+=== WebSocket Support
+
+==== WebSocket Configuration
+Real-time communication setup.
+
+[source,java]
+----
+@Configuration
+public class WebSocketConfig implements WebSocketConfigurer {
+    // WebSocket endpoint configuration
+}
+----
+
+==== Message Broadcasting
+Multi-client message distribution.
+
+[source,java]
+----
+@Service
+public class WebSocketBroadcastService {
+    public void broadcastToAll(String message) {
+        // Send message to all connected clients
+    }
+}
+----
+
+== Monitoring and Observability
+
+=== Health Checks
+
+==== System Health
+Comprehensive system health monitoring.
+
+[source,java]
+----
+@Component
+public class SystemHealthCheck implements HealthIndicator {
+    @Override
+    public Health health() {
+        // System health assessment
+    }
+}
+----
+
+==== Database Health
+Database connectivity monitoring.
+
+[source,java]
+----
+@Component
+public class DbHealthCheck implements HealthIndicator {
+    // Database health verification
+}
+----
+
+=== Metrics and Reporting
+
+==== Metrics Reporter
+Custom metrics collection and reporting.
+
+[source,java]
+----
+@Service
+public class Reporter implements ReportMeter {
+    // Custom metrics reporting
+}
+----
+
+==== Tracing
+Distributed tracing support.
+
+[source,java]
+----
+public class TracingContext {
+    // Trace context management
+}
+----
+
+== Workflow and Processing
+
+=== Saga Pattern
+Distributed transaction management.
+
+[source,java]
+----
+@Service
+public class OrderSagaService {
+    // Saga orchestration for order processing
+}
+----
+
+=== Pipeline Processing
+Data processing pipelines.
+
+[source,java]
+----
+@Component
+public class Pipeline {
+    // Configurable data processing pipeline
+}
+----
+
+=== Async Processing
+Asynchronous task processing.
+
+[source,java]
+----
+@Component
+public class AsyncProcessor {
+    @Async
+    public CompletableFuture<String> processAsync(String input) {
+        // Asynchronous processing
+    }
+}
+----
+
+== Design Patterns
+
+=== Legacy Patterns
+
+==== Circuit Breaker
+Fault tolerance pattern.
+
+[source,java]
+----
+public class CircuitBreaker {
+    // Circuit breaker implementation
+}
+----
+
+==== Object Pool
+Resource pooling pattern.
+
+[source,java]
+----
+public class ObjectPool<T> {
+    // Generic object pooling
+}
+----
+
+=== Modern Patterns
+
+==== Fluent API
+Builder pattern with method chaining.
+
+[source,java]
+----
+public class FluentApi {
+    // Fluent interface implementation
+}
+----
+
+==== Template Method
+Algorithm skeleton with customizable steps.
+
+[source,java]
+----
+public abstract class TemplateMethod {
+    // Template method pattern
+}
+----
+
+== Utility Libraries
+
+=== Context Management
+
+==== Spring Context
+Static access to Spring application context.
+
+[source,java]
+----
+public class SpringContext {
+    public static <T> T getBean(Class<T> clazz) {
+        return getContext().getBean(clazz);
+    }
+}
+----
+
+==== Tenant Context
+Multi-tenant context management.
+
+[source,java]
+----
+public class TenantContext {
+    // Tenant-specific context handling
+}
+----
+
+=== Client Libraries
+
+==== REST Template
+Enhanced REST client with interceptors.
+
+[source,java]
+----
+@Configuration
+public class RestTemplateConfig {
+    // Pre-configured REST template with auth
+}
+----
+
+==== WebClient
+Reactive web client configuration.
+
+[source,java]
+----
+@Configuration
+public class WebClientConfig {
+    // Reactive HTTP client setup
+}
+----
+
+== AI and Machine Learning
+
+=== Chat AI Integration
+AI chat service integration.
+
+[source,java]
+----
+@Service
+public class ChatAiServiceImpl implements ChatAIService {
+    public String chat(String message) {
+        // AI chat implementation
+    }
+}
+----
+
+== Blockchain
+
+=== Simple Blockchain
+Basic blockchain implementation.
+
+[source,java]
+----
+@Service
+public class NoobChain {
+    // Simple blockchain for learning
+}
+----
+
+== Configuration Properties
+
+The library provides numerous configuration properties for customization:
+
+- `app.jwt.*` - JWT configuration
+- `security.role.*` - Role-based security
+- `security.whitelist.*` - Security whitelist
+- `app.cors.allowed.*` - CORS settings
+- `grpc.*` - gRPC configuration
+- `kafka.brokers.*` - Multi-Kafka setup
+- `ignite.*` - Apache Ignite settings
+- `mapdb.*` - MapDB configuration
+- `scylla.*` - ScyllaDB settings
+- `spring.cassandra.*` - Cassandra configuration
+- `video.*` - Video processing settings
+- `graylog.*` - Graylog integration
+
+== Getting Started
+
+=== Dependencies
+Add the common library to your project:
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.app</groupId>
+    <artifactId>common</artifactId>
+    <version>${common.version}</version>
+</dependency>
+----
+
+=== Auto-Configuration
+Many components are auto-configured. Enable specific features using:
+
+[source,java]
+----
+@EnableApacheIgnite
+@EnableCassandra
+@EnableRestTemplate
+@EnableClickHouse
+@EnableDbSystem
+@EnableJdbc
+public class Application {
+    // Your application configuration
+}
+----
+
+== Best Practices
+
+1. **Use Abstract Classes**: Extend `AbstractService` and `AbstractController` for consistent CRUD operations
+2. **Leverage Caching**: Implement multi-level caching for better performance
+3. **Security First**: Use provided security filters and JWT authentication
+4. **Monitor Everything**: Implement health checks and metrics reporting
+5. **Test with AAA**: Use the AAA pattern for structured unit testing
+6. **Choose Right Data Structure**: Use appropriate algorithms and data structures for your use case
+7. **Async Processing**: Leverage async components for better scalability
+
+== Conclusion
+
+This common library provides a comprehensive set of tools and patterns for building robust, scalable Spring Boot applications. Each component is designed to work together while maintaining modularity and flexibility.

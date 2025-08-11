@@ -1,0 +1,8 @@
+services:
+  nexus:
+    volumes:
+      - nexus-data:/nexus-data
+    environment:
+      - INSTALL4J_ADD_VM_PARAMS=-Xms1200m -Xmx1200m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+      - NEXUS_SECURITY_RANDOMPASSWORD=false
+      - NEXUS_CONTEXT=nexus

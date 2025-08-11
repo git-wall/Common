@@ -22,7 +22,7 @@ public class CMDUtils {
             }
             process.waitFor();
         } catch (Exception e) {
-            MessageUtils.logWithTracing(e);
+            LogUtils.tracing(e);
         }
         return output.toString();
     }

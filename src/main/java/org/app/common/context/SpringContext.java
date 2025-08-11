@@ -23,4 +23,12 @@ public class SpringContext implements ApplicationContextAware {
         Assert.notNull(context, "Spring context not initialized");
         return context.getBean(clazz);
     }
+
+    public static <T> T getBean(String name, Class<T> clazz) {
+        return context.containsBean(name) ? getBean(clazz) : null;
+    }
+
+    public static boolean containsBean(String name) {
+        return context.containsBean(name);
+    }
 }

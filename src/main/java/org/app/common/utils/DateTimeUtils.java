@@ -52,15 +52,45 @@ public class DateTimeUtils {
         }
     }
 
-    public static Date now(){
+    public static Date now() {
         return new Date(System.currentTimeMillis());
     }
 
-    public static Date nowPlus(long time){
+    public static Date nowPlus(long time) {
         return new Date(Instant.now().plusSeconds(time).toEpochMilli());
     }
 
-    public static Date nowMinus(long time){
+    public static Date nowMinus(long time) {
         return new Date(Instant.now().minusSeconds(time).toEpochMilli());
+    }
+
+    public static Timestamp minDate(Timestamp endDate, Timestamp offDate) {
+        if (endDate == null) {
+            return offDate;
+        }
+
+        if (offDate == null)
+            return endDate;
+
+        if (endDate.before(offDate)) {
+            return endDate;
+        }
+
+        return offDate;
+    }
+
+    public static Timestamp maxDate(Timestamp endDate, Timestamp offDate) {
+        if (endDate == null) {
+            return offDate;
+        }
+
+        if (offDate == null)
+            return endDate;
+
+        if (endDate.after(offDate)) {
+            return endDate;
+        }
+
+        return offDate;
     }
 }

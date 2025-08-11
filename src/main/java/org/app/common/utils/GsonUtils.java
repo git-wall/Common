@@ -18,7 +18,12 @@ public class GsonUtils {
         return GSON.fromJson(json, clazz);
     }
 
-    public static String toJsonString(Object object) {
+    public static String toJson(Object object) {
         return GSON.toJson(object);
+    }
+
+    public String prettyPrintUsingGson(String uglyJsonString) {
+        var o = GSON.fromJson(uglyJsonString, Object.class);
+        return GSON.toJson(o);
     }
 }

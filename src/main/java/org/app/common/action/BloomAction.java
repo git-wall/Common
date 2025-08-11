@@ -3,7 +3,7 @@ package org.app.common.action;
 import com.google.common.hash.Funnels;
 import org.app.common.db.QuerySupplier;
 import org.app.common.filter.ScalableBloomFilter;
-import org.app.common.utils.HexUtils;
+import org.app.common.utils.PasswordCrypto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
@@ -52,7 +52,7 @@ public class BloomAction<T> {
     public BloomAction<T> load(List<T> items) {
         items.stream()
                 .map(Object::hashCode)
-                .map(HexUtils::hash)
+                .map(PasswordCrypto::hash)
                 .forEach(hash -> {
                     redisTemplate.opsForValue().set(hash, UUID.randomUUID().toString());
                     bloomFilter.add(hash);
@@ -77,7 +77,7 @@ public class BloomAction<T> {
     }
 
     public T register(T element, String message) {
-        String hash = HexUtils.hash(element.hashCode());
+        String hash = PasswordCrypto.hash(element.hashCode());
         if (exists(hash)) {
             throw new IllegalArgumentException(message);
         }
@@ -94,7 +94,7 @@ public class BloomAction<T> {
     }
 
     public T register(T element) {
-        String hash = HexUtils.hash(element.hashCode());
+        String hash = PasswordCrypto.hash(element.hashCode());
 
         if (exists(hash)) {
             return null;

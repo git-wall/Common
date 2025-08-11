@@ -3,7 +3,7 @@ package org.app.common.entities.log;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.app.common.interceptor.log.LogMonitor;
+import org.app.common.interceptor.log.InterceptorLog;
 
 @Data
 @NoArgsConstructor
@@ -14,8 +14,8 @@ public class EntityUserLog implements IEntity {
     private String accessToken;
     private String username;
     private String[] userAddress;
-    private Integer level;
-    private Long time;
+    private int level;
+    private long time;
     private String application;
     private String headers;
     private String ip;
@@ -24,7 +24,12 @@ public class EntityUserLog implements IEntity {
     private String description;
 
     @Override
-    public LogMonitor.LogType[] getTracingLogType() {
+    public InterceptorLog.LogType getTracingLogType() {
         return tracingLog.getType();
+    }
+
+    @Override
+    public void setLevel(int level) {
+        this.level = level;
     }
 }

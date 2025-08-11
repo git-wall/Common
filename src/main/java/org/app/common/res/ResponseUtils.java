@@ -7,7 +7,7 @@ public class ResponseUtils {
 
     public static class Success {
         public static <T, E extends Enum<E>> ApiResponse<T, E> build(Object id, E code) {
-            return ApiResponse.<T, E>builder()
+            return  ApiResponse.<T, E>builder()
                     .id(id)
                     .code(code)
                     .error(false)
@@ -15,7 +15,7 @@ public class ResponseUtils {
         }
 
         public static <T, E extends Enum<E>> ApiResponse<T, E> build(Object id, E code, String message) {
-            return ApiResponse.<T, E>builder()
+            return  ApiResponse.<T, E>builder()
                     .id(id)
                     .code(code)
                     .error(false)
@@ -24,7 +24,7 @@ public class ResponseUtils {
         }
 
         public static <T, E extends Enum<E>> ApiResponse<T, E> build(Object id, E code, String message, T data) {
-            return ApiResponse.<T, E>builder()
+            return  ApiResponse.<T, E>builder()
                     .id(id)
                     .code(code)
                     .error(false)
