@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.support.converter.ByteArrayJsonMessageConverter;
+import org.springframework.kafka.support.converter.JsonMessageConverter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +27,11 @@ import java.util.Map;
 public class KafkaConfig {
 
     private final KafkaProperties kafkaProperties;
+
+    @Bean
+    public JsonMessageConverter jsonMessageConverter() {
+        return new ByteArrayJsonMessageConverter();
+    }
 
     @Bean
     @ConditionalOnProperty(name = "spring.kafka.producer")

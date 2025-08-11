@@ -75,14 +75,14 @@ public class ClientBasicAuthFactory extends HttpComponentsClientHttpRequestFacto
         authCache.put(host, basicAuth);
 
         // Add AuthCache to the execution context
-        HttpClientContext localcontext = HttpClientContext.create();
-        localcontext.setAuthCache(authCache);
+        HttpClientContext clientContext = HttpClientContext.create();
+        clientContext.setAuthCache(authCache);
 
         if (userName != null) {
             BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(new AuthScope(host), new UsernamePasswordCredentials(userName, password));
-            localcontext.setCredentialsProvider(credsProvider);
+            clientContext.setCredentialsProvider(credsProvider);
         }
-        return localcontext;
+        return clientContext;
     }
 }

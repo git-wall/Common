@@ -6,6 +6,7 @@ public class ArrayProvider {
     /**
      * Root of thing to optimize about combine array with layer near JVM
      * */
+    @SuppressWarnings("unchecked")
     public static <T> T[] combine(T[] src1, T[] src2) {
         Object[] combineArray = new Object[src1.length + src2.length];
 

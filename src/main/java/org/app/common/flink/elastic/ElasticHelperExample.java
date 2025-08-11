@@ -10,7 +10,6 @@ import org.elasticsearch.common.xcontent.XContentType;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * Example class demonstrating how to use ElasticHelper with Flink 2.0.0
@@ -55,7 +54,7 @@ public class ElasticHelperExample {
      */
     public static void main(String[] args) throws Exception {
         // Create Flink execution environment
-        StreamExecutionEnvironment env = StreamEnvironment.buildEnvironment("elastic-example", "1.0.0");
+        StreamExecutionEnvironment env = StreamEnvironment.buildEnv("elastic-example", "1.0.0");
 
         // Define Elasticsearch hosts
         List<HttpHost> esHosts = Arrays.asList(

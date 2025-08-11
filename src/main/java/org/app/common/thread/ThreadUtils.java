@@ -11,6 +11,10 @@ public class ThreadUtils {
     static {
         CORE_AVAILABLE = Runtime.getRuntime().availableProcessors();
     }
+    public static int getActiveCount() {
+        // Returns the number of active threads in the current thread's thread group
+        return Thread.activeCount();
+    }
 
     public static int getCoreAvailable() {
         return Runtime.getRuntime().availableProcessors();

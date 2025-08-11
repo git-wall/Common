@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
-import static org.app.common.contain.TagURL.*;
+import static org.app.common.constant.TagURL.*;
 
 @RequiredArgsConstructor
 public abstract class AbstractController<DTO, E, ID> {

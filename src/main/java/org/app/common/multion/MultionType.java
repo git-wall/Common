@@ -65,7 +65,7 @@ public class MultionType<K extends Enum<K>, V> {
                     try {
                         V instance = getInstance(implClass);
                         multion.put(enumConstant, instance);
-                        break; // Found a match, move to next enum
+                        break; // Found a match, move to the next enum
                     } catch (Exception e) {
                         continue;
                         // Skip if instantiation fails

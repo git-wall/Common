@@ -1,6 +1,7 @@
   #==============================================================================#
  #     Builder stage 1 : Compile the application and prepare dependencies         #
 #==================================================================================#
+# Use version ap or
 FROM eclipse-temurin:11-jdk as build
 WORKDIR /app
 # Copy all project files (source code, Gradle files, etc.) to the container
@@ -71,11 +72,14 @@ ENTRYPOINT ["java",
              "-XX:InitialRAMPercentage=50.0", \
              "-XX:MinRAMPercentage=25.0", \
              # if not want setup ram auto set number ram like under, just choose above and below
-             "Xms256m", \
-             "Xmx512m", \
+#             "-Xms256m", \
+#             "-Xmx512m",
+ "-XX:ActiveProcessorCount=4" , \
  "-XX:+UseContainerSupport", \
- "-Xlog:gc", \
- "org.springframework.boot.loader.JarLauncher"]
+ "-jar", "app.jar"
+# "-Xlog:gc", \
+# "org.springframework.boot.loader.JarLauncher"
+ ]
 
 # For java 17+
 #ENTRYPOINT ["java", \

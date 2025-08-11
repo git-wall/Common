@@ -1,12 +1,83 @@
 package org.app.common.utils;
 
+import org.apache.commons.collections.CollectionUtils;
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 public class DataUtils {
     public DataUtils() {
     }
 
-    public static <T> T getOrDefault(T data, T defaultValue) {
+    public static <T> T parse(Map<String, Object> map, String key, Class<T> clazz) {
+        Object val = map.getOrDefault(key, null);
+
+        if (val == null) {
+            return null;
+        }
+
+        if (clazz.isInstance(val)) {
+            return clazz.cast(val);
+        }
+
+        if (clazz == Long.class && val instanceof String) {
+            try {
+                LocalDateTime ldt = LocalDateTime.parse(val.toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                Long epochMilli = ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
+                return clazz.cast(epochMilli);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    public static <T> T parseOrDefault(Map<String, Object> map, String key, Class<T> clazz, T defaultValue) {
+        var val = map.getOrDefault(key, null);
+
+        if (val == null) {
+            return defaultValue;
+        }
+
+        if (clazz.isInstance(val)) {
+            return clazz.cast(val);
+        }
+
+        if (clazz == Long.class && val instanceof String) {
+            try {
+                LocalDateTime ldt = LocalDateTime.parse(val.toString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                Long epochMilli = ldt.toInstant(ZoneOffset.UTC).toEpochMilli();
+                return clazz.cast(epochMilli);
+            } catch (Exception e) {
+                return defaultValue;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    public static <T> T ifNullDefault(T data, T defaultValue) {
         if (data == null) {
             return defaultValue;
+        }
+        return data;
+    }
+
+    public static <T> List<T> ifEmptyDefault(List<T> data, List<T> defaultValue) {
+        if (CollectionUtils.isEmpty(data)) {
+            return defaultValue;
+        }
+        return data;
+    }
+
+    public static <T> List<T> defaultListIf(List<T> data) {
+        if (CollectionUtils.isEmpty(data)) {
+            return Collections.emptyList();
         }
         return data;
     }
@@ -60,5 +131,13 @@ public class DataUtils {
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("Data cannot be cast to the expected type", e);
         }
+    }
+
+    public static String maskCard(String creditCard, int visibleDigits) {
+        if (creditCard == null || creditCard.length() < visibleDigits) {
+            return creditCard;
+        }
+        String maskedPart = "*".repeat(creditCard.length() - visibleDigits);
+        return maskedPart + creditCard.substring(creditCard.length() - visibleDigits);
     }
 }

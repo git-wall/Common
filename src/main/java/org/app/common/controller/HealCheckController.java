@@ -1,11 +1,11 @@
 package org.app.common.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.app.common.contain.TagURL;
+import org.app.common.constant.TagURL;
 import org.app.common.health.CacheHealthCheck;
 import org.app.common.health.DbHealthCheck;
 import org.app.common.health.SystemHealthCheck;
-import org.app.common.interceptor.log.LogMonitor;
+import org.app.common.interceptor.log.InterceptorLog;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +21,7 @@ public class HealCheckController {
     private final SystemHealthCheck systemHealthCheck;
 
     @GetMapping(TagURL.HEALTH)
-    @LogMonitor
+    @InterceptorLog
     public Health health() {
         return Health.up()
                 .withDetail("heap", Runtime.getRuntime().freeMemory())
@@ -30,7 +30,7 @@ public class HealCheckController {
     }
 
     @GetMapping(TagURL.HEALTH_LIVE)
-    @LogMonitor
+    @InterceptorLog
     public Health liveness() {
         return Health.up().build();  // Basic health check
     }
@@ -44,8 +44,9 @@ public class HealCheckController {
     }
 
     @GetMapping(TagURL.HEALTH_SYSTEM)
-    @LogMonitor
+    @InterceptorLog
     public Health system() {
         return systemHealthCheck.health();
     }
+
 }

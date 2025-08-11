@@ -5,3 +5,5 @@ org.app.common.grpc.GrpcAutoConfiguration,\
 org.app.common.seata.config.SeataConfiguration,\
 org.app.common.seata.saga.SagaConfiguration,\
 org.app.common.seata.monitoring.SeataMonitoringConfiguration
+
+org.springframework.boot.env.EnvironmentPostProcessor=

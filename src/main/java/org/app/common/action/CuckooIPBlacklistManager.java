@@ -14,7 +14,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class CuckooIPBlacklistManager<T> {
@@ -24,7 +23,6 @@ public class CuckooIPBlacklistManager<T> {
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final QuerySupplier<T> query;
     private final String apiKey;
-    private final long redisTTLSeconds;
     private static final String ABUSE_API = "https://api.abuseipdb.com/api/v2/check";
 
     public CuckooIPBlacklistManager(RedisTemplate<String, String> redisTemplate,
@@ -34,18 +32,17 @@ public class CuckooIPBlacklistManager<T> {
         this.redisTemplate = redisTemplate;
         this.query = query;
         this.apiKey = env.getProperty("abuseipdb.api.key");
-        this.redisTTLSeconds = env.getProperty("ip.blacklist.redis.ttl:3600", Long.class, 3600L);
         this.cuckooFilter = new CuckooFilter<>(capacity);
     }
 
     public void registerIp(String ip) {
         cuckooFilter.insert(ip);
-        redisTemplate.opsForValue().set(ip, "BLACKLISTED", redisTTLSeconds, TimeUnit.SECONDS);
+        redisTemplate.opsForSet().add("BLACKLIST:IPS", ip);
     }
 
-    public boolean isBlacklisted(String ip) {
+    public boolean isBlacklist(String ip) {
         if (!cuckooFilter.contains(ip)) return false;
-        return Boolean.TRUE.equals(redisTemplate.hasKey(ip));
+        return Boolean.TRUE.equals(redisTemplate.opsForSet().isMember("BLACKLIST:IPS", ip));
     }
 
     public boolean checkAndRegisterFromAbuse(String ip) throws IOException, InterruptedException {
@@ -63,7 +60,7 @@ public class CuckooIPBlacklistManager<T> {
     }
 
     public boolean checkIpTraffic(String ip) throws IOException, InterruptedException {
-        if (!isBlacklisted(ip)) {
+        if (!isBlacklist(ip)) {
             return checkAndRegisterFromAbuse(ip);
         }
         return false;
@@ -74,10 +71,6 @@ public class CuckooIPBlacklistManager<T> {
         cuckooFilter.clear();
         List<String> knownIps = query.getFindFields().get();
         knownIps.forEach(this::registerIp);
-    }
-
-    public void clear() {
-        cuckooFilter.clear();
     }
 
     public CuckooFilter<String> getFilter() {

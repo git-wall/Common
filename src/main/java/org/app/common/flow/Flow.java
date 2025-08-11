@@ -58,7 +58,7 @@ import java.util.List;
  * </pre>
  */
 public class Flow<T> extends FluentApi<Flow<T>> {
-    private final List<Step<T>> steps = new ArrayList<>(16);
+    private final List<Step<T>> steps = new ArrayList<>(8);
 
     public Flow<T> step(Step<T> step) {
         steps.add(step);

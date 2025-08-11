@@ -3,7 +3,7 @@ package org.app.common.blockchain;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.utils.HexUtils;
+import org.app.common.utils.PasswordCrypto;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
@@ -27,7 +27,7 @@ public class Block {
     }
 
     public @NotNull String hash() {
-        return HexUtils.sha256(previousHash + timeStamp + data);
+        return PasswordCrypto.sha256(previousHash + timeStamp + data);
     }
 
     public void mineBlock(int difficulty) {

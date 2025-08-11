@@ -22,8 +22,12 @@ class Pipeline<T> {
     }
 
     map<U>(fn: (data: T[] | T) => U): Pipeline<U> {
-        const rs: U[] | U = this.data === null ? null : fn(this.data);
-        return new Pipeline(rs);
+        if (this.data === null) {
+            // If data is null, return a Pipeline with null as data
+            return new Pipeline<U>(null as any);
+        }
+        const result = fn(this.data);
+        return new Pipeline<U>(result);
     }
 
     first(): Pipeline<T> {

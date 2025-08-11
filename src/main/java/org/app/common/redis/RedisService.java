@@ -1,6 +1,7 @@
 package org.app.common.redis;
 
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class RedisService {
 
@@ -108,6 +111,21 @@ public class RedisService {
         return result != null && result;
     }
 
+    public <T, K> void setGroupByIfAbsentWithTimeout(List<T> list,
+                                                     Function<T, K> classifier,
+                                                     String keyExtractor,
+                                                     long timeout) {
+        var map = list.stream().collect(Collectors.groupingBy(classifier));
+        setIfAbsentWithTimeout(map, keyExtractor, timeout);
+    }
+
+    public <T, V> void setIfAbsentWithTimeout(Map<T, V> map, String keyFormat, long timeout) {
+        map.forEach((k, v) -> {
+            String key = String.format(keyFormat, k);
+            setIfAbsentWithTimeout(key, v, timeout, TimeUnit.MILLISECONDS);
+        });
+    }
+
     public <T> void setIfAbsentWithTimeout(List<T> list,
                                            String keyFormat,
                                            Function<T, ?> keyExtractor,
@@ -145,27 +163,6 @@ public class RedisService {
     }
 
     /**
-     * Retrieves a value from Redis by its key or loads it using the provided callable if the key does not exist.
-     *
-     * @param <R>      The type of the value to be returned.
-     * @param key      The key to retrieve from Redis.
-     * @param callable A callable function to load the value if the key does not exist in Redis.
-     * @return The value associated with the key if it exists, or the value provided by the callable.
-     */
-    @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public <R> R getOrLoad(String key, Callable<R> callable) {
-        if (hasKey(key)) {
-            var r = get(key);
-            if (r != null) {
-                return (R) r;
-            }
-        }
-        return callable.call();
-    }
-
-
-    /**
      * Retrieves a value from Redis by its key or loads it using the provided loader if the key does not exist.
      * If the value is loaded, it is also saved in the Redis cache.
      *
@@ -187,7 +184,6 @@ public class RedisService {
         set(key, r);
         return r;
     }
-
 
     /**
      * Retrieves a value from Redis by its key or loads it using the provided callable if the key does not exist.
@@ -224,7 +220,7 @@ public class RedisService {
     }
 
     /**
-     * Gets a range of elements by index (simulates skip list range query).
+     * Gets a range of elements by index (simulates a skip list range query).
      */
     public Set<Object> zRange(String key, long start, long end) {
         return redisTemplate.opsForZSet().range(key, start, end);
@@ -256,5 +252,18 @@ public class RedisService {
      */
     public Long zRank(String key, Object value) {
         return redisTemplate.opsForZSet().rank(key, value);
+    }
+
+    // ===================================================================
+    // Publisher
+    // ===================================================================
+
+    public void publish(String pattern, String id, String message) {
+        String channel = String.format(pattern, id);
+        redisTemplate.convertAndSend(channel, message);
+    }
+
+    public void publish(String channel, String message) {
+        redisTemplate.convertAndSend(channel, message);
     }
 }

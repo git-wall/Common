@@ -1,0 +1,14 @@
+SELECT usename,passwd FROM pg_shadow;
+
+you’ll see :
+
+username    | password
+myuser      | SCRAM-SHA-256$4096:rixxxxxxxxxxxxxxxxxxxxxxxxxx
+
+add in pgbouncer/userlist.txt
+
+"myuser" "SCRAM-SHA-256$4096:rixxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+then, just running
+
+docker-compose -f postgres-docker-compose.yml up -d

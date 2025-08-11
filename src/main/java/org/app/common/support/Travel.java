@@ -36,7 +36,7 @@ public class Travel {
     }
 
     @SneakyThrows
-    public static <T> Tuple2<T, Long> tuple$timer(Callable<T> callable) {
+    public static <T> Tuple2<T, Long> result$timer(Callable<T> callable) {
         var s = System.currentTimeMillis();
         T result = callable.call();
         return new Tuple2<>(result, System.currentTimeMillis() - s);

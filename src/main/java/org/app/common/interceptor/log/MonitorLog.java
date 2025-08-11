@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.app.common.context.AuthContext;
 import org.app.common.context.TracingContext;
 import org.app.common.design.revisited.PoisonPill;
 import org.app.common.entities.log.EntityUserLog;
@@ -16,7 +17,6 @@ import org.app.common.entities.log.TracingLog;
 import org.app.common.interceptor.Interceptor;
 import org.app.common.kafka.multi.BrokerManager;
 import org.app.common.support.Travel;
-import org.app.common.utils.AuthUtils;
 import org.app.common.utils.JacksonUtils;
 import org.app.common.utils.RequestUtils;
 import org.app.common.utils.TokenUtils;
@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 @Aspect
 @Component
 @Slf4j
-public class MonitorLog extends Interceptor<LogMonitor> {
+public class MonitorLog extends Interceptor<InterceptorLog> {
 
     private final Tracer tracer;
 
@@ -81,21 +81,21 @@ public class MonitorLog extends Interceptor<LogMonitor> {
                         send(entity, key);
                     }
 
-                    log.info(token, entity);
+                    log.info("Key {} Info {}", key, entity);
                 }
         );
     }
 
-    private static @NotNull Supplier<LogMonitor> getDefaultInterceptorLog() {
-        return () -> new LogMonitor() {
+    private static @NotNull Supplier<InterceptorLog> getDefaultInterceptorLog() {
+        return () -> new InterceptorLog() {
             @Override
             public Class<? extends java.lang.annotation.Annotation> annotationType() {
-                return LogMonitor.class;
+                return InterceptorLog.class;
             }
 
             @Override
-            public LogType[] type() {
-                return new LogType[]{LogType.GRAYLOG};
+            public LogType type() {
+                return LogType.GRAYLOG;
             }
         };
     }
@@ -107,27 +107,25 @@ public class MonitorLog extends Interceptor<LogMonitor> {
             "@annotation(org.springframework.web.bind.annotation.PostMapping) || " +
             "@annotation(org.springframework.web.bind.annotation.PutMapping) || " +
             "@annotation(org.springframework.web.bind.annotation.DeleteMapping) ||" +
-            "@annotation(org.app.common.interceptor.log.LogMonitor)"
+            "@annotation(org.app.common.interceptor.log.InterceptorLog)"
     )
     public Object monitorApi(ProceedingJoinPoint joinPoint) {
-        LogMonitor logMonitor = getOrDefault(joinPoint, LogMonitor.class, getDefaultInterceptorLog());
+        InterceptorLog logMonitor = getOrDefault(joinPoint, InterceptorLog.class, getDefaultInterceptorLog());
 
         HttpServletRequest request = RequestUtils.getHttpServletRequest();
         before(request);
 
-        IEntity logEntity = null;
         var tracingLog = getTracingLog(request, joinPoint, logMonitor);
+        IEntity logEntity = startCollect(request, LogLevel.INFO.ordinal(), tracingLog);
         try {
-            logEntity = startCollect(request, LogLevel.INFO.ordinal(), tracingLog);
-
-            Tuple2<Object, Long> tuple2 = Travel.tuple$timer(() -> Travel.process(joinPoint));
+            Tuple2<Object, Long> tuple2 = Travel.result$timer(() -> Travel.process(joinPoint));
 
             endCollect(tuple2._2, tuple2._1, tracingLog);
             return tuple2._1;
-        } catch (Exception exception) {
-            logEntity = startCollect(request, LogLevel.ERROR.ordinal(), tracingLog);
-            endCollect(0L, exception, tracingLog);
-            throw exception;
+        } catch (Exception e) {
+            logEntity.setLevel(LogLevel.ERROR.ordinal());
+            endCollect(0L, e, tracingLog);
+            throw e;
         } finally {
             after(logEntity);
         }
@@ -149,9 +147,9 @@ public class MonitorLog extends Interceptor<LogMonitor> {
         }
     }
 
-    private void endCollect(long executeDuration, Object response, TracingLog tracingLog) {
+    private void endCollect(long executeDuration, Object result, TracingLog tracingLog) {
         tracingLog.setExecuteDuration(executeDuration);
-        tracingLog.setResponse(JacksonUtils.toString(response));
+        tracingLog.setResponse(JacksonUtils.toJson(result));
     }
 
     private IEntity startCollect(HttpServletRequest hsr, int ordinal, TracingLog tracingLog) {
@@ -159,7 +157,7 @@ public class MonitorLog extends Interceptor<LogMonitor> {
         e.setId(TokenUtils.generateId("log_user", 12));
         e.setDeviceId(RequestUtils.getDeviceId(hsr));
         e.setAccessToken(RequestUtils.getToken(hsr));
-        e.setUsername(AuthUtils.getCurrentUsername());
+        e.setUsername(AuthContext.getUserName());
         e.setUserAddress(new String[]{tracingLog.getUserAddress()});
         e.setLevel(ordinal);
         e.setTime(new Date().getTime());
@@ -172,7 +170,7 @@ public class MonitorLog extends Interceptor<LogMonitor> {
     }
 
     @NonNull
-    private TracingLog getTracingLog(HttpServletRequest hsr, ProceedingJoinPoint jp, LogMonitor il) {
+    private TracingLog getTracingLog(HttpServletRequest hsr, ProceedingJoinPoint jp, InterceptorLog il) {
         TracingLog tracingLog = new TracingLog();
         tracingLog.setRequestId(TracingContext.getRequestId());
         tracingLog.setTracID(getSpan().context().traceIdString());
@@ -181,6 +179,7 @@ public class MonitorLog extends Interceptor<LogMonitor> {
         tracingLog.setMethod(((MethodSignature) jp.getSignature()).getMethod().getName());
         tracingLog.setType(il.type());
         tracingLog.setUserAddress(RequestUtils.getRemoteAddress(hsr));
+        tracingLog.setCurl(RequestUtils.getCurl());
         return tracingLog;
     }
 
@@ -207,7 +206,7 @@ public class MonitorLog extends Interceptor<LogMonitor> {
     }
 
     private void send(IEntity entity, String key) {
-        var val = JacksonUtils.toString(entity);
+        var val = JacksonUtils.toJson(entity);
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, val);
         kafkaProducer.send(record);
     }
@@ -219,9 +218,6 @@ public class MonitorLog extends Interceptor<LogMonitor> {
     }
 
     private static boolean hasKafka(IEntity entity) {
-        for (LogMonitor.LogType lt : entity.getTracingLogType()) {
-            return lt == LogMonitor.LogType.KAFKA;
-        }
-        return false;
+        return InterceptorLog.LogType.KAFKA.equals(entity.getTracingLogType());
     }
 }

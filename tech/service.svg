@@ -1,0 +1,76 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
+        "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+     width="100"
+     height="100"
+     viewBox="0 0 112.000000 75.000000"
+     preserveAspectRatio="xMidYMid meet">
+
+    <!-- Use this for animation fly to sky change cy down to move from low to high -->
+<!--    <ellipse-->
+<!--            cx="55"-->
+<!--            cy="30"-->
+<!--            rx="36"-->
+<!--            ry="15"-->
+<!--            fill="#ffffff"-->
+<!--    />-->
+
+    <ellipse
+            cx="55"
+            cy="37"
+            rx="26"
+            ry="15"
+            fill="#ffffff"
+            opacity="0.3"
+    />
+
+    <g transform="translate(0.000000,73.000000) scale(0.100000,-0.100000)"
+       fill="#ffffff"
+       opacity="0.5">
+        <path d="M290 314 c0 -19 58 -60 115 -79 67 -23 202 -24 276 -2 53 16 119 63
+119 85 0 5 -15 -5 -34 -23 -45 -42 -111 -60 -221 -60 -110 0 -176 18 -221 60
+-19 18 -34 26 -34 19z"/>
+    </g>
+
+    <g transform="translate(0.000000,79.000000) scale(0.100000,-0.100000)" fill="#ffffff" stroke="none">
+        <path d="M780 179 c0 -17 4 -28 10 -24 6 3 10 17 10 31 0 13 -4 24 -10 24 -50 -10 -14 -10 -31z"/>
+    </g>
+
+    <g transform="translate(-5.000000,81.000000) scale(0.100000,-0.100000)" fill="#ffffff" stroke="none">
+        <path d="M780 179 c0 -17 4 -28 10 -24 6 3 10 17 10 31 0 13 -4 24 -10 24 -50 -10 -14 -10 -31z"/>
+    </g>
+
+    <g transform="translate(0.000000,94.000000) scale(0.100000,-0.100000)"
+       fill="#ffffff" opacity="0.3">
+        <path d="
+    M180 400
+    Q560 50 940 400
+    L940 500
+    Q720 320 560 360
+    Q400 320 180 500
+    Z"/>
+    </g>
+
+    <g transform="translate(0.000000,83.000000) scale(0.100000,-0.100000)"
+       fill="#ffffff" opacity="0.4">
+        <path d="
+    M180 400
+    Q560 50 940 400
+    Q720 220 560 260
+    Q400 220 180 400
+    Z"/>
+    </g>
+
+    <g transform="translate(0.000000,95.000000) scale(0.100000,-0.100000)"
+       fill="#ffffff" opacity="0.4">
+        <path d="
+    M190 400
+    Q560 50 960 400
+    Q720 220 550 250
+    Q400 220 160 430
+    Z"/>
+    </g>
+
+
+</svg>

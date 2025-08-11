@@ -1,9 +1,5 @@
 ﻿#!/bin/bash
 
-# =============================================
-# Fast Docker Build, Clean, Run Pipeline Script
-# =============================================
-
 # Fail on any error, undefined variable, or pipeline failures
 set -euo pipefail
 
@@ -113,7 +109,7 @@ function run_container_securely() {
       --tmpfs /tmp:rw,noexec,nosuid \
       --memory=1g \
       --cpu-shares=1024 \
-      --health-cmd "curl -f http://localhost:${APP_PORT}/health || exit 1" \
+      --health-cmd "curl -f http://${HOSTNAME}:${APP_PORT}/health || exit 1" \
       --health-interval=30s \
       --health-retries=3 \
       --health-timeout=5s \

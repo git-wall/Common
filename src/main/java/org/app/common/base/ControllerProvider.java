@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
-import static org.app.common.contain.TagURL.*;
+import static org.app.common.constant.TagURL.*;
 
 public class ControllerProvider<DTO, E, ID> {
 
