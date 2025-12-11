@@ -4,7 +4,6 @@ import org.app.common.client.AuthTokenInfo;
 import org.app.common.client.ClientBasicAuthInfo;
 import org.app.common.client.rest.ClientBasicAuthFactory;
 import org.app.common.client.rest.interceptor.AuthRequestInterceptor;
-import org.app.common.interceptor.InterceptorUtils;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.client.BufferingClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -17,21 +16,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class RestTemplateUtils {
-    /**
-     * Builds a RestTemplate with basic authentication using AuthTokenInfo and ClientInfo
-     *
-     * @param authTokenInfo Information about the authentication token
-     * @param clientInfo    Information about the client
-     * @return RestTemplate configured with basic authentication
-     */
-    public static RestTemplate buildBasicAuth(AuthTokenInfo authTokenInfo, ClientBasicAuthInfo clientInfo) {
-        ClientBasicAuthFactory basicAuthFactory = ClientBasicAuthFactory.of(clientInfo);
-        var interceptor = InterceptorUtils.basicAuthInterceptor(authTokenInfo, clientInfo);
-
-        RestTemplate restTemplate = new RestTemplate(basicAuthFactory);
-        restTemplate.setInterceptors(List.of(interceptor));
-        return restTemplate;
-    }
 
     /**
      * Builds a RestTemplate with token authentication and automatic token refresh capability

@@ -23,6 +23,7 @@ import java.util.function.Predicate;
 public class Valid<T> {
     private final T obj;
     private final List<Throwable> exceptions = new ArrayList<>();
+    private Function<String, Throwable> exceptionFn;
 
     private Valid(T obj) {
         this.obj = obj;
@@ -32,9 +33,14 @@ public class Valid<T> {
         return new Valid<>(t);
     }
 
+    public Valid<T> ofType(Function<String, Throwable> exceptionFn) {
+        this.exceptionFn = exceptionFn;
+        return this;
+    }
+
     public Valid<T> valid(Predicate<? super T> validation, String message) {
         if (!validation.test(obj)) {
-            exceptions.add(new IllegalStateException(message));
+            exceptions.add(exceptionFn.apply(message));
         }
         return this;
     }

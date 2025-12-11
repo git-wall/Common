@@ -1,5 +1,6 @@
 package org.app.common.support;
 
+import org.app.common.utils.EnrichUtils;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -66,7 +67,7 @@ class EnrichTest {
         };
 
         // Enrich the person
-        Person enrichedPerson = Enrich.object(person, enricher);
+        Person enrichedPerson = EnrichUtils.object(person, enricher);
 
         // Verify enrichment
         assertEquals("John", enrichedPerson.getName());
@@ -93,7 +94,7 @@ class EnrichTest {
         };
 
         // Enrich the person with context
-        Person enrichedPerson = Enrich.objectWithContext(person, hobbiesByName, enricher);
+        Person enrichedPerson = EnrichUtils.objectWithContext(person, hobbiesByName, enricher);
 
         // Verify enrichment
         assertEquals(2, enrichedPerson.getHobbies().size());
@@ -113,13 +114,13 @@ class EnrichTest {
         };
 
         // Enrich the person in-place
-        Person enrichedPerson = Enrich.objectInPlace(person, enricher);
+        Person enrichedPerson = EnrichUtils.objectInPlace(person, enricher);
 
         // Verify enrichment
         assertEquals("John", enrichedPerson.getName());
         assertEquals(31, enrichedPerson.getAge());
         assertTrue(enrichedPerson.getHobbies().contains("Cooking"));
-        
+
         // Verify it's the same object
         assertSame(person, enrichedPerson);
     }
@@ -140,7 +141,7 @@ class EnrichTest {
         };
 
         // Enrich the list
-        List<Person> enrichedPersons = Enrich.list(persons, enricher);
+        List<Person> enrichedPersons = EnrichUtils.list(persons, enricher);
 
         // Verify enrichment
         assertEquals(3, enrichedPersons.size());
@@ -174,20 +175,20 @@ class EnrichTest {
         };
 
         // Enrich the list with context
-        List<Person> enrichedPersons = Enrich.listWithContext(persons, hobbiesByName, enricher);
+        List<Person> enrichedPersons = EnrichUtils.listWithContext(persons, hobbiesByName, enricher);
 
         // Verify enrichment
         assertEquals(3, enrichedPersons.size());
         assertEquals(2, enrichedPersons.get(0).getHobbies().size());
         assertEquals(2, enrichedPersons.get(1).getHobbies().size());
         assertEquals(2, enrichedPersons.get(2).getHobbies().size());
-        
+
         assertTrue(enrichedPersons.get(0).getHobbies().contains("Reading"));
         assertTrue(enrichedPersons.get(0).getHobbies().contains("Swimming"));
-        
+
         assertTrue(enrichedPersons.get(1).getHobbies().contains("Dancing"));
         assertTrue(enrichedPersons.get(1).getHobbies().contains("Painting"));
-        
+
         assertTrue(enrichedPersons.get(2).getHobbies().contains("Hiking"));
         assertTrue(enrichedPersons.get(2).getHobbies().contains("Cooking"));
     }
@@ -208,7 +209,7 @@ class EnrichTest {
         };
 
         // Enrich the list in-place
-        List<Person> enrichedPersons = Enrich.listInPlace(persons, enricher);
+        List<Person> enrichedPersons = EnrichUtils.listInPlace(persons, enricher);
 
         // Verify enrichment
         assertEquals(3, enrichedPersons.size());
@@ -217,7 +218,7 @@ class EnrichTest {
             // Age should be incremented
             assertTrue(p.getAge() > 25);
         }
-        
+
         // Verify it's the same list
         assertSame(persons, enrichedPersons);
     }
@@ -238,14 +239,14 @@ class EnrichTest {
         };
 
         // Enrich the collection
-        Set<Person> enrichedPersons = Enrich.collection(persons, enricher);
+        Set<Person> enrichedPersons = EnrichUtils.collection(persons, enricher);
 
         // Verify enrichment
         assertEquals(3, enrichedPersons.size());
         for (Person p : enrichedPersons) {
             assertTrue(p.getHobbies().contains("Reading"));
         }
-        
+
         // Verify it's the same collection
         assertSame(persons, enrichedPersons);
     }
@@ -265,14 +266,14 @@ class EnrichTest {
         };
 
         // Enrich the map values
-        Map<String, Person> enrichedMap = Enrich.mapValues(personMap, enricher);
+        Map<String, Person> enrichedMap = EnrichUtils.mapValues(personMap, enricher);
 
         // Verify enrichment
         assertEquals(3, enrichedMap.size());
         for (Person p : enrichedMap.values()) {
             assertTrue(p.getHobbies().contains("Reading"));
         }
-        
+
         // Verify it's the same map
         assertSame(personMap, enrichedMap);
     }

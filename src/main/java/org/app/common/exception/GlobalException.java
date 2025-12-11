@@ -3,7 +3,6 @@ package org.app.common.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.app.common.context.TracingContext;
 import org.app.common.res.ResponseUtils;
-import org.app.common.utils.RequestUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
-public abstract class GlobalException {
+public class GlobalException {
 
     private static final String ERROR_MESSAGE_PATTERN = "Field: %s, Error: %s";
 
@@ -55,5 +54,15 @@ public abstract class GlobalException {
         return ResponseEntity
                 .status(status)
                 .body(ResponseUtils.Error.build(id, status, ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Object> handleNotFound(NotFoundException ex) {
+        var id = TracingContext.getRequestId();
+        HttpStatus status = HttpStatus.NOT_FOUND;
+        return ResponseEntity
+            .status(status)
+            .header("X-Error", HttpStatus.NOT_FOUND.getReasonPhrase())
+            .body(ResponseUtils.Error.build(id, status, ex.getMessage()));
     }
 }

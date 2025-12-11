@@ -1,3 +1,5 @@
+## old way for auto config
+
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.app.common.grpc.server.GrpcServerConfiguration,\
 org.app.common.grpc.client.GrpcClientConfiguration,\

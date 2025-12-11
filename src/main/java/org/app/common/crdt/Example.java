@@ -110,7 +110,7 @@ public class Example {
         System.out.println("All tags: " + tags1.getAll());
     }
 
-    public static void main(String[] args) {
+    public static void test(String[] args) {
         System.out.println("=== Web Analytics Example ===");
         webAnalyticsExample();
 

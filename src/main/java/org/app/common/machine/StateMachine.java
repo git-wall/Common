@@ -169,8 +169,8 @@ public class StateMachine<S, E, C> {
      * @param guard The guard condition that must be satisfied for the transition to occur
      * @return The StateMachine instance for chaining
      */
-    public StateMachine<S, E, C> addGlobalTransition(E event, S targetState,
-                                                     TransitionAction<S, C> action, Predicate<C> guard) {
+    public StateMachine<S, E, C> addGlobalTransition(
+        E event, S targetState, TransitionAction<S, C> action, Predicate<C> guard) {
         Transition<S, C> transition = new Transition<>(null, targetState, action, guard);
         globalTransitions.put(event, transition);
         return this;

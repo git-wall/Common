@@ -7,7 +7,7 @@ public class TomlExample {
      */
     public static void demonstrateTomlConfig() {
         // Load TOML from classpath
-        TomlConfig config = TomlConfig.loadFromClasspath("dependencies/cache.toml");
+        TomlConfig config = TomlConfig.loadFromClasspath("resources/dependencies/cache.toml");
 
         // Get a string value
         String description = config.getString("dependencies.hazelcast.description");
@@ -34,11 +34,11 @@ public class TomlExample {
      */
     public static void demonstrateDependencyLoader() {
         // Load dependencies from classpath
-        DependencyTomlLoader loader = DependencyTomlLoader.fromClasspath("dependencies/cache.toml");
+        DependencyTomlLoader loader = DependencyTomlLoader.fromClasspath("resources/dependencies/cache.toml");
 
         // Get all dependencies
         Map<String, DependencyTomlLoader.DependencyInfo> dependencies = loader.getDependencies();
-        System.out.println("Found " + dependencies.size() + " dependencies");
+        System.out.println("Found " + dependencies.size() + "resources/dependencies");
 
         // Get a specific dependency
         DependencyTomlLoader.DependencyInfo caffeine = loader.getDependency("caffeine");
@@ -56,7 +56,7 @@ public class TomlExample {
 
     /**
      * Main method to run the examples.
-     * 
+     *
      * @param args command line arguments
      */
     public static void main(String[] args) {

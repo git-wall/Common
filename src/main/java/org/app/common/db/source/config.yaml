@@ -1,0 +1,15 @@
+databases:
+  dataSources:
+    primary:
+      name: primary
+      url: jdbc:postgresql://localhost:5432/primary_db
+      username: postgres
+      password: password
+      driverClassName: org.postgresql.Driver
+      primary: true
+    secondary:
+      name: secondary
+      url: jdbc:postgresql://localhost:5432/secondary_db
+      username: postgres
+      password: password
+      driverClassName: org.postgresql.Driver

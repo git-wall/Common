@@ -1,12 +1,12 @@
 package org.app.common.data;
 
-import org.app.common.design.legacy.FluentApi;
+import org.app.common.design.legacy.Fluent;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class DataHolder extends FluentApi<DataHolder> {
+public class DataHolder implements Fluent<DataHolder> {
     private final Map<String, Object> holder;
 
     public DataHolder(Map<String, Object> holder) {

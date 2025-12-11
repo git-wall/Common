@@ -7,3 +7,17 @@ services:
     networks:
       - nexus-network
     restart: always
+    
+networks:
+  name:
+    driver: brigh
+    
+    
+configs:
+  
+secrets:
+  sd:
+    name: 
+    
+volumes:
+  

@@ -1,15 +1,15 @@
 package org.app.common.redis;
 
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -17,14 +17,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class RedisService {
 
     private final RedisTemplate<String, Object> redisTemplate;
-
-    @Autowired
-    public RedisService(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+    private final ZSetOperations<String, Object> zSetOps;
 
     /**
      * Stores a key-value pair in Redis with a default TTL.
@@ -107,8 +104,7 @@ public class RedisService {
      * @return True if the key was set, false if the key already exists.
      */
     public boolean setIfAbsentWithTimeout(String key, Object value, long timeout, TimeUnit timeUnit) {
-        Boolean result = redisTemplate.opsForValue().setIfAbsent(key, value, timeout, timeUnit);
-        return result != null && result;
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, timeout, timeUnit));
     }
 
     public <T, K> void setGroupByIfAbsentWithTimeout(List<T> list,
@@ -137,75 +133,63 @@ public class RedisService {
         });
     }
 
-    public <T> void setIfAbsentWithTimeout(Map<String, T> map,
-                                           long timeout,
-                                           TimeUnit timeUnit) {
+    public <T> void setIfAbsentWithTimeout(Map<String, T> map, long timeout, TimeUnit timeUnit) {
         map.forEach((k, v) -> setIfAbsentWithTimeout(k, v, timeout, timeUnit));
     }
 
-    /**
-     * Retrieves a value from Redis by its key or loads it using the provided loader if the key does not exist.
-     *
-     * @param <R>    The type of the value to be returned.
-     * @param key    The key to retrieve from Redis.
-     * @param loader A supplier function to load the value if the key does not exist in Redis.
-     * @return The value associated with the key if it exists, or the value provided by the loader.
-     */
-    @SuppressWarnings("unchecked")
-    public <R> R getOrLoad(String key, Supplier<R> loader) {
-        if (hasKey(key)) {
-            var r = get(key);
-            if (r != null) {
-                return (R) r;
-            }
-        }
-        return loader.get();
+    @SneakyThrows
+    public <T> T getAside(String key, Supplier<T> loader, int ttl, TimeUnit timeUnit) {
+        var data = get(key);
+        if (data != null)
+            return (T) data;
+
+        T loaded = loader.get();
+        setWithTimeout(key, loaded, ttl, timeUnit);
+        return loaded;
     }
 
-    /**
-     * Retrieves a value from Redis by its key or loads it using the provided loader if the key does not exist.
-     * If the value is loaded, it is also saved in the Redis cache.
-     *
-     * @param <R>    The type of the value to be returned.
-     * @param key    The key to retrieve from Redis.
-     * @param loader A supplier function to load the value if the key does not exist in Redis.
-     * @return The value associated with the key if it exists, or the value provided by the loader.
-     */
     @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public <R> R getOrLoadAndSaveInCache(String key, Supplier<R> loader) {
-        if (hasKey(key)) {
-            var r = get(key);
-            if (r != null) {
-                return (R) r;
-            }
-        }
-        R r = loader.get();
-        set(key, r);
-        return r;
+    public <T> T getAsideMillisecond(String key, Supplier<T> loader, int ttl) {
+        var data = get(key);
+        if (data != null)
+            return (T) data;
+
+        T loaded = loader.get();
+        setWithTimeout(key, loaded, ttl, TimeUnit.MILLISECONDS);
+        return loaded;
     }
 
-    /**
-     * Retrieves a value from Redis by its key or loads it using the provided callable if the key does not exist.
-     * If the value is loaded, it is also saved in the Redis cache.
-     *
-     * @param <R>      The type of the value to be returned.
-     * @param key      The key to retrieve from Redis.
-     * @param callable A callable function to load the value if the key does not exist in Redis.
-     * @return The value associated with the key if it exists, or the value provided by the callable.
-     */
     @SneakyThrows
-    @SuppressWarnings("unchecked")
-    public <R> R getOrLoadAndSaveInCache(String key, Callable<R> callable) {
-        if (hasKey(key)) {
-            var r = get(key);
-            if (r != null) {
-                return (R) r;
-            }
-        }
-        R r = callable.call();
-        set(key, r);
-        return r;
+    public <T> T getAsideMinute(String key, Supplier<T> loader, int ttl) {
+        var data = get(key);
+        if (data != null)
+            return (T) data;
+
+        T loaded = loader.get();
+        setWithTimeout(key, loaded, ttl, TimeUnit.MINUTES);
+        return loaded;
+    }
+
+    @SneakyThrows
+    public <T> T getAsideDay(String key, Supplier<T> loader, int ttl) {
+        var data = get(key);
+        if (data != null)
+            return (T) data;
+
+        T loaded = loader.get();
+        setWithTimeout(key, loaded, ttl, TimeUnit.DAYS);
+        return loaded;
+    }
+
+    @SneakyThrows
+    public <T> T getAsideTemplate(String format, String key, Supplier<T> loader, int ttl, TimeUnit timeUnit) {
+        String keyFinal = String.format(format, key);
+        var data = get(keyFinal);
+        if (data != null)
+            return (T) data;
+        T loaded = loader.get();
+        setWithTimeout(keyFinal, loaded, ttl, timeUnit);
+        return loaded;
     }
 
     // ===================================================================
@@ -265,5 +249,53 @@ public class RedisService {
 
     public void publish(String channel, String message) {
         redisTemplate.convertAndSend(channel, message);
+    }
+
+    // ===================================================================
+    // zSetOps
+    // ===================================================================
+
+    private String getKey(String category) {
+        return "leaderboard:" + category;
+    }
+
+    // Add or update score
+    public <T> void addScore(String category, T member, double score) {
+        zSetOps.add(getKey(category), member, score);
+    }
+
+    // Increase score ZSCORE
+    public <T> void incrementScore(String category, T member, double delta) {
+        zSetOps.incrementScore(getKey(category), member, delta);
+    }
+
+    // Get user's rank ZREVRANK
+    public <T> Long getRank(String category, T member) {
+        Long rank = zSetOps.reverseRank(getKey(category), member);
+        return rank == null ? null : rank + 1; // convert to 1-based rank
+    }
+
+    // Get user's score
+    public <T> Double getScore(String category, T member) {
+        return zSetOps.score(getKey(category), member);
+    }
+
+    // Get top N members ZREVRANGE
+    public Set<ZSetOperations.TypedTuple<Object>> getTopN(String category, int n) {
+        return zSetOps.reverseRangeWithScores(getKey(category), 0, n - 1);
+    }
+
+    // Get members around a given user ZREVRANGE
+    public <T> Set<ZSetOperations.TypedTuple<Object>> getAroundUser(String category, T member, int range) {
+        Long rank = zSetOps.reverseRank(getKey(category), member);
+        if (rank == null) return Set.of();
+        long start = Math.max(rank - range, 0);
+        long end = rank + range;
+        return zSetOps.reverseRangeWithScores(getKey(category), start, end);
+    }
+
+    // Remove one member
+    public <T> void removeMember(String category, T member) {
+        zSetOps.remove(getKey(category), member);
     }
 }

@@ -1,0 +1,14 @@
+﻿{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "pgbouncer.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "pgbouncer.labels" . | nindent 4 }}
+spec:
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  selector:
+    matchLabels:
+      {{- include "pgbouncer.selectorLabels" . | nindent 6 }}
+{{- end }}

@@ -37,7 +37,7 @@ public class HashUtil {
 
 
     /**
-     * Computes a hash of the given bytes, using the FNV-1a hashing function, but with a custom inital hash value.
+     * Computes a hash of the given bytes, using the FNV-1a hashing function, but with a custom initial hash value.
      */
     public static int hash(byte[] data, int init) {
         int hash = init;

@@ -3,8 +3,10 @@ package org.app.common.context;
 import org.app.common.utils.RequestUtils;
 
 import javax.annotation.PreDestroy;
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class TracingContext {
 
@@ -15,7 +17,15 @@ public class TracingContext {
     }
 
     public static Object get(String key) {
-        return CONTEXT.get().getOrDefault(key, "N/A");
+        return CONTEXT.get().get(key);
+    }
+
+    public static void extractRequestId(HttpServletRequest httpServletRequest, Supplier<String> supplier) {
+        if (getRequestId() != null) return;
+
+        var requestId = RequestUtils.getRequestIdOrElse(httpServletRequest, supplier);
+
+        putRequestId(requestId);
     }
 
     public static void putRequestId(String requestId) {

@@ -1,5 +1,7 @@
 package org.app.common.support;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.http.config.Lookup;
 
 import java.io.InputStream;
@@ -14,16 +16,14 @@ import java.util.function.Function;
  * Utility class providing methods to create and work with Lookup objects.
  * A Lookup is a functional interface that maps a String key to a value of type T.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Finding {
-
-    public Finding() {
-    }
 
     /**
      * Creates a Lookup from a function that maps String to T.
      *
      * @param function the function to convert to a Lookup
-     * @param <T> the type of values returned by the Lookup
+     * @param <T>      the type of values returned by the Lookup
      * @return a Lookup that delegates to the provided function
      */
     public static <T> Lookup<T> lookup(Function<String, T> function) {
@@ -55,8 +55,8 @@ public class Finding {
     public static Lookup<Method[]> lookupMethod(Class<?> clazz) {
         return n -> {
             Method[] methods = Arrays.stream(clazz.getDeclaredMethods())
-                    .filter(m -> m.getName().equals(n))
-                    .toArray(Method[]::new);
+                .filter(m -> m.getName().equals(n))
+                .toArray(Method[]::new);
 
             if (methods.length == 0) {
                 throw new IllegalArgumentException("Method not found: " + n);
@@ -147,9 +147,9 @@ public class Finding {
     /**
      * Creates a Lookup that returns a default value if the key is not found.
      *
-     * @param lookup the primary Lookup to use
+     * @param lookup       the primary Lookup to use
      * @param defaultValue the default value to return if the key is not found
-     * @param <T> the type of values returned by the Lookup
+     * @param <T>          the type of values returned by the Lookup
      * @return a Lookup with default value handling
      */
     public static <T> Lookup<T> withDefault(Lookup<T> lookup, T defaultValue) {
@@ -165,10 +165,10 @@ public class Finding {
     /**
      * Creates a Lookup that transforms the values returned by another Lookup.
      *
-     * @param lookup the source Lookup
+     * @param lookup      the source Lookup
      * @param transformer the function to transform values
-     * @param <T> the input type
-     * @param <R> the output type
+     * @param <T>         the input type
+     * @param <R>         the output type
      * @return a transforming Lookup
      */
     public static <T, R> Lookup<R> transform(Lookup<T> lookup, Function<T, R> transformer) {

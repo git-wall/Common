@@ -1,6 +1,3 @@
-
-
-
 services:
   my-bundle-server:
     url: http://host.docker.internal:8888

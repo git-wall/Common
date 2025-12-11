@@ -1,15 +1,20 @@
-  #==============================================================================#
- #     Builder stage 1 : Compile the application and prepare dependencies         #
-#==================================================================================#
+#==============================================================================
+#     Builder stage 1 : Compile the application and prepare dependencies
+#==============================================================================
 # Use version ap or
 FROM eclipse-temurin:11-jdk as build
+
+# set work app in docker
 WORKDIR /app
+
 # Copy all project files (source code, Gradle files, etc.) to the container
 COPY . .
+
 # Run Gradle to build the application, skipping tests for faster builds
 # - 'clean' ensures a fresh build
 # - 'build -x test' skips unit tests (remove '-x test' if tests are critical)
 RUN ./gradlew clean build -x test
+
 # Analyze dependencies with jdeps to minimize runtime image size
 # - '--ignore-missing-deps': Ignores unresolved dependencies (useful for optional libs)
 # - '-q': Quiet mode, reduces output noise
@@ -25,6 +30,7 @@ RUN jdeps  \
     --class-path "build/libs/*" \
     --print-module-deps  \
     build/libs/Common.jar > modules.txt \
+
 # Create a custom JRE using jlink for a smaller runtime
 # - '--add-modules $(cat modules.txt),jdk.crypto.ec': Includes required modules from modules.txt plus jdk.crypto.ec (for SSL/TLS)
 # - '--module-path $JAVA_HOME/jmods': Uses JDK's module path
@@ -52,6 +58,7 @@ ENV PATH="/opt/java/openjdk/bin:${PATH}"
 # ENV JAVA_OPTS=""
 # EXPOSE 8080
 
+# use user with some role can be access for security
 RUN useradd -u 1000 -m thanh && chown -R thanh /app
 USER thanh
 
@@ -130,7 +137,7 @@ ENTRYPOINT ["java",
 #    - Legacy concurrent GC, lower pauses than ParallelGC, deprecated in Java 9+
 #    - Use: Replace '-XX:+UseZGC' with '-XX:+UseConcMarkSweepGC' (remove UnlockExperimentalVMOptions)
 
-# Why ZGC with NUMA?
+# Why ZGC with NUMA
 # - ZGC minimizes GC pauses, critical for real-time or interactive apps
 # - NUMA awareness leverages multi-socket hardware (if available) for faster memory access
 # - Pairing with a custom JRE (via jlink) reduces image size and attack surface

@@ -5,12 +5,53 @@ import org.apache.commons.collections.CollectionUtils;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class DataUtils {
-    public DataUtils() {
+    private DataUtils() {
+    }
+
+    public static int of(Integer i) {
+        return i == null ? 0 : i;
+    }
+
+    public static long of(Long l) {
+        return l == null ? 0 : l;
+    }
+
+    public static double of(Double d) {
+        return d == null ? 0.d : d;
+    }
+
+    public static float of(Float f) {
+        return f == null ? 0.f : f;
+    }
+
+    public static String of(String s) {
+        return s == null ? "" : s;
+    }
+
+    public static <T> T cast(Object o, Class<T> clazz) {
+        try {
+            return clazz.cast(o);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> List<T> castCollection(Object o, Class<T> clazz) {
+        try {
+            Collection<?> raw = (Collection) o;
+            List<T> result = new ArrayList<>(raw.size());
+            for (Object item : raw) {
+                result.add(clazz.cast(item));
+            }
+            return result;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static <T> T parse(Map<String, Object> map, String key, Class<T> clazz) {
@@ -61,6 +102,10 @@ public class DataUtils {
         return defaultValue;
     }
 
+    public static <T> T nullable(Supplier<T> supplier) {
+        return supplier == null ? null : supplier.get();
+    }
+
     public static <T> T ifNullDefault(T data, T defaultValue) {
         if (data == null) {
             return defaultValue;
@@ -75,7 +120,7 @@ public class DataUtils {
         return data;
     }
 
-    public static <T> List<T> defaultListIf(List<T> data) {
+    public static <T> List<T> defaultListOf(List<T> data) {
         if (CollectionUtils.isEmpty(data)) {
             return Collections.emptyList();
         }
@@ -107,7 +152,7 @@ public class DataUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T autoCast(Object data) {
+    public static <T> T as(Object data) {
         if (data == null) {
             return null;
         }
@@ -131,13 +176,5 @@ public class DataUtils {
         } catch (ClassCastException e) {
             throw new IllegalArgumentException("Data cannot be cast to the expected type", e);
         }
-    }
-
-    public static String maskCard(String creditCard, int visibleDigits) {
-        if (creditCard == null || creditCard.length() < visibleDigits) {
-            return creditCard;
-        }
-        String maskedPart = "*".repeat(creditCard.length() - visibleDigits);
-        return maskedPart + creditCard.substring(creditCard.length() - visibleDigits);
     }
 }

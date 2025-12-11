@@ -10,7 +10,6 @@ import org.apache.ignite.cache.query.ScanQuery;
 import org.apache.ignite.cache.query.SqlFieldsQuery;
 import org.apache.ignite.configuration.CacheConfiguration;
 import org.apache.ignite.lang.IgniteBiPredicate;
-import org.apache.ignite.lang.IgniteRunnable;
 import org.apache.ignite.stream.StreamTransformer;
 
 import javax.cache.Cache;
@@ -62,10 +61,10 @@ public class AnalyticsService {
      * @param <V> The value type
      */
     public <K, V> void streamData(
-            String cacheName,
-            Map<K, V> data,
-            int batchSize,
-            boolean allowOverwrite) {
+        String cacheName,
+        Map<K, V> data,
+        int batchSize,
+        boolean allowOverwrite) {
 
         try (IgniteDataStreamer<K, V> streamer = createDataStreamer(cacheName)) {
             streamer.allowOverwrite(allowOverwrite);
@@ -85,8 +84,8 @@ public class AnalyticsService {
      * @param <V> The value type
      */
     public <K, V> void registerStreamTransformer(
-            String cacheName,
-            StreamTransformer<K, V> transformer) {
+        String cacheName,
+        StreamTransformer<K, V> transformer) {
 
         try (IgniteDataStreamer<K, V> streamer = createDataStreamer(cacheName)) {
             streamer.receiver(transformer);
@@ -126,7 +125,7 @@ public class AnalyticsService {
         sqlQuery.setDistributedJoins(true);
 
         // Set query timeout
-        sqlQuery.setTimeout(60000, TimeUnit.MILLISECONDS); // 1 minute timeout
+        sqlQuery.setTimeout(60000, TimeUnit.MILLISECONDS); // 1-minute timeout
 
         IgniteCache<?, ?> cache = ignite.cache(cacheName);
         return cache.query(sqlQuery).getAll();
@@ -142,8 +141,8 @@ public class AnalyticsService {
      * @return The query cursor
      */
     public <K, V> QueryCursor<Cache.Entry<K, V>> executeScanQuery(
-            String cacheName,
-            IgniteBiPredicate<K, V> filter) {
+        String cacheName,
+        IgniteBiPredicate<K, V> filter) {
 
         IgniteCache<K, V> cache = ignite.cache(cacheName);
         ScanQuery<K, V> scanQuery = new ScanQuery<>(filter);
@@ -162,9 +161,9 @@ public class AnalyticsService {
      * @return The registered ContinuousQuery object
      */
     public <K, V> ContinuousQuery<K, V> setupContinuousQuery(
-            String cacheName,
-            CacheEntryUpdatedListener<K, V> listener,
-            CacheEntryEventFilter<K, V> filter) {
+        String cacheName,
+        CacheEntryUpdatedListener<K, V> listener,
+        CacheEntryEventFilter<K, V> filter) {
 
         IgniteCache<K, V> cache = ignite.cache(cacheName);
         ContinuousQuery<K, V> query = new ContinuousQuery<>();
@@ -210,20 +209,14 @@ public class AnalyticsService {
      * @param <K> The key type
      * @param <V> The value type
      */
-    public <K, V> void processDataInParallel(
-            String cacheName,
-            Consumer<Cache.Entry<K, V>> processor) {
-
+    public <K, V> void processDataInParallel(String cacheName, Consumer<Cache.Entry<K, V>> processor) {
         IgniteCache<K, V> cache = ignite.cache(cacheName);
 
-        ignite.compute().run(new IgniteRunnable() {
-            @Override
-            public void run() {
-                ScanQuery<K, V> scanQuery = new ScanQuery<>();
-                scanQuery.setLocal(true);
+        ignite.compute().run(() -> {
+            ScanQuery<K, V> scanQuery = new ScanQuery<>();
+            scanQuery.setLocal(true);
 
-                cache.query(scanQuery).forEach(processor);
-            }
+            cache.query(scanQuery).forEach(processor);
         });
     }
 

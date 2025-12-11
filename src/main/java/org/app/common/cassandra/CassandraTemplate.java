@@ -53,8 +53,9 @@ public class CassandraTemplate {
             try {
                 asyncCqlTemplate.execute(cql, args).get();
                 return true;
-            } catch (Exception e) {
+            } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
                 log.error("Error executing async CQL: {}", cql, e);
+                Thread.currentThread().interrupt();
                 throw new CassandraException("Error executing async CQL", "ASYNC_ERROR", e);
             }
         });

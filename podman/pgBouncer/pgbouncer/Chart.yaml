@@ -1,0 +1,13 @@
+﻿apiVersion: v2
+name: pgbouncer
+description: A Helm chart for PgBouncer connection pooler
+type: application
+version: 1.0.0
+appVersion: "1.24.1"
+keywords:
+  - pgbouncer
+  - postgresql
+  - database
+  - connection-pooler
+maintainers:
+  - name: Thanh

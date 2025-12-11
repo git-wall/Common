@@ -6,7 +6,11 @@ import java.util.function.Predicate;
 
 public class OptionalUtils {
     public static <T, R> R mapper(T t, Function<T, R> mapper) {
-        return Optional.of(t).map(mapper).orElseThrow(() -> new IllegalStateException("Error when mapper"));
+        return Optional.of(t).map(mapper).orElseThrow(() -> new IllegalStateException("Mapper failed"));
+    }
+
+    public static <T, R> R mapper(T t, Function<T, R> mapper, String errorMessage) {
+        return Optional.of(t).map(mapper).orElseThrow(() -> new IllegalStateException(errorMessage));
     }
 
     public static <T> T filterThrow(T t, Predicate<T> filter, String error) {

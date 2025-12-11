@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: A
+  datasource:
+    hikari:
+      driver-class-name: org.postgresql.Driver
+      jdbc-url: jdbc:postgresql://localhost:5001/postgres
+      username: admin
+      password: admin
+      minimum-idle: 5
+      idle-timeout: 30000
+      maximum-pool-size: 10
+      max-lifetime: 1800000
+      connection-timeout: 300000
+      leak-detection-threshold: 60000 # 60s log lỗi ai đó code ngu lụm mất connection khiến service và db gặp problem
+      data-source-properties:
+        statement_timeout: 5000 # 5s time out cho mỗi tiến trình tránh treo hoặc quá lâu nên xem sét lại câu query  set phía db

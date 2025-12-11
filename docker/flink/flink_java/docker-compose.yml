@@ -1,0 +1,25 @@
+services:
+  jobmanager:
+    image: flink:1.19.0-java17 # Use a Flink image with Java 17
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    ports:
+      - "8081:8081" # Flink Web UI
+    command: jobmanager
+    volumes:
+    # Optional: Mount a volume to persist Flink logs or application JARs
+    # - ./flink-logs:/opt/flink/log
+    # - ./jars:/opt/flink/usrlib # For your application JARs
+  taskmanager:
+    image: flink:1.19.0-java17
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    deploy:
+      replicas: 2 # Number of TaskManagers
+    volumes:
+    # Optional: Mount a volume to persist Flink logs or application JARs
+    # - ./flink-logs:/opt/flink/log
+    # - ./jars:/opt/flink/usrlib

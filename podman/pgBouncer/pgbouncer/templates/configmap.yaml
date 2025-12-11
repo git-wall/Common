@@ -1,0 +1,53 @@
+﻿apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "pgbouncer.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "pgbouncer.labels" . | nindent 4 }}
+data:
+  pgbouncer.ini: |-
+    [databases]
+    * = host={{ .Values.postgresql.host }} port={{ .Values.postgresql.port }}
+
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 5432
+
+    ; PRODUCTION AUTH
+    auth_type = {{ .Values.pgbouncer.authType }}
+    auth_query = {{ .Values.pgbouncer.authQuery }}
+    auth_user = {{ .Values.pgbouncer.authUser }}
+    auth_file = {{ .Values.pgbouncer.authFile }}
+    
+    ; Connection limits
+    max_client_conn = {{ .Values.pgbouncer.maxClientConn }}
+    default_pool_size = {{ .Values.pgbouncer.defaultPoolSize }}
+    min_pool_size = {{ .Values.pgbouncer.minPoolSize }}
+    reserve_pool_size = {{ .Values.pgbouncer.reservePoolSize }}
+    max_db_connections = {{ .Values.pgbouncer.maxDbConnections }}
+    max_user_connections = {{ .Values.pgbouncer.maxUserConnections }}
+
+    ; Pooling mode (transaction mode for best performance)
+    pool_mode = {{ .Values.pgbouncer.poolMode }}
+
+    ; Timeouts
+    server_idle_timeout = {{ .Values.pgbouncer.serverIdleTimeout }}
+    server_lifetime = {{ .Values.pgbouncer.serverLifetime }}
+    server_connect_timeout = {{ .Values.pgbouncer.serverConnectTimeout }}
+    query_timeout = {{ .Values.pgbouncer.queryTimeout }}
+    query_wait_timeout = {{ .Values.pgbouncer.queryWaitTimeout }}
+    client_idle_timeout = {{ .Values.pgbouncer.clientIdleTimeout }}
+    idle_transaction_timeout = {{ .Values.pgbouncer.idleTransactionTimeout }}
+
+    ; Logging (production settings)
+    log_connections = {{ .Values.pgbouncer.logConnections }}
+    log_disconnections = {{ .Values.pgbouncer.logDisconnections }}
+    log_pooler_errors = {{ .Values.pgbouncer.logPoolerErrors }}
+    stats_period = 60
+
+    ; Advanced
+    ignore_startup_parameters = {{ .Values.pgbouncer.ignoreStartupParameters }}
+    server_reset_query = {{ .Values.pgbouncer.serverResetQuery }}
+    server_reset_query_always = {{ .Values.pgbouncer.serverResetQueryAlways }}
+    application_name_add_host = {{ .Values.pgbouncer.applicationNameAddHost }}

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Fluent Bit Config Pro Editor</title>
+  <style>
+    /* --- BASE & LAYOUT --- */
+    body { margin:0; font-family:Arial,sans-serif; background:#1e1e2f; color:#eee; }
+    header { background:#2a1e3c; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; }
+    header h1 { margin:0; font-size:20px; color:#e0d7ff; flex:1; text-align:center; }
+    #main { display:flex; height:calc(100vh - 50px); position:relative; }
+    #left { flex:1; overflow:auto; padding:10px; border-right:1px solid #444; background:#2b1e3f; position:relative; }
+    #right { flex:1; overflow:auto; padding:10px; background:#1e1e2f; white-space:pre; font-family:'Fira Code', 'Consolas', monospace; border-left:1px solid #444; }
+
+    /* --- BUTTONS & UPLOAD --- */
+    button { margin:5px 5px 5px 0; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; transition:0.2s; background:#7b4de0; color:white; }
+    button:hover { transform:scale(1.02); background:#6a3ccf; }
+    #uploadConf { display:none; }
+    .upload-label {
+      background:#7b4de0;
+      color:white;
+      padding:8px 15px;
+      border-radius:5px;
+      cursor:pointer;
+      margin:5px 5px 5px 0;
+      display:inline-block;
+      transition:0.2s;
+    }
+    .upload-label:hover {
+      transform:scale(1.02);
+      background:#6a3ccf;
+    }
+
+    .header-left { flex:1; }
+    .header-right { flex:1; display:flex; justify-content:flex-end; align-items:center; }
+
+    /* --- GUIDE OVERLAY (Ẩn hoàn toàn khi chưa mở) --- */
+    #guideBtn {
+      position:fixed;
+      top:10px;
+      left:10px;
+      background:#7b4de0;
+      z-index:1001;
+    }
+    #guideOverlay {
+      position:fixed;
+      top:0;
+      left:-400px;
+      width:400px;
+      height:100%;
+      background:#2b1e3f;
+      border-right:1px solid #444;
+      padding:20px;
+      overflow:auto;
+      transition:left 0.3s ease;
+      z-index:-1;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+      visibility:hidden;
+    }
+    #guideOverlay.show {
+      left:0;
+      z-index:1000;
+      visibility:visible;
+    }
+    #guideOverlay h2 { color:#4ec9b0; }
+    #guideOverlay h3 { color:#4ec9b0; margin-top:20px; }
+    #guideOverlay h4 { color:#e0d7ff; margin-top:15px; margin-bottom:5px; }
+    #guideOverlay ul { padding-left:20px; }
+
+    /* --- BLOCK STYLES --- */
+    .block { border:1px solid #444; padding:15px; margin-bottom:15px; border-radius:10px; background:#2f1e44; position:relative; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+    .block:hover { box-shadow:0 0 12px #7b4de0; }
+    .remove-btn { position:absolute; top:8px; right:8px; background:#e03b3b; color:white; border:none; cursor:pointer; padding:4px 8px; border-radius:5px; font-weight:bold; }
+    label { display:block; margin-top:10px; font-weight:bold; color:#ccc; }
+    input, select, textarea { width:100%; margin-top:5px; padding:8px; box-sizing:border-box; border-radius:6px; border:1px solid #444; background:#3b2a54; color:#eee; resize:vertical; }
+    input:focus, select:focus, textarea:focus { outline:2px solid #4ec9b0; border-color:#4ec9b0; }
+
+    /* --- TOOLTIP & INFO --- */
+    .tooltip { color:#ff6b81; font-size:12px; margin-top:5px; }
+    .info-btn { background:#7b4de0; color:white; border-radius:50%; width:20px; height:20px; line-height:20px; text-align:center; font-size:12px; cursor:pointer; margin-left:10px; display:inline-block; }
+    .info-text { display:none; background:#3b2a54; padding:10px; border-radius:6px; margin-top:5px; font-size:13px; color:#ccc; border-left:3px solid #4ec9b0; }
+
+    /* --- AUTOCOMPLETE --- */
+    .autocomplete-list { position:absolute; background:#3b2a54; border:1px solid #7b4de0; max-height:150px; overflow-y:auto; border-radius:6px; z-index:1000; box-shadow: 0 4px 8px rgba(0,0,0,0.4); }
+    .autocomplete-item { padding:5px 10px; cursor:pointer; font-size:14px; }
+    .autocomplete-item:hover, .autocomplete-item.active { background:#7b4de0; color:white; }
+
+    /* --- PREVIEW & VALIDATION --- */
+    #preview { line-height: 1.4; }
+    .block-header { color: #e0d7ff; font-weight: bold; margin-top: 10px; }
+    .config-key { color: #4ec9b0; margin-right: 5px; }
+    .config-value { color: #f9f9f9; }
+    .key-invalid { color:#ff6b81; font-weight:bold; background-color: #3e1e24; padding:0 3px; border-radius:3px; }
+
+    #copyBtn {
+      background:#4ec9b0;
+      color:#000;
+      margin-bottom:10px;
+      font-weight:bold;
+    }
+    #copyBtn:hover {
+      background:#42b89f;
+    }
+    .copy-success {
+      background:#5cb85c !important;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left"></div>
+  <h1>Fluent Bit</h1>
+  <div class="header-right">
+    <button onclick="addBlock('input')">➕ Input</button>
+    <button onclick="addBlock('filter')">🔎 Filter</button>
+    <button onclick="addBlock('output')">📤 Output</button>
+    <button onclick="downloadConf()">⬇️ Download</button>
+    <label for="uploadConf" class="upload-label">⬆️ Upload</label>
+    <input type="file" id="uploadConf" onchange="loadConf(event)">
+  </div>
+</header>
+
+<button id="guideBtn" onclick="toggleGuide()">Guide</button>
+<div id="guideOverlay">
+  <h2>Fluent Bit Quick Guide</h2>
+  <p>Hướng dẫn dành cho người mới bắt đầu:</p>
+  <ul>
+    <li><b>INPUT</b>: Nguồn log (Path, Parser, Tag).</li>
+    <li><b>FILTER</b>: Xử lý log (thêm key=value, K8S_Logging_Parser).</li>
+    <li><b>OUTPUT</b>: Nơi gửi log (Host, Port, Index, Type).</li>
+    <li>Advanced Options: key value. Sử dụng **autocomplete** (bắt đầu gõ) để tránh lỗi key.</li>
+    <li>Preview realtime: bên phải hiển thị file .conf đầy đủ, highlight key hợp lệ xanh, key lỗi đỏ.</li>
+    <li>Nút info <i>i</i>: giải thích từng block.</li>
+  </ul>
+
+  <h3>📝 Template đầy đủ:</h3>
+
+  <h4>1. INPUT - Đọc log từ file</h4>
+  <pre style="background:#1e1e2f; padding:10px; border-radius:5px; font-size:12px;">
+[INPUT]
+    Name tail
+    Path /var/log/containers/*.log
+    Parser docker
+    Tag kube.*
+    Refresh_Interval 5
+    Mem_Buf_Limit 5MB
+    Skip_Long_Lines On
+    DB /var/log/flb_kube.db
+  </pre>
+
+  <h4>2. FILTER - Kubernetes metadata</h4>
+  <pre style="background:#1e1e2f; padding:10px; border-radius:5px; font-size:12px;">
+[FILTER]
+    Name kubernetes
+    Match kube.*
+    Kube_URL https://kubernetes.default.svc:443
+    Kube_CA_File /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+    Kube_Token_File /var/run/secrets/kubernetes.io/serviceaccount/token
+    Merge_Log On
+    K8S_Logging_Parser On
+  </pre>
+
+  <h4>3. FILTER - Modify/Add fields</h4>
+  <pre style="background:#1e1e2f; padding:10px; border-radius:5px; font-size:12px;">
+[FILTER]
+    Name record_modifier
+    Match *
+    Record hostname ${HOSTNAME}
+    Record cluster_name production
+    Remove _p
+  </pre>
+
+  <h4>4. OUTPUT - Elasticsearch</h4>
+  <pre style="background:#1e1e2f; padding:10px; border-radius:5px; font-size:12px;">
+[OUTPUT]
+    Name es
+    Match kube.*
+    Host elasticsearch.logging.svc
+    Port 9200
+    Index kubernetes-logs
+    Type _doc
+    Logstash_Format On
+    Logstash_Prefix k8s
+    Retry_Limit 5
+    storage.type filesystem
+  </pre>
+
+  <h4>5. OUTPUT - HTTP endpoint</h4>
+  <pre style="background:#1e1e2f; padding:10px; border-radius:5px; font-size:12px;">
+[OUTPUT]
+    Name http
+    Match *
+    Host api.example.com
+    Port 443
+    URI /logs
+    Format json
+    tls On
+    tls.verify Off
+  </pre>
+
+  <p style="margin-top:15px; color:#ccc;"><b>💡 Tips:</b></p>
+  <ul style="font-size:13px;">
+    <li>Dùng Tag để phân loại log (kube.*, app.*, nginx.*)</li>
+    <li>Match trong FILTER/OUTPUT phải khớp với Tag trong INPUT</li>
+    <li>Parser docker/cri/json xử lý format log container</li>
+    <li>Mem_Buf_Limit giới hạn bộ nhớ buffer</li>
+    <li>storage.type filesystem: persistent khi restart</li>
+  </ul>
+</div>
+
+<div id="main">
+  <div id="left"></div>
+  <div id="right">
+    <h2>Preview & Validation</h2>
+    <button id="copyBtn" onclick="copyPreview()">📋 Copy Config</button>
+    <div id="preview"></div>
+  </div>
+</div>
+
+<script>
+  const validKeys = ['Name', 'Match', 'Path', 'Parser', 'Tag', 'Host', 'Port', 'Index', 'Type', 'Add', 'Remove', 'Key', 'Value', 'Merge_Log', 'K8S_Logging_Parser', 'Buffer_Size', 'Mem_Buf_Limit', 'storage.type', 'Log_Level', 'Refresh_Interval', 'Skip_Long_Lines', 'DB', 'Kube_URL', 'Kube_CA_File', 'Kube_Token_File', 'Record', 'Logstash_Format', 'Logstash_Prefix', 'Retry_Limit', 'URI', 'Format', 'tls', 'tls.verify'];
+  let container = document.getElementById('left');
+  let preview = document.getElementById('preview');
+
+  // --- Guide Functions ---
+  function toggleGuide() {
+    let guide = document.getElementById('guideOverlay');
+    guide.classList.toggle('show');
+  }
+
+  function toggleInfo(btn) {
+    let info = btn.parentNode.nextElementSibling;
+    info.style.display = (info.style.display === 'block') ? 'none' : 'block';
+  }
+
+  // --- Block Management ---
+  function addBlock(type, data = {}) {
+    let div = document.createElement('div');
+    div.className = 'block';
+    let html = `<button class="remove-btn" onclick="this.parentNode.remove();updatePreview()">X</button>`;
+    html += `<h3>[${type.toUpperCase()}]<button class="info-btn" onclick="toggleInfo(this)">i</button></h3>`;
+    html += `<div class="info-text">`;
+    if (type === 'input') html += 'Input block: nguồn log, Parser, Tag, Path. Cần Name và Match.';
+    else if (type === 'filter') html += 'Filter block: match tag, modify logs, thêm key=value, ví dụ: kubernetes, record_modifier.';
+    else if (type === 'output') html += 'Output block: nơi gửi log, Host, Port, Index. Cần Name và Match.';
+    html += `</div>`;
+
+    html += `<label>Name <span style="color:red;">*</span>: <input value="${data.Name || ''}" oninput="updatePreview()"></label>`;
+    html += `<label>Match <span style="color:red;">*</span>: <input value="${data.Match || ''}" oninput="updatePreview()"></label>`;
+    html += `<label>Advanced Options (key value):</label>`;
+    html += `<textarea rows="6" oninput="updatePreview()" onkeydown="handleKey(event)" onkeyup="handleKeyup(event)">${data.Options || ''}</textarea>`;
+    html += `<div class="tooltip"></div><div class="autocomplete-list" style="display:none;"></div>`;
+
+    div.innerHTML = html;
+    div.dataset.type = type;
+    container.appendChild(div);
+    updatePreview();
+  }
+
+  // --- Config Generation ---
+  function generateConfigString() {
+    let blocks = container.querySelectorAll('.block');
+    let conf = '';
+    blocks.forEach(block => {
+      let type = block.dataset.type;
+      let inputs = block.querySelectorAll('input');
+      let textarea = block.querySelector('textarea');
+
+      conf += `[${type.toUpperCase()}]\n`;
+
+      if (inputs[0] && inputs[0].value.trim()) conf += `    Name ${inputs[0].value.trim()}\n`;
+      if (inputs[1] && inputs[1].value.trim()) conf += `    Match ${inputs[1].value.trim()}\n`;
+
+      if (textarea && textarea.value) {
+        textarea.value.split('\n').forEach(line => {
+          const trimmedLine = line.trim();
+          if (trimmedLine) {
+            conf += `    ${trimmedLine}\n`;
+          }
+        });
+      }
+      conf += '\n';
+    });
+    return conf;
+  }
+
+  // --- Preview & Validation ---
+  function updatePreview() {
+    let blocks = container.querySelectorAll('.block');
+    let html = '';
+    blocks.forEach(block => {
+      let type = block.dataset.type;
+      let inputs = block.querySelectorAll('input');
+      let textarea = block.querySelector('textarea');
+      let tooltip = block.querySelector('.tooltip');
+
+      tooltip.innerHTML = '';
+      let hasInvalidKey = false;
+
+      html += `<span class="block-header">[${type.toUpperCase()}]</span>\n`;
+
+      if (inputs[0] && inputs[0].value.trim()) {
+        html += `    <span class="config-key">Name</span> <span class="config-value">${inputs[0].value.trim()}</span>\n`;
+      }
+      if (inputs[1] && inputs[1].value.trim()) {
+        html += `    <span class="config-key">Match</span> <span class="config-value">${inputs[1].value.trim()}</span>\n`;
+      }
+
+      if (textarea && textarea.value) {
+        textarea.value.split('\n').forEach(line => {
+          let trimmedLine = line.trim();
+          if (!trimmedLine) return;
+
+          const parts = trimmedLine.split(/(\s+)/).filter(p => p.trim().length > 0);
+          const key = parts[0];
+          const value = parts.slice(1).join(' ');
+
+          if (key && !['Name', 'Match'].includes(key) && !validKeys.includes(key)) {
+            html += `    <span class="config-key key-invalid">${key}</span> ${value}  <-- INVALID KEY\n`;
+            hasInvalidKey = true;
+          } else {
+            html += `    <span class="config-key">${key}</span> <span class="config-value">${value}</span>\n`;
+          }
+        });
+      }
+      html += '\n';
+
+      if (hasInvalidKey) {
+        tooltip.innerHTML = '<span class="key-invalid">Lỗi: Tồn tại khóa không hợp lệ (INVALID KEY).</span>';
+      }
+    });
+    preview.innerHTML = html;
+  }
+
+  // --- File Handling ---
+  function downloadConf() {
+    const conf = generateConfigString();
+    const blob = new Blob([conf], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'fluentbit.conf';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function loadConf(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) { parseConf(e.target.result); }
+    reader.readAsText(file);
+  }
+
+  function parseConf(text) {
+    container.innerHTML = '';
+    const lines = text.split('\n');
+    let current = null;
+    let optionsBuffer = [];
+
+    const flushCurrent = () => {
+      if (current) {
+        current.data.Options = optionsBuffer.join('\n');
+        addBlock(current.type, current.data);
+      }
+      optionsBuffer = [];
+      current = null;
+    };
+
+    lines.forEach(line => {
+      line = line.trim();
+      if (!line || line.startsWith('#')) return;
+
+      if (line.startsWith('[')) {
+        flushCurrent();
+        const blockType = line.substring(1, line.length - 1).toLowerCase();
+        if (['input', 'filter', 'output'].includes(blockType)) {
+          current = { type: blockType, data: {} };
+        }
+      } else if (current) {
+        const firstSpaceIdx = line.indexOf(' ');
+        if (firstSpaceIdx > 0) {
+          let key = line.substring(0, firstSpaceIdx).trim();
+          let val = line.substring(firstSpaceIdx + 1).trim();
+
+          if (key === 'Name') current.data.Name = val;
+          else if (key === 'Match') current.data.Match = val;
+          else optionsBuffer.push(line);
+        } else {
+          optionsBuffer.push(line);
+        }
+      }
+    });
+    flushCurrent();
+  }
+
+  // --- Autocomplete Logic ---
+  let activeTextarea = null;
+  let currentSuggestions = [];
+  let currentIndex = -1;
+
+  function getCursorContext(ta) {
+    let cursor = ta.selectionStart;
+    let val = ta.value.substring(0, cursor);
+    let lines = val.split('\n');
+    let line = lines[lines.length - 1];
+
+    let match = line.match(/^(\s*|[\t\s]*)?([a-zA-Z_.]*)$/);
+    if (match) {
+      return {
+        prefix: match[2],
+        start: cursor - match[2].length,
+        end: cursor
+      };
+    }
+    return null;
+  }
+
+  function handleKeyup(e) {
+    let ta = e.target;
+    if (ta.tagName !== 'TEXTAREA') return;
+
+    activeTextarea = ta;
+
+    if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(e.key)) return;
+
+    let context = getCursorContext(ta);
+    if (context && context.prefix.length > 0) {
+      showAutocomplete(context.prefix, ta);
+    } else {
+      hideAutocomplete(ta);
+    }
+  }
+
+  function handleKey(e) {
+    let ta = e.target;
+    if (ta.tagName !== 'TEXTAREA') return;
+
+    let list = ta.parentNode.querySelector('.autocomplete-list');
+    if (list.style.display === 'block') {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        currentIndex = (currentIndex + 1) % list.children.length;
+        updateActive(list);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        currentIndex = (currentIndex - 1 + list.children.length) % list.children.length;
+        updateActive(list);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (currentIndex !== -1) {
+          selectItem(list.children[currentIndex]);
+        } else {
+          hideAutocomplete(ta);
+        }
+      } else if (e.key === 'Escape') {
+        hideAutocomplete(ta);
+      }
+    }
+  }
+
+  function showAutocomplete(prefix, ta) {
+    let list = ta.parentNode.querySelector('.autocomplete-list');
+    list.innerHTML = '';
+
+    currentSuggestions = validKeys.filter(k => k.toLowerCase().startsWith(prefix.toLowerCase()) && !['Name', 'Match'].includes(k));
+
+    if (currentSuggestions.length === 0) {
+      hideAutocomplete(ta);
+      return;
+    }
+
+    currentSuggestions.forEach(k => {
+      let div = document.createElement('div');
+      div.className = 'autocomplete-item';
+      div.textContent = k;
+      div.onmousedown = (e) => {
+        e.preventDefault();
+        insertAutocomplete(ta, k);
+        hideAutocomplete(ta);
+      }
+      list.appendChild(div);
+    });
+
+    list.style.display = 'block';
+    currentIndex = 0;
+    updateActive(list);
+
+    const rect = ta.getBoundingClientRect();
+    list.style.top = `${ta.offsetHeight - 5}px`;
+    list.style.left = '0px';
+    list.style.width = `${rect.width}px`;
+  }
+
+  function updateActive(list) {
+    Array.from(list.children).forEach((c, i) => c.classList.remove('active'));
+    if (list.children[currentIndex]) list.children[currentIndex].classList.add('active');
+  }
+
+  function selectItem(item) {
+    insertAutocomplete(activeTextarea, item.textContent);
+  }
+
+  function insertAutocomplete(ta, value) {
+    let context = getCursorContext(ta);
+    if (!context) return;
+
+    let text = ta.value;
+
+    ta.value = text.substring(0, context.start) + value + ' ' + text.substring(context.end);
+
+    let newCursorPosition = context.start + value.length + 1;
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = newCursorPosition;
+
+    updatePreview();
+  }
+
+  function hideAutocomplete(ta) {
+    let list = ta.parentNode.querySelector('.autocomplete-list');
+    if (list) list.style.display = 'none';
+    currentIndex = -1;
+  }
+
+  // --- Copy Preview Function ---
+  function copyPreview() {
+    const config = generateConfigString();
+    navigator.clipboard.writeText(config).then(() => {
+      const btn = document.getElementById('copyBtn');
+      const originalText = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      btn.classList.add('copy-success');
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove('copy-success');
+      }, 2000);
+    }).catch(err => {
+      alert('Không thể sao chép. Vui lòng thử lại!');
+      console.error('Copy failed:', err);
+    });
+  }
+
+  // --- Initialization ---
+  addBlock('input');
+  addBlock('filter');
+  addBlock('output');
+</script>
+</body>
+</html>

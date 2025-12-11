@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -44,21 +43,24 @@ public class BasicSecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    // when use filter and set data to session, need to disable csrf, formLogin, httpBasic, oauth2Login
+    // if you need session, set sessionCreationPolicy to IF_REQUIRED or ALWAYS
+    // REST API usually set to STATELESS
+    // FORM LOGIN usually set to IF_REQUIRED or ALWAYS
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors()
-                .and()
-                .csrf().disable()
-                .formLogin(Customizer.withDefaults())
-                .oauth2Login(Customizer.withDefaults())
-                .addFilterBefore(authBeforeFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeRequests(urlRegistry)
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint(RequestUtils::authEntryPointHandler)
-                        .accessDeniedHandler(RequestUtils::accessDeniedHandler)
-                )
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.cors().and()
+            .csrf().disable()
+            .httpBasic().disable()
+            .formLogin().disable()
+            .oauth2Login().disable()
+            .addFilterBefore(authBeforeFilter, UsernamePasswordAuthenticationFilter.class)
+            .authorizeHttpRequests(urlRegistry)
+            .exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(RequestUtils::authEntryPointHandler)
+                .accessDeniedHandler(RequestUtils::accessDeniedHandler)
+            )
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         return http.build();
     }

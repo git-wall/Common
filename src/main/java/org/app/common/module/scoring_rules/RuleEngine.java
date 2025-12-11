@@ -20,6 +20,7 @@ import static org.app.common.module.scoring_rules.formula.ExpressionParser.*;
 // uppercase for combine all
 @Slf4j
 public class RuleEngine {
+    private RuleEngine() {}
 
     /**
      * Evaluates a list of rules against a given request object and returns the result of the first rule

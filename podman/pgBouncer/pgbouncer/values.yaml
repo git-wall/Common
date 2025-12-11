@@ -1,0 +1,131 @@
+﻿# Production values for pgbouncer
+replicaCount: 2
+
+image:
+  repository: docker.io/edoburu/pgbouncer
+  tag: "v1.24.1-p1"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 5432
+  nodePort: 30441
+
+postgresql:
+  host: postgres18-service
+  port: 5432
+  database: "*"
+
+auth:
+  existingSecret: "pgbouncer-userlist"
+  username: "admin"
+  password: "admin"
+
+# PRODUCTION PGBOUNCER SETTINGS
+pgbouncer:
+  # Transaction pooling - best for microservices
+  poolMode: transaction
+  
+  # Pool sizes (tune based on your workload)
+  defaultPoolSize: 10
+  minPoolSize: 10
+  reservePoolSize: 5
+  maxClientConn: 100
+  maxDbConnections: 25
+  maxUserConnections: 25
+  
+  authUser: admin
+  authQuery: "SELECT usename, passwd FROM pg_shadow WHERE usename=$1"
+  authType: trust # nên để trust dể ủy quyền xác thực cho db vì đó vốn dĩ là việc của nó pgbouner chỉ là proxy pool ko nên dùng scram-sha-256
+  authFile: /etc/pgbouncer/userlist.txt
+  
+  # Timeouts (production-tuned)
+  serverIdleTimeout: 600
+  serverLifetime: 3600
+  serverConnectTimeout: 15
+  queryTimeout: 0
+  queryWaitTimeout: 120
+  clientIdleTimeout: 0
+  idleTransactionTimeout: 0
+  
+  # Logging
+  logConnections: 1
+  logDisconnections: 1
+  logPoolerErrors: 1
+  
+  # Advanced
+  ignoreStartupParameters: extra_float_digits
+  serverResetQuery: DISCARD ALL
+  serverResetQueryAlways: 0
+  applicationNameAddHost: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 256m
+    memory: 256Mi
+
+livenessProbe:
+  enabled: true
+  tcpSocket:
+    port: 5432
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  enabled: true
+  tcpSocket:
+    port: 5432
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+# Production HPA settings
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Always enable PDB in production
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+  capabilities:
+    drop:
+      - ALL
+
+# Annotations KHÔNG ảnh hưởng đến cách Pod chạy, nhưng có thể dùng bởi:
+#Monitoring tools (Prometheus, Datadog, etc.)
+#Sidecar injectors (như Istio, Linkerd)
+#CI/CD pipelines hoặc audit log
+podAnnotations: {}
+
+nodeSelector: {}
+tolerations: []
+
+# Anti-affinity to spread pods across nodes
+# Phân bổ đều các pod cho các node(vm -  server) tránh việc server down thì service vẫn hoạt động do còn pod khác trên node khác hoạt động
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - pgbouncer
+          topologyKey: kubernetes.io/hostname

@@ -3,131 +3,271 @@ package org.app.common.utils;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.NonNull;
 
-import java.text.SimpleDateFormat;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JacksonUtils {
 
-    protected static final ObjectMapper MAPPER;
-    // Instead, expose immutable reader and writer for advanced use cases.
-    protected static final ObjectReader READER;
-    protected static final ObjectWriter WRITER;
-    protected static final ObjectWriter WRITER_PRETTY;
+    // Default mapper
+    protected static final ObjectMapper DEFAULT_MAPPER;
+    protected static final ObjectReader DEFAULT_READER;
+    protected static final ObjectWriter DEFAULT_WRITER;
+    protected static final ObjectWriter DEFAULT_WRITER_PRETTY;
     protected static final TypeFactory TF;
 
-    private JacksonUtils() {
-    }
+    // Mapper registry for reusable custom mappers
+    private static final Map<String, ObjectMapper> MAPPER_REGISTRY = new ConcurrentHashMap<>();
 
-    public static ObjectMapper mapper() {
-        return MAPPER;
-    }
+    // Pre-configured mapper names
+    public static final String MAPPER_CASE_INSENSITIVE = "case_insensitive";
+    public static final String MAPPER_SNAKE_CASE = "snake_case";
+    public static final String MAPPER_FAIL_ON_UNKNOWN = "fail_on_unknown";
 
     static {
-        MAPPER = new ObjectMapper()
+        // Initialize default mapper
+        DEFAULT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        READER = MAPPER.reader();
-        WRITER = MAPPER.writer();
-        WRITER_PRETTY = MAPPER.writerWithDefaultPrettyPrinter();
-        TF = MAPPER.getTypeFactory();
+            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
+            .disable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+            .disable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+
+        DEFAULT_READER = DEFAULT_MAPPER.reader();
+        DEFAULT_WRITER = DEFAULT_MAPPER.writer();
+        DEFAULT_WRITER_PRETTY = DEFAULT_MAPPER.writerWithDefaultPrettyPrinter();
+        TF = DEFAULT_MAPPER.getTypeFactory();
+
+        // Register pre-configured mappers
+        registerPreconfiguredMappers();
+    }
+
+    private static void registerPreconfiguredMappers() {
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        // Case insensitive mapper
+        registerMapper(MAPPER_CASE_INSENSITIVE, JsonMapper.builder()
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .addModule(javaTimeModule)
+            .build());
+
+        // Snake case mapper
+        registerMapper(MAPPER_SNAKE_CASE, new ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL));
+
+        // Strict mapper (fail on unknown properties)
+        registerMapper(MAPPER_FAIL_ON_UNKNOWN, new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL));
+    }
+
+    // ============ MAPPER REGISTRY MANAGEMENT ============
+
+    /**
+     * Register a custom mapper with a unique name
+     */
+    public static void registerMapper(String name, ObjectMapper mapper) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Mapper name cannot be null or empty");
+        }
+        MAPPER_REGISTRY.put(name, mapper);
+        log.debug("Registered mapper: {}", name);
     }
 
     /**
-     * Returns an ObjectReader for advanced use cases.
+     * Register a mapper with custom configuration
      */
-    public static ObjectReader reader() {
-        return READER;
+    public static void registerMapper(String name, Consumer<ObjectMapper> configurator) {
+        ObjectMapper mapper = new ObjectMapper();
+        configurator.accept(mapper);
+        registerMapper(name, mapper);
     }
 
     /**
-     * Returns an ObjectWriter for advanced use cases.
+     * Get a registered mapper by name
      */
-    public static ObjectWriter writer() {
-        return WRITER;
+    public static ObjectMapper getMapper(String name) {
+        ObjectMapper mapper = MAPPER_REGISTRY.get(name);
+        if (mapper == null) {
+            throw new IllegalArgumentException("Mapper not found: " + name);
+        }
+        return mapper;
+    }
+
+    /**
+     * Get default mapper
+     */
+    public static ObjectMapper mapper() {
+        return DEFAULT_MAPPER;
+    }
+
+    /**
+     * Check if a mapper exists
+     */
+    public static boolean hasMapper(String name) {
+        return MAPPER_REGISTRY.containsKey(name);
+    }
+
+    /**
+     * Get all registered mapper names
+     */
+    public static Set<String> getRegisteredMapperNames() {
+        return new HashSet<>(MAPPER_REGISTRY.keySet());
+    }
+
+    /**
+     * Remove a mapper from registry
+     */
+    public static void unregisterMapper(String name) {
+        MAPPER_REGISTRY.remove(name);
+        log.debug("Unregistered mapper: {}", name);
+    }
+
+    // ============ READ OPERATIONS WITH MAPPER SELECTION ============
+
+    @SneakyThrows
+    public static <T> T readValue(Object json, Class<T> clazz) {
+        return readValue(json, clazz, null);
+    }
+
+    @SneakyThrows
+    public static <T> T readValue(Object json, Class<T> clazz, String mapperName) {
+        try {
+            ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+            return mapper.readValue(json.toString(), clazz);
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException("Can not read to Class " + clazz.getSimpleName(), e);
+        }
     }
 
     @SneakyThrows
     public static <T> T readValue(Object json, JavaType type) {
-        return MAPPER.readValue(json.toString(), type);
+        return readValue(json, type, null);
     }
 
     @SneakyThrows
-    public static <T> T readValue(Object json, Class<T> clazz) {
-        return MAPPER.readValue(json.toString(), clazz);
+    public static <T> T readValue(Object json, JavaType type, String mapperName) {
+        try {
+            ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+            return mapper.readValue(json.toString(), type);
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException("Can not read to Type " + type.getRawClass().getSimpleName(), e);
+        }
     }
 
     @SneakyThrows
     public static <K, V> Map<K, V> readToMap(Object json, Class<K> key, Class<V> value) {
-        return MAPPER.readValue(json.toString(), typeOf(Map.class, key, value));
+        return readToMap(json, key, value, null);
+    }
+
+    @SneakyThrows
+    public static <K, V> Map<K, V> readToMap(Object json, Class<K> key, Class<V> value, String mapperName) {
+        try {
+            ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+            return mapper.readValue(json.toString(), typeOf(Map.class, key, value));
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException(
+                String.format("Can not read to Map<%s, %s>", key.getSimpleName(), value.getSimpleName()), e);
+        }
     }
 
     @SneakyThrows
     public static <T> List<T> readToList(Object json, Class<T> elementType) {
-        return MAPPER.readValue(json.toString(), typeOf(List.class, elementType));
+        return readToList(json, elementType, null);
     }
+
+    @SneakyThrows
+    public static <T> List<T> readToList(Object json, Class<T> elementType, String mapperName) {
+        try {
+            ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+            return mapper.readValue(json.toString(), typeOf(List.class, elementType));
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException(String.format("Can not read to List<%s>", elementType.getSimpleName()), e);
+        }
+    }
+
+    // ============ CONVERT OPERATIONS WITH MAPPER SELECTION ============
 
     @SneakyThrows
     public static <T> T convert(Object json, Class<T> clazz) {
-        return MAPPER.convertValue(json, clazz);
+        return convert(json, clazz, null);
     }
 
     @SneakyThrows
-    public static <T> T convert(Object json, JavaType type) {
-        return MAPPER.convertValue(json.toString(), type);
+    public static <T> T convert(Object json, Class<T> clazz, String mapperName) {
+        try {
+            ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+            return mapper.convertValue(json, clazz);
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException("Can not convert to Class " + clazz.getSimpleName(), e);
+        }
     }
 
     public static <K, V> Map<K, V> convertMap(Object json, Class<K> key, Class<V> value) {
-        return MAPPER.convertValue(json, typeOf(Map.class, key, value));
+        return convertMap(json, key, value, null);
+    }
+
+    public static <K, V> Map<K, V> convertMap(Object json, Class<K> key, Class<V> value, String mapperName) {
+        try {
+            ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+            return mapper.convertValue(json, typeOf(Map.class, key, value));
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException(
+                String.format("Can not convert to Map<%s, %s>", key.getSimpleName(), value.getSimpleName()), e);
+        }
     }
 
     public static <T> List<T> convertList(Object json, Class<T> elementType) {
-        return MAPPER.convertValue(json, typeOf(List.class, elementType));
+        return convertList(json, elementType, null);
     }
 
-    /**
-     * Dynamic conversion based on runtime class name
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T convertByClassName(Object source, String targetClassName) {
+    public static <T> List<T> convertList(Object json, Class<T> elementType, String mapperName) {
         try {
-            Class<T> targetClass = (Class<T>) Class.forName(targetClassName);
-            return convert(source, targetClass);
-
-        } catch (ClassNotFoundException e) {
-            throw new ConversionException("Target class not found: " + targetClassName, e);
+            ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+            return mapper.convertValue(json, typeOf(List.class, elementType));
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException(String.format("Can not convert to List<%s>", elementType.getSimpleName()), e);
         }
     }
 
-    //-----------------------------JAVA TYPE---------------------------------------//
-    // with java type it still has cache, so we not need to create cache it makes flow is double caching
+    // ============ JAVA TYPE FACTORY ============
 
-    /**
-     * Builds a JavaType for a simple type or nested generic type.
-     * <pre> {@code
-     *   typeOf(List.class, String.class) -> List<String>
-     *   typeOf(Map.class, String.class, Integer.class) -> Map<String, Integer>
-     *   typeOf(Map.class, String.class, List.class, MyDto.class) -> Map<String, List<MyDto>>
-     * }</>
-     */
+    public static JavaType mapType(Class<?> key, Class<?> value) {
+        return TF.constructMapType(Map.class, key, value);
+    }
+
+    public static JavaType listType(Class<?> elementType) {
+        return TF.constructCollectionType(List.class, elementType);
+    }
+
+    public static JavaType setType(Class<?> elementType) {
+        return TF.constructCollectionType(Set.class, elementType);
+    }
+
     public static JavaType typeOf(Class<?> mainType, Class<?>... parameterTypes) {
         if (parameterTypes == null || parameterTypes.length == 0) {
-            // No generics, just a simple type
-            return typeOf(mainType);
+            return TF.constructType(mainType);
         }
 
-        // Recursively resolve nested generics
         JavaType[] javaParamTypes = new JavaType[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
             javaParamTypes[i] = TF.constructType(parameterTypes[i]);
@@ -136,89 +276,61 @@ public class JacksonUtils {
         return TF.constructParametricType(mainType, javaParamTypes);
     }
 
-    //----------------------------------------------------------------------------//
-
-    public static ObjectNode createObjectNode() {
-        return MAPPER.createObjectNode();
-    }
-
-    /**
-     * Get an object as JsonNode for manipulation
-     */
-    public JsonNode getAsJsonNode(Object source) {
-        if (source == null) {
-            return MAPPER.nullNode();
-        }
-        return MAPPER.valueToTree(source);
-    }
-
-    /**
-     * Convert JsonNode to target class
-     */
-    @SneakyThrows
-    public <T> T convertJsonNode(JsonNode jsonNode, Class<T> targetClass) {
-        try {
-            return MAPPER.treeToValue(jsonNode, targetClass);
-        } catch (Exception e) {
-            throw new ConversionException("Failed to convert JsonNode to " + targetClass.getSimpleName(), e);
-        }
-    }
+    // ============ WRITE OPERATIONS ============
 
     @SneakyThrows
     public static String writeValueAsString(Object o) {
-        return MAPPER.writeValueAsString(o);
+        return writeValueAsString(o, null);
     }
 
-    /**
-     * increase from default of 20 MB to 20 MiB (note megabytes vs mebibyte)
-     */
-    public static ObjectMapper newMapperMax20MIB() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.getFactory().setStreamReadConstraints(
-            StreamReadConstraints.defaults().rebuild()
-                .maxStringLength(20 * 1024 * 1024)
-                .build()
-        );
-        return mapper;
-    }
-
-    @NonNull
-    public static ObjectMapper newMapperWithCaseInsensitive(String dateFormat) {
-        ObjectMapper mapper = new ObjectMapper()
-            .enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES)
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        mapper.setDateFormat(new SimpleDateFormat(dateFormat));
-        return mapper;
-    }
-
-    public static ObjectMapper newMapperWithCaseInsensitive() {
-        return JsonMapper.builder()
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-            .build();
+    @SneakyThrows
+    public static String writeValueAsString(Object o, String mapperName) {
+        ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+        return mapper.writeValueAsString(o);
     }
 
     @SneakyThrows
     public static String toJson(Object data) {
+        return toJson(data, null);
+    }
+
+    @SneakyThrows
+    public static String toJson(Object data, String mapperName) {
         try {
-            return WRITER_PRETTY.writeValueAsString(data);
+            ObjectWriter writer = mapperName == null
+                ? DEFAULT_WRITER_PRETTY
+                : getMapper(mapperName).writerWithDefaultPrettyPrinter();
+            return writer.writeValueAsString(data);
         } catch (InvalidDefinitionException e) {
             return data.toString();
         } catch (JsonProcessingException e) {
             log.error("Error occurred while parsing json", e);
-            // handler more case has special char that make JSON invalid and not parseable and error
-            return WRITER_PRETTY.writeValueAsString(e).replace('%', ' ');
+            return DEFAULT_WRITER_PRETTY.writeValueAsString(e).replace('%', ' ');
         }
+    }
+
+    // ============ UTILITY METHODS (unchanged) ============
+
+    public static ObjectReader reader() {
+        return DEFAULT_READER;
+    }
+
+    public static ObjectWriter writer() {
+        return DEFAULT_WRITER;
+    }
+
+    public static ObjectNode createObjectNode() {
+        return DEFAULT_MAPPER.createObjectNode();
     }
 
     @SneakyThrows
     public static JsonNode readTree(String data) {
-        return MAPPER.readTree(data);
+        return DEFAULT_MAPPER.readTree(data);
     }
 
     public static void replaceNullStrings(JsonNode node) {
         if (node.isObject()) {
-            node.fields().forEachRemaining(entry -> {
+            node.properties().forEach(entry -> {
                 JsonNode childNode = entry.getValue();
                 if (childNode.isTextual() && childNode.textValue().equalsIgnoreCase("null")) {
                     ((ObjectNode) node).putNull(entry.getKey());
@@ -233,24 +345,29 @@ public class JacksonUtils {
         }
     }
 
-    /**
-     * Deep clone object
-     */
     public <T> T deepClone(T source) {
         if (source == null) {
             return null;
         }
-
         @SuppressWarnings("unchecked")
         Class<T> clazz = (Class<T>) source.getClass();
         return convert(source, clazz);
     }
 
-    /**
-     * Custom exception for conversion errors
-     */
+    // ============ EXCEPTIONS ============
+
     public static class ConversionException extends RuntimeException {
+        private static final long serialVersionUID = 2594071083304122225L;
+
         public ConversionException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class ReadException extends RuntimeException {
+        private static final long serialVersionUID = 2594071083304122225L;
+
+        public ReadException(String message, Throwable cause) {
             super(message, cause);
         }
     }

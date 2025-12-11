@@ -1,18 +1,10 @@
 openapi: 3.0.3
 info:
   title: API Title
-  description: |
+  description:
     A detailed description of your API.
     You can use Markdown here.
   version: 1.0.0
-  termsOfService: https://example.com/terms/
-  contact:
-    name: API Support
-    url: https://example.com/support
-    email: support@example.com
-  license:
-    name: Apache 2.0
-    url: https://www.apache.org/licenses/LICENSE-2.0.html
 
 servers:
   - url: https://api.example.com/v1
@@ -96,7 +88,6 @@ paths:
           $ref: '#/components/responses/ServerError'
       security:
         - bearerAuth: []
-
   /users/{userId}:
     get:
       summary: Returns a user by ID

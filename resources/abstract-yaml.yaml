@@ -1,0 +1,11 @@
+default-config: &default
+  retries: 2
+  timeout: 10s
+
+service-a:
+  <<: *default
+  endpoint: /users
+
+service-b:
+  <<: *default
+  endpoint: /orders

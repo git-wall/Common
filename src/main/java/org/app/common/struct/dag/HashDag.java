@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * A DAG is a graph with directed edges and no cycles, making it suitable for
  * representing dependencies, workflows, or any hierarchical relationships.
  * </p>
- * 
+ *
  * @param <E> the type of elements in this DAG
  */
 public class HashDag<E> implements Dag<E> {
@@ -28,11 +28,11 @@ public class HashDag<E> implements Dag<E> {
 
     private int size;
 
-   /**
+    /**
      * Constructs a HashDag with the specified initial capacity and load factor.
      *
      * @param initialCapacity the initial capacity of the HashMap
-     * @param loadFactor the load factor of the HashMap
+     * @param loadFactor      the load factor of the HashMap
      */
     public HashDag(int initialCapacity, float loadFactor) {
         this.map = new HashMap<>(initialCapacity, loadFactor);
@@ -42,14 +42,14 @@ public class HashDag<E> implements Dag<E> {
      * Constructs an empty HashDag with default initial capacity and load factor.
      */
     public HashDag() {
-        this.map = new HashMap<>(16, 0.75f);
+        this.map = new HashMap<>(8, 0.75f);
     }
 
     /**
      * Adds a directed edge from key to value in this DAG.
      * If the key or value doesn't exist in the DAG, it will be added.
      *
-     * @param key the source node
+     * @param key   the source node
      * @param value the target node
      * @return true if the edge was added, false if it already existed
      */
@@ -64,7 +64,7 @@ public class HashDag<E> implements Dag<E> {
      * Adds multiple directed edges from key to each value in the collection.
      * If the key or any value doesn't exist in the DAG, it will be added.
      *
-     * @param key the source node
+     * @param key    the source node
      * @param values the collection of target nodes
      * @return true if the operation was successful
      * @throws NullPointerException if key is null
@@ -90,10 +90,10 @@ public class HashDag<E> implements Dag<E> {
     public Deque<E> getRoots() {
         // More efficient implementation using streams
         return map.keySet()
-                .stream()
-                .filter(key -> map.values().stream()
-                        .noneMatch(edges -> edges.contains(key)))
-                .collect(Collectors.toCollection(LinkedList::new));
+            .stream()
+            .filter(key -> map.values().stream()
+                .noneMatch(edges -> edges.contains(key)))
+            .collect(Collectors.toCollection(LinkedList::new));
     }
 
     /**
@@ -135,8 +135,8 @@ public class HashDag<E> implements Dag<E> {
     @Override
     public Deque<Edge<E>> getRootTrees() {
         return getRoots().stream()
-                .map(r -> newNode(r, getChildEdges(r)))
-                .collect(Collectors.toCollection(LinkedList::new));
+            .map(r -> newNode(r, getChildEdges(r)))
+            .collect(Collectors.toCollection(LinkedList::new));
     }
 
     /**
@@ -197,7 +197,7 @@ public class HashDag<E> implements Dag<E> {
      * @return an array containing all nodes in this DAG
      */
     @Override
-    public Object [] toArray() {
+    public Object[] toArray() {
         return map.keySet().toArray();
     }
 
@@ -208,7 +208,7 @@ public class HashDag<E> implements Dag<E> {
      * @return an array containing all nodes in this DAG
      */
     @Override
-    public <T> T [] toArray(T [] array) {
+    public <T> T[] toArray(T[] array) {
         return map.keySet().toArray(array);
     }
 
@@ -285,7 +285,7 @@ public class HashDag<E> implements Dag<E> {
     /**
      * Creates a new Node with the specified data and children.
      *
-     * @param data the data for the node
+     * @param data     the data for the node
      * @param children the children of the node
      * @return a new Node instance
      */
@@ -303,8 +303,8 @@ public class HashDag<E> implements Dag<E> {
         Set<E> children = map.getOrDefault(parent, Collections.emptySet());
         if (children.isEmpty()) return Collections.emptySet();
         return children.stream()
-                .map(child -> newNode(child, getChildEdges(child)))
-                .collect(Collectors.toSet());
+            .map(child -> newNode(child, getChildEdges(child)))
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -320,21 +320,21 @@ public class HashDag<E> implements Dag<E> {
      * Checks if adding an edge from key to value would create a cycle.
      * Uses breadth-first search to detect potential cycles.
      *
-     * @param key source node
+     * @param key   source node
      * @param value target node
      * @return true if adding the edge would create a cycle
      */
     public boolean wouldCreateCycle(E key, E value) {
         if (key.equals(value)) return true;
-        
+
         Set<E> visited = new HashSet<>(8);
         Deque<E> queue = new ArrayDeque<>(8);
         queue.add(value);
-        
+
         while (!queue.isEmpty()) {
             E current = queue.poll();
             if (current.equals(key)) return true;
-            
+
             Set<E> edges = map.get(current);
             if (edges != null) {
                 for (E edge : edges) {
@@ -344,7 +344,7 @@ public class HashDag<E> implements Dag<E> {
                 }
             }
         }
-        
+
         return false;
     }
 
@@ -352,7 +352,7 @@ public class HashDag<E> implements Dag<E> {
      * Puts an edge from key to value only if it doesn't create a cycle.
      * This method ensures the graph remains acyclic.
      *
-     * @param key source node
+     * @param key   source node
      * @param value target node
      * @return true if the edge was added, false if it would create a cycle
      */
@@ -374,28 +374,28 @@ public class HashDag<E> implements Dag<E> {
     public List<E> topologicalSort() {
         // Initialize in-degree for all nodes
         Map<E, Integer> inDegree = map.keySet()
-                .stream()
-                .collect(Collectors.toMap(node -> node, node -> 0, (a, b) -> b));
-        
+            .stream()
+            .collect(Collectors.toMap(node -> node, node -> 0, (a, b) -> b));
+
         // Calculate in-degree for each node
-        map.forEach((node, edges) -> 
-            edges.forEach(edge -> 
+        map.forEach((node, edges) ->
+            edges.forEach(edge ->
                 inDegree.merge(edge, 1, Integer::sum)));
-        
+
         // Queue nodes with in-degree of 0
         Queue<E> queue = new LinkedList<>();
         inDegree.entrySet().stream()
-                .filter(entry -> entry.getValue() == 0)
-                .map(Map.Entry::getKey)
-                .forEach(queue::add);
-        
+            .filter(entry -> entry.getValue() == 0)
+            .map(Map.Entry::getKey)
+            .forEach(queue::add);
+
         List<E> result = new ArrayList<>();
-        
+
         // Process nodes
         while (!queue.isEmpty()) {
             E node = queue.poll();
             result.add(node);
-            
+
             Set<E> edges = map.get(node);
             if (edges != null) {
                 for (E edge : edges) {
@@ -406,12 +406,12 @@ public class HashDag<E> implements Dag<E> {
                 }
             }
         }
-        
+
         // If result size is less than the number of nodes, there's a cycle
         if (result.size() != map.size()) {
             throw new IllegalStateException("Graph contains a cycle");
         }
-        
+
         return result;
     }
 

@@ -3,7 +3,8 @@ package org.app.common.flink.sink;
 import org.apache.flink.api.connector.sink2.SinkWriter;
 import org.app.common.notification.NotificationInfo;
 import org.app.common.support.SnapShot;
-import org.app.common.utils.HttpClientUtils;
+import org.app.common.client.http.request.HttpRequestUtils;
+import org.app.common.utils.JacksonUtils;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -28,10 +29,10 @@ public class HttpApiSinkWriter<T> implements SinkWriter<T> {
     }
 
     @Override
-    public void write(T request, Context context) throws IOException, InterruptedException {
+    public void write(Object request, Context context) throws IOException, InterruptedException {
         if (request == null) return;
         try {
-            HttpRequest httpRequest = HttpClientUtils.requestPost(request, url, token, 30);
+            HttpRequest httpRequest = HttpRequestUtils.post(JacksonUtils.toJson(request), url, token);
             httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) {
             SnapShot.exceptionToLine(e, "Request: " + request, notificationInfo);

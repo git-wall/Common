@@ -25,10 +25,10 @@ public class EncodingFilter extends BaseFilter {
             ServletResponse response,
             FilterChain chain
     ) throws IOException, ServletException {
-        String encoding = Optional
+        String e = Optional
                 .ofNullable(request.getParameter("encoding"))
                 .orElse(this.encoding);
-        response.setCharacterEncoding(encoding);
+        response.setCharacterEncoding(e);
         chain.doFilter(request, response);
     }
 }

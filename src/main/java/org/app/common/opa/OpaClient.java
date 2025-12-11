@@ -1,32 +1,26 @@
 package org.app.common.opa;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.app.common.client.rest.BodyUtils;
-import org.app.common.client.rest.HeaderUtils;
-import org.springframework.http.HttpEntity;
-import org.springframework.web.client.RestTemplate;
+import org.app.common.client.http.WebClient;
+import org.app.common.constant.JType;
+import org.springframework.http.HttpMethod;
+
+import java.util.Map;
 
 public class OpaClient {
-    private final RestTemplate restTemplate;
-    private final String opaUrl;
-    
-    public OpaClient(RestTemplate restTemplate, String opaUrl) {
-        this.restTemplate = restTemplate;
-        this.opaUrl = opaUrl;
+    private final WebClient webClient;
+    private final OpaProperties opaProperties;
+    private static final String RESULT = "result";
+
+    public OpaClient(WebClient webClient, OpaProperties opaProperties) {
+        this.webClient = webClient;
+        this.opaProperties = opaProperties;
     }
-    
-    public boolean checkPermission(String policyPath, Object input) {
+
+    public boolean checkPermission(Object body) {
         try {
-            var headers = HeaderUtils.createHeaders();
-            var body = BodyUtils.getBody(input);
-            var request = new HttpEntity<>(body, headers);
-            
-            String url = String.format(opaUrl, policyPath);
-            JsonNode response = restTemplate.postForObject(url, request, JsonNode.class);
-            
-            return response != null && response.has("result") && response.get("result").asBoolean();
+            Map<String, Object> response = webClient.read(HttpMethod.POST, body, opaProperties.getUri(), JType.MAP_STR_OBJ);
+            return response != null && response.containsKey(RESULT) && Boolean.parseBoolean(response.get(RESULT).toString());
         } catch (Exception e) {
-            // Log error and default to deny
             return false;
         }
     }

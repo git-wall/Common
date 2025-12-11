@@ -1,0 +1,25 @@
+# warning: in mount volumes linux have security for path 
+# IF YOU WANT TO SHARE USE ( :z ) AT THE END OF PATH
+# IF YOU WANT TO PRIVATE USE ( :Z ) AT THE END OF PATH
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    container_name: postgres18
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin" ]
+      interval: 10s
+      timeout: 5s
+      retries: 1
+
+volumes:
+  postgres_data:
+    driver: local

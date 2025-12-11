@@ -19,7 +19,6 @@ public class TraceTransformer {
                           @Origin Method method,
                           @SuperCall Callable<?> callable,
                           @AllArguments Object[] args) throws Exception {
-        String traceId = TracingContext.getRequestId();
         long startTime = System.currentTimeMillis();
 
         try {

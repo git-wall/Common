@@ -20,7 +20,7 @@ public class Client5Utils {
 
     @SneakyThrows
     public static <T> T getFieldBody(String field, @NonNull RestInfo restInfo) {
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings(value = "unchecked")
         T t = (T) getFieldAny(field, Object.class, restInfo);
         return t;
     }

@@ -9,17 +9,18 @@ import java.util.Map;
  * This class provides a flexible way to configure IO operations with different parameters.
  */
 public class IOOptions implements Serializable {
-    private static final long serialVersionUID = 1L;
-    
-    private final Map<String, Object> options;
-    
+
+    private static final long serialVersionUID = -2214208861012556373L;
+
+    private final transient Map<String, Object> options;
+
     /**
      * Default constructor.
      */
     public IOOptions() {
         this.options = new HashMap<>();
     }
-    
+
     /**
      * Constructor with initial options.
      *
@@ -28,7 +29,7 @@ public class IOOptions implements Serializable {
     public IOOptions(Map<String, Object> options) {
         this.options = new HashMap<>(options);
     }
-    
+
     /**
      * Set an option value.
      *
@@ -40,7 +41,7 @@ public class IOOptions implements Serializable {
         options.put(key, value);
         return this;
     }
-    
+
     /**
      * Get an option value.
      *
@@ -52,7 +53,7 @@ public class IOOptions implements Serializable {
     public <T> T get(String key) {
         return (T) options.get(key);
     }
-    
+
     /**
      * Get an option value with a default value if not found.
      *
@@ -65,7 +66,7 @@ public class IOOptions implements Serializable {
     public <T> T getOrDefault(String key, T defaultValue) {
         return (T) options.getOrDefault(key, defaultValue);
     }
-    
+
     /**
      * Check if an option exists.
      *
@@ -75,7 +76,7 @@ public class IOOptions implements Serializable {
     public boolean has(String key) {
         return options.containsKey(key);
     }
-    
+
     /**
      * Remove an option.
      *
@@ -86,11 +87,11 @@ public class IOOptions implements Serializable {
         options.remove(key);
         return this;
     }
-    
+
     /**
      * Get all options.
      *
-     * @return The options map
+     * @return The option map
      */
     public Map<String, Object> getAll() {
         return new HashMap<>(options);

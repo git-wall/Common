@@ -20,7 +20,7 @@ public class LogUtils {
     public static void log(Object message) {
         Assert.notNull(message, "Message must not be null");
         if (message instanceof Throwable) {
-            log.error("Error occurred: {}", JacksonUtils.toString(message));
+            log.error("Error occurred: {}", JacksonUtils.toJson(message));
         } else {
             log.info("Message: {}", message);
         }
@@ -30,7 +30,7 @@ public class LogUtils {
     public static void tracing(Object message) {
         Assert.notNull(message, "Message must not be null");
         if (message instanceof Throwable) {
-            log.error("{} - Error occurred: {}", TracingContext.getRequestId(), JacksonUtils.toString(message));
+            log.error("{} - Error occurred: {}", TracingContext.getRequestId(), JacksonUtils.toJson(message));
         } else {
             log.info("{} - Message: {}", TracingContext.getRequestId(), message);
         }

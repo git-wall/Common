@@ -12,7 +12,7 @@ public class WebInitializerWar extends SpringBootServletInitializer {
     @Value("${app.main.class}")
     private String mainClassName;
 
-    @Value("${app.enable.servlet.initializer=false}")
+    @Value("${servlet.initializer}")
     private boolean enableServletInitializer;
 
     @Override

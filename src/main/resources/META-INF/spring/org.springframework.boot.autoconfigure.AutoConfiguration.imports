@@ -1,0 +1,5 @@
+## new way import class auto config
+
+org.app.common.grpc.server.GrpcServerConfiguration
+org.app.common.grpc.client.GrpcClientConfiguration
+org.app.common.grpc.GrpcAutoConfiguration

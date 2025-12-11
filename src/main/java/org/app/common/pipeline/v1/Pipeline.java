@@ -1,5 +1,6 @@
 package org.app.common.pipeline.v1;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -115,7 +116,6 @@ public class Pipeline<T> {
      * {@code false}.
      *
      * @return {@code true} if a value is not present, otherwise {@code false}
-     * @since 11
      */
     public boolean isEmpty() {
         return value == null;
@@ -133,6 +133,16 @@ public class Pipeline<T> {
         return this;
     }
 
+    /**
+     * Throws an exception provided by the given supplier if the value is null.
+     *
+     * @param <X>               The type of the exception to be thrown.
+     * @param exceptionSupplier A supplier that provides the exception to be thrown if the value is null.
+     *                          Must not be null.
+     * @return The current Pipeline instance for method chaining.
+     * @throws X                    If the value is null.
+     * @throws NullPointerException If the exception supplier is null.
+     */
     public <X extends Throwable> Pipeline<T> ifNullThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (value == null) {
             throw exceptionSupplier.get();
@@ -140,29 +150,54 @@ public class Pipeline<T> {
         return this;
     }
 
+    /**
+     * Throws an exception provided by the given supplier if the value is null or empty.
+     * The emptiness check is applied based on the type of the value:
+     * <ul>
+     * <li>For Strings, checks if the string is empty.</li>
+     * <li>For arrays, checks if the array length is zero.</li>
+     * <li>For Maps, checks if the map is empty.</li>
+     * <li>For Collections, checks if the collection is empty.</li>
+     * </ul>
+     *
+     * @param <X>               The type of the exception to be thrown.
+     * @param exceptionSupplier A supplier that provides the exception to be thrown if the value is null or empty.
+     *                          Must not be null.
+     * @return The current Pipeline instance for method chaining.
+     * @throws X                    If the value is null or empty.
+     * @throws NullPointerException If the exception supplier is null.
+     */
     public <X extends Throwable> Pipeline<T> ifEmptyThrow(Supplier<? extends X> exceptionSupplier) throws X {
         if (value == null) {
             throw exceptionSupplier.get();
-        } else if (value instanceof String) {
-            if (((String) value).isEmpty()) {
-                throw exceptionSupplier.get();
-            }
-        } else if (value.getClass().isArray()) {
-            if (((Object[]) value).length == 0) {
-                throw exceptionSupplier.get();
-            }
-        } else if (value instanceof Map) {
-            if (((Map<?, ?>) value).isEmpty()) {
-                throw exceptionSupplier.get();
-            }
-        } else if (value instanceof Collection) {
-            if (((Collection<?>) value).isEmpty()) {
-                throw exceptionSupplier.get();
-            }
+        } else if (value instanceof String && ((String) value).isEmpty()) {
+            throw exceptionSupplier.get();
+        } else if (value.getClass().isArray() && ((Object[]) value).length == 0) {
+            throw exceptionSupplier.get();
+        } else if (value instanceof Map && ((Map<?, ?>) value).isEmpty()) {
+            throw exceptionSupplier.get();
+        } else if (value instanceof Collection && ((Collection<?>) value).isEmpty()) {
+            throw exceptionSupplier.get();
         }
+
         return this;
     }
 
+    /**
+     * Throws an IllegalArgumentException with the given message if the value is null or empty.
+     * The emptiness check is applied based on the type of the value:
+     * <ul>
+     * <li>For Strings, checks if the string is empty or contains only whitespace.</li>
+     * <li>For arrays, checks if the array length is zero.</li>
+     * <li>For Maps, checks if the map is empty.</li>
+     * <li>For Collections, checks if the collection is empty.</li>
+     * </ul>
+     *
+     * @param message The exception message to use if the value is null or empty. Must not be null.
+     * @return The current Pipeline instance for method chaining.
+     * @throws IllegalArgumentException If the value is null or empty.
+     * @throws NullPointerException     If the message is null.
+     */
     public Pipeline<T> ifEmptyThrow(String message) {
         if (value == null) {
             throw new IllegalArgumentException(message);
@@ -230,6 +265,52 @@ public class Pipeline<T> {
         } else {
             return predicate.test(value) ? this : empty();
         }
+    }
+
+    /**
+     * Ensures that the value extracted from the current Pipeline instance using the provided extractor
+     * function is not null. If the extracted value is null, an IllegalArgumentException is thrown with
+     * the provided error message.
+     *
+     * @param extractor    A function that extracts a value from the current Pipeline instance.
+     *                     Must not be null.
+     * @param errorMessage The error message to include in the exception if the extracted value is null.
+     *                     Must not be null.
+     * @return The current Pipeline instance for method chaining.
+     * @throws NullPointerException     If the extractor or errorMessage is null.
+     * @throws IllegalArgumentException If the extracted value is null.
+     */
+    public Pipeline<T> checkNull(Function<T, ?> extractor, String errorMessage) {
+        Objects.requireNonNull(extractor, "Extractor must not be null");
+        Objects.requireNonNull(errorMessage, "Error message must not be null");
+
+        if (extractor.apply(value) == null) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return this;
+    }
+
+    /**
+     * Validates the current value of the Pipeline instance against the provided condition.
+     * If the condition evaluates to false, an IllegalArgumentException is thrown with the
+     * provided error message.
+     *
+     * @param condition    A function that evaluates the current value of the Pipeline instance
+     *                     and returns a Boolean. Must not be null.
+     * @param errorMessage The error message to include in the exception if the condition evaluates to false.
+     *                     Must not be null.
+     * @return The current Pipeline instance for method chaining.
+     * @throws NullPointerException     If the condition or errorMessage is null.
+     * @throws IllegalArgumentException If the condition evaluates to false.
+     */
+    public Pipeline<T> check(Function<T, Boolean> condition, String errorMessage) {
+        Objects.requireNonNull(condition, "Condition must not be null");
+        Objects.requireNonNull(errorMessage, "Error message must not be null");
+
+        if (Boolean.FALSE.equals(condition.apply(value))) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+        return this;
     }
 
     /**
@@ -463,7 +544,7 @@ public class Pipeline<T> {
     @Override
     public String toString() {
         return value != null
-                ? String.format("Pipeline[%s]", value)
-                : "Pipeline.empty";
+            ? String.format("Pipeline[%s]", value)
+            : "Pipeline.empty";
     }
 }

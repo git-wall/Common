@@ -1,6 +1,5 @@
 package org.app.common.utils
 
-import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.core.type.TypeReference
@@ -14,15 +13,15 @@ import java.text.SimpleDateFormat
 object KJacksonUtils {
     private val log = LoggerFactory.getLogger(this::class.java)
 
-    private var MAPPER: ObjectMapper = ObjectMapper()
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-        .setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+    private var MAPPER: ObjectMapper = ObjectMapper().configure(
+        DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+        false
+    )
 
     private var READER: ObjectReader = MAPPER.reader()
     private var WRITER: ObjectWriter = MAPPER.writer()
-    private var WRITER_PRETTY: ObjectWriter = MAPPER.writerWithDefaultPrettyPrinter()
+    private var WRITER_PRETTY: ObjectWriter =
+        MAPPER.writerWithDefaultPrettyPrinter()
 
     fun mapper(): ObjectMapper = MAPPER
     fun reader(): ObjectReader = READER

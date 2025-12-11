@@ -1,0 +1,2374 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker Gen</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0a0e27;
+      color: #e0e0e0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #stars-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      flex: 1;
+    }
+
+    .zoom-controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    .zoom-btn {
+      background: rgba(102, 126, 234, 0.2);
+      border: 1px solid #667eea;
+      color: #667eea;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .zoom-btn:hover {
+      background: rgba(102, 126, 234, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .main-content {
+      display: flex;
+      gap: 20px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .left-panel {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .stage-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .stage-btn {
+      padding: 15px 30px;
+      border: 2px solid;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: bold;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stage-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .stage-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .stage-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .stage-btn.active {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .docker-btn {
+      background: rgba(33, 150, 243, 0.2);
+      border-color: #2196F3;
+      color: #2196F3;
+    }
+
+    .docker-btn.active {
+      background: rgba(33, 150, 243, 0.4);
+    }
+
+    .docker-btn:hover {
+      background: rgba(33, 150, 243, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(33, 150, 243, 0.3);
+    }
+
+    .compose-btn {
+      background: rgba(76, 175, 80, 0.2);
+      border-color: #4CAF50;
+      color: #4CAF50;
+    }
+
+    .compose-btn.active {
+      background: rgba(76, 175, 80, 0.4);
+    }
+
+    .compose-btn:hover {
+      background: rgba(76, 175, 80, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+    }
+
+    .k8s-btn {
+      background: rgba(156, 39, 176, 0.2);
+      border-color: #9C27B0;
+      color: #9C27B0;
+    }
+
+    .k8s-btn.active {
+      background: rgba(156, 39, 176, 0.4);
+    }
+
+    .k8s-btn:hover {
+      background: rgba(156, 39, 176, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(156, 39, 176, 0.3);
+    }
+
+    .output-panel {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: none;
+      flex-direction: column;
+    }
+
+    .output-panel.active {
+      display: flex;
+    }
+
+    .output-header {
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      color: #667eea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .code-block {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      padding: 15px;
+      overflow-y: auto;
+      flex: 1;
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    pre {
+      margin: 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #a8dadc;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(102, 126, 234, 0.3);
+      border: 1px solid #667eea;
+      color: #667eea;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.85em;
+      z-index: 10;
+    }
+
+    .copy-btn:hover {
+      background: rgba(102, 126, 234, 0.6);
+      transform: scale(1.05);
+    }
+
+    .config-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .add-field-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      flex: 1;
+    }
+
+    .template-btn {
+      background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      flex: 1;
+    }
+
+    .add-field-btn:hover, .template-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    /* YAML Structure Styling */
+    .yaml-structure {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .yaml-node {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+      animation: slideIn 0.3s ease;
+    }
+
+    .yaml-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+    }
+
+    .yaml-header:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .yaml-header.expanded {
+      background: rgba(102, 126, 234, 0.1);
+      border-bottom-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .yaml-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      color: #667eea;
+      font-size: 1em;
+    }
+
+    .yaml-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s;
+    }
+
+    .yaml-header.expanded .yaml-icon {
+      transform: rotate(90deg);
+    }
+
+    .yaml-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .add-property-btn {
+      background: rgba(76, 175, 80, 0.3);
+      border: 1px solid #4CAF50;
+      color: #4CAF50;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+
+    .add-property-btn:hover {
+      background: rgba(76, 175, 80, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .remove-node-btn {
+      background: rgba(244, 67, 54, 0.3);
+      border: 1px solid #f44336;
+      color: #f44336;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .remove-node-btn:hover {
+      background: rgba(244, 67, 54, 0.6);
+      transform: scale(1.1);
+    }
+
+    .yaml-content {
+      padding: 15px;
+      display: none;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .yaml-header.expanded + .yaml-content {
+      display: block;
+    }
+
+    .property-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .property-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 6px;
+      border-left: 3px solid #4CAF50;
+    }
+
+    .property-key {
+      min-width: 150px;
+      color: #4CAF50;
+      font-weight: 500;
+      padding: 5px;
+    }
+
+    .property-value {
+      flex: 1;
+    }
+
+    .property-value input,
+    .property-value select,
+    .property-value textarea {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 0.9em;
+    }
+
+    .property-value input:focus,
+    .property-value select:focus,
+    .property-value textarea:focus {
+      outline: none;
+      border-color: #4CAF50;
+      box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+    }
+
+    .property-info {
+      font-size: 0.8em;
+      color: #888;
+      margin-top: 4px;
+      font-style: italic;
+    }
+
+    .property-actions {
+      display: flex;
+      gap: 5px;
+    }
+
+    .property-remove-btn {
+      background: rgba(244, 67, 54, 0.2);
+      border: 1px solid #f44336;
+      color: #f44336;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8em;
+      transition: all 0.2s;
+    }
+
+    .property-remove-btn:hover {
+      background: rgba(244, 67, 54, 0.4);
+    }
+
+    .property-add-btn {
+      background: rgba(33, 150, 243, 0.2);
+      border: 1px solid #2196F3;
+      color: #2196F3;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8em;
+      transition: all 0.2s;
+    }
+
+    .property-add-btn:hover {
+      background: rgba(33, 150, 243, 0.4);
+    }
+
+    .property-modal {
+      position: absolute;
+      background: #1a1d3a;
+      border: 1px solid #667eea;
+      border-radius: 8px;
+      padding: 15px;
+      min-width: 300px;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .property-modal-header {
+      color: #667eea;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(102, 126, 234, 0.3);
+    }
+
+    .property-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .property-option {
+      padding: 10px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .property-option:hover {
+      background: rgba(102, 126, 234, 0.3);
+      border-color: #667eea;
+    }
+
+    .property-option-title {
+      font-weight: bold;
+      color: #e0e0e0;
+      margin-bottom: 3px;
+    }
+
+    .property-option-desc {
+      font-size: 0.85em;
+      color: #a0a0a0;
+    }
+
+    .info-text {
+      color: #a0a0a0;
+      font-size: 0.9em;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #1a1d3a;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 80vh;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+      color: #667eea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .modal-tab {
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .modal-tab.active {
+      background: rgba(102, 126, 234, 0.3);
+      color: #667eea;
+      border: 1px solid #667eea;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .field-option {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .field-option.selected {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+    }
+
+    .field-option.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .field-option:hover:not(.disabled) {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .field-option-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .field-option-desc {
+      font-size: 0.8em;
+      color: #a0a0a0;
+      flex: 1;
+    }
+
+    .field-option-type {
+      font-size: 0.75em;
+      color: #667eea;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .multi-badge {
+      background: rgba(76, 175, 80, 0.3);
+      color: #4CAF50;
+      font-size: 0.7em;
+      padding: 2px 6px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-close {
+      background: rgba(244, 67, 54, 0.3);
+      border: 1px solid #f44336;
+      color: #f44336;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .modal-close:hover {
+      background: rgba(244, 67, 54, 0.6);
+    }
+
+    .modal-confirm {
+      background: rgba(102, 126, 234, 0.3);
+      border: 1px solid #667eea;
+      color: #667eea;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .modal-confirm:hover {
+      background: rgba(102, 126, 234, 0.6);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(102, 126, 234, 0.5);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(102, 126, 234, 0.7);
+    }
+
+    .template-modal-content {
+      max-width: 600px;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    .template-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 1px solid transparent;
+    }
+
+    .template-card:hover {
+      background: rgba(102, 126, 234, 0.2);
+      border-color: #667eea;
+      transform: translateY(-3px);
+    }
+
+    .template-card-title {
+      font-size: 1.1em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #4CAF50;
+    }
+
+    .template-card-desc {
+      font-size: 0.9em;
+      color: #a0a0a0;
+      margin-bottom: 10px;
+    }
+
+    .template-card-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .template-badge {
+      background: rgba(33, 150, 243, 0.2);
+      color: #2196F3;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+    }
+  </style>
+</head>
+<body>
+<div id="stars-container"></div>
+
+<div class="container">
+  <header>
+    <h1>Docker Gen</h1>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoomOut()">-</button>
+      <button class="zoom-btn" onclick="zoomReset()">100%</button>
+      <button class="zoom-btn" onclick="zoomIn()">+</button>
+    </div>
+  </header>
+
+  <div class="main-content" id="mainContent">
+    <div class="left-panel">
+      <div class="config-actions">
+        <button class="add-field-btn" onclick="showFieldModal()">
+          <span>+</span> Thêm Cấu Hình
+        </button>
+        <button class="template-btn" onclick="showTemplateModal()">
+          <span>📋</span> Mẫu Có Sẵn
+        </button>
+      </div>
+      <div class="yaml-structure" id="fieldsContainer"></div>
+    </div>
+
+    <div class="right-panel">
+      <div class="stage-buttons">
+        <button class="stage-btn docker-btn active" onclick="switchStage('docker')">
+          <span>🐳 Dockerfile</span>
+        </button>
+        <button class="stage-btn compose-btn" onclick="switchStage('compose')">
+          <span>📦 Docker Compose</span>
+        </button>
+        <button class="stage-btn k8s-btn" onclick="switchStage('k8s')">
+          <span>☸️ Kubernetes</span>
+        </button>
+      </div>
+
+      <div class="output-panel active" id="outputPanel">
+        <div class="output-header">
+          <span id="outputHeader">Dockerfile</span>
+          <button class="copy-btn" onclick="copyContent()">Copy Tất Cả</button>
+        </div>
+        <div class="code-block">
+          <pre id="outputContent"># Chọn cấu hình để tạo Dockerfile</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal chọn cấu hình -->
+<div class="modal" id="fieldModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <span>Chọn Cấu Hình</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-tabs" id="fieldTabs"></div>
+    <div class="modal-body">
+      <div class="field-grid" id="fieldOptions"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-confirm" onclick="addSelectedFields()">Thêm Cấu Hình</button>
+      <button class="modal-close" onclick="closeModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal chọn mẫu có sẵn -->
+<div class="modal" id="templateModal">
+  <div class="modal-content template-modal-content">
+    <div class="modal-header">
+      <span>Mẫu Cấu Hình Có Sẵn</span>
+      <button class="modal-close" onclick="closeTemplateModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="template-grid" id="templateOptions"></div>
+      <p class="info-text">Chọn mẫu để tự động tạo cấu hình tối ưu</p>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-close" onclick="closeTemplateModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Create stars
+  function createStars() {
+    const container = document.getElementById('stars-container');
+    container.innerHTML = '';
+    for (let i = 0; i < 150; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.width = Math.random() * 4 + 'px';
+      star.style.height = star.style.width;
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 5 + 's';
+      star.style.animationDuration = Math.random() * 3 + 2 + 's';
+      container.appendChild(star);
+    }
+  }
+  createStars();
+
+  let zoomLevel = 1;
+  function zoomIn() {
+    zoomLevel = Math.min(zoomLevel + 0.1, 1.5);
+    document.getElementById('mainContent').style.transform = `scale(${zoomLevel})`;
+  }
+  function zoomOut() {
+    zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+    document.getElementById('mainContent').style.transform = `scale(${zoomLevel})`;
+  }
+  function zoomReset() {
+    zoomLevel = 1;
+    document.getElementById('mainContent').style.transform = `scale(1)`;
+  }
+
+  let currentStage = 'docker';
+  let selectedFields = new Set();
+  let showPropertyModal = null;
+  let showPropertyModalForNode = null;
+
+  // Định nghĩa cấu hình theo từng stage với thông tin chi tiết
+  const fieldDefinitions = {
+    docker: {
+      baseImage: {
+        title: 'Base Image',
+        desc: 'Image gốc để build container (VD: node:18-alpine, python:3.11-slim)',
+        type: 'text',
+        suggestions: ['node:18-alpine', 'node:20-alpine', 'python:3.11-slim', 'nginx:alpine', 'openjdk:17-jdk-slim', 'golang:1.21-alpine'],
+        required: true,
+        multi: false
+      },
+      workdir: {
+        title: 'Working Directory',
+        desc: 'Thư mục làm việc trong container',
+        type: 'text',
+        suggestions: ['/app', '/usr/src/app', '/var/www', '/home/app'],
+        required: true,
+        multi: false
+      },
+      port: {
+        title: 'Port',
+        desc: 'Port để expose từ container',
+        type: 'text',
+        suggestions: ['3000', '8080', '80', '443', '5000', '8000'],
+        required: true,
+        multi: false
+      },
+      env: {
+        title: 'Environment Variable',
+        desc: 'Biến môi trường (KEY=VALUE)',
+        type: 'text',
+        suggestions: ['NODE_ENV=production', 'PORT=3000', 'DATABASE_URL=', 'API_KEY='],
+        multi: true,
+        info: 'Mỗi biến môi trường trên một dòng, định dạng KEY=VALUE'
+      },
+      copyFiles: {
+        title: 'Copy Files',
+        desc: 'Copy file từ host vào container (VD: . /app)',
+        type: 'text',
+        suggestions: ['. /app', 'package*.json ./', './src /app/src'],
+        multi: true,
+        info: 'Định dạng: <source> <destination>'
+      },
+      runCommands: {
+        title: 'RUN Commands',
+        desc: 'Lệnh cài đặt dependencies',
+        type: 'textarea',
+        suggestions: ['npm ci --only=production', 'apt-get update && apt-get install -y curl', 'pip install -r requirements.txt'],
+        multi: true,
+        info: 'Mỗi lệnh RUN trên một dòng'
+      },
+      entrypoint: {
+        title: 'Entrypoint',
+        desc: 'Entrypoint script để chạy khi container khởi động',
+        type: 'text',
+        suggestions: ['docker-entrypoint.sh', 'entrypoint.sh'],
+        multi: false,
+        info: 'Script sẽ được chạy khi container start'
+      },
+      user: {
+        title: 'User',
+        desc: 'User chạy ứng dụng (nên dùng non-root user)',
+        type: 'text',
+        suggestions: ['node', 'app', '1001'],
+        multi: false,
+        info: 'User ID hoặc username'
+      },
+      healthcheck: {
+        title: 'Health Check',
+        desc: 'Lệnh kiểm tra sức khỏe của container',
+        type: 'text',
+        suggestions: ['CMD curl -f http://localhost:3000/health || exit 1'],
+        multi: false,
+        info: 'Sử dụng CMD để định nghĩa health check'
+      }
+    },
+    compose: {
+      service: {
+        title: 'Service',
+        desc: 'Dịch vụ trong docker-compose',
+        type: 'object',
+        children: ['image', 'build', 'ports', 'environment', 'volumes', 'networks', 'depends_on', 'restart', 'deploy'],
+        multi: true,
+        info: 'Mỗi service đại diện cho một container'
+      },
+      image: {
+        title: 'Image',
+        desc: 'Image name hoặc build context',
+        type: 'text',
+        suggestions: ['nginx:alpine', 'postgres:15', 'redis:alpine', 'mongo:latest'],
+        info: 'Tên image từ Docker Hub hoặc registry'
+      },
+      build: {
+        title: 'Build Context',
+        desc: 'Thư mục build Dockerfile',
+        type: 'text',
+        suggestions: ['.', './frontend', './backend'],
+        info: 'Đường dẫn tới thư mục chứa Dockerfile'
+      },
+      ports: {
+        title: 'Ports',
+        desc: 'Port mapping (host:container)',
+        type: 'text',
+        suggestions: ['3000:3000', '80:80', '5432:5432', '6379:6379'],
+        multi: true,
+        info: 'Định dạng: <host_port>:<container_port>'
+      },
+      environment: {
+        title: 'Environment',
+        desc: 'Biến môi trường cho service',
+        type: 'textarea',
+        suggestions: ['NODE_ENV=production\nDATABASE_URL=postgres://user:pass@db:5432/db'],
+        multi: true,
+        info: 'Mỗi biến môi trường trên một dòng'
+      },
+      volumes: {
+        title: 'Volumes',
+        desc: 'Mount volumes từ host vào container',
+        type: 'textarea',
+        suggestions: ['./data:/app/data\n./logs:/var/log'],
+        multi: true,
+        info: 'Định dạng: <host_path>:<container_path>'
+      },
+      networks: {
+        title: 'Networks',
+        desc: 'Network cho service',
+        type: 'text',
+        suggestions: ['app-network', 'default', 'backend-network'],
+        multi: true,
+        info: 'Tên network mà service sẽ kết nối'
+      },
+      depends_on: {
+        title: 'Depends On',
+        desc: 'Service dependencies (service này phụ thuộc vào service nào)',
+        type: 'text',
+        suggestions: ['db', 'redis', 'cache'],
+        multi: true,
+        info: 'Danh sách các service phụ thuộc, cách nhau bởi dấu cách'
+      },
+      restart: {
+        title: 'Restart Policy',
+        desc: 'Chính sách restart khi container bị stop',
+        type: 'select',
+        suggestions: ['no', 'always', 'on-failure', 'unless-stopped'],
+        info: 'Luôn restart, chỉ restart khi lỗi, hoặc không restart'
+      },
+      deploy: {
+        title: 'Deploy Config',
+        desc: 'Cấu hình deploy (resources, replicas)',
+        type: 'textarea',
+        suggestions: 'replicas: 3\nresources:\n  limits:\n    cpus: "0.5"\n    memory: 512M',
+        info: 'Cấu hình cho swarm mode'
+      },
+      networkConfig: {
+        title: 'Network Configuration',
+        desc: 'Cấu hình network cho docker-compose',
+        type: 'object',
+        children: ['network_name', 'driver'],
+        multi: false,
+        info: 'Định nghĩa custom network'
+      },
+      network_name: {
+        title: 'Network Name',
+        desc: 'Tên network',
+        type: 'text',
+        suggestions: ['app-network', 'default', 'backend-network'],
+        info: 'Tên của network'
+      },
+      driver: {
+        title: 'Driver',
+        desc: 'Network driver',
+        type: 'select',
+        suggestions: ['bridge', 'overlay', 'host', 'none'],
+        info: 'Loại network driver'
+      }
+    },
+    k8s: {
+      deployment: {
+        title: 'Deployment',
+        desc: 'Kubernetes Deployment resource',
+        type: 'object',
+        children: ['apiVersion', 'kind', 'metadata', 'spec'],
+        multi: false,
+        info: 'Định nghĩa một deployment Kubernetes'
+      },
+      apiVersion: {
+        title: 'API Version',
+        desc: 'API version của resource',
+        type: 'text',
+        suggestions: ['apps/v1', 'v1'],
+        required: true,
+        info: 'Phiên bản API Kubernetes'
+      },
+      kind: {
+        title: 'Kind',
+        desc: 'Loại resource',
+        type: 'text',
+        suggestions: ['Deployment', 'StatefulSet', 'DaemonSet'],
+        required: true,
+        info: 'Loại Kubernetes resource'
+      },
+      metadata: {
+        title: 'Metadata',
+        desc: 'Metadata của deployment',
+        type: 'object',
+        children: ['name', 'namespace', 'labels'],
+        info: 'Thông tin metadata cho resource'
+      },
+      name: {
+        title: 'Name',
+        desc: 'Tên deployment',
+        type: 'text',
+        suggestions: ['web-deployment', 'api-deployment', 'frontend-deployment'],
+        required: true,
+        info: 'Tên duy nhất của deployment'
+      },
+      namespace: {
+        title: 'Namespace',
+        desc: 'Kubernetes namespace',
+        type: 'text',
+        suggestions: ['default', 'production', 'staging', 'development'],
+        info: 'Namespace để deploy resource'
+      },
+      labels: {
+        title: 'Labels',
+        desc: 'Labels cho resource',
+        type: 'object',
+        children: ['app', 'version', 'environment'],
+        info: 'Labels để selector và filtering'
+      },
+      app: {
+        title: 'App Label',
+        desc: 'App label selector',
+        type: 'text',
+        suggestions: ['web-app', 'api', 'frontend'],
+        info: 'Label chính để selector'
+      },
+      version: {
+        title: 'Version Label',
+        desc: 'Version label',
+        type: 'text',
+        suggestions: ['v1.0.0', 'latest', 'stable'],
+        info: 'Phiên bản của ứng dụng'
+      },
+      spec: {
+        title: 'Spec',
+        desc: 'Deployment specification',
+        type: 'object',
+        children: ['replicas', 'selector', 'template'],
+        info: 'Cấu hình chi tiết của deployment'
+      },
+      replicas: {
+        title: 'Replicas',
+        desc: 'Số lượng replicas',
+        type: 'text',
+        suggestions: ['1', '2', '3', '5'],
+        required: true,
+        info: 'Số lượng pod replicas cần chạy'
+      },
+      selector: {
+        title: 'Selector',
+        desc: 'Pod selector',
+        type: 'object',
+        children: ['matchLabels'],
+        info: 'Selector để tìm pod'
+      },
+      matchLabels: {
+        title: 'Match Labels',
+        desc: 'Label selector',
+        type: 'object',
+        children: ['app'],
+        info: 'Labels để match với pods'
+      },
+      template: {
+        title: 'Template',
+        desc: 'Pod template',
+        type: 'object',
+        children: ['metadata', 'spec'],
+        info: 'Template cho pod'
+      },
+      container: {
+        title: 'Container',
+        desc: 'Container configuration',
+        type: 'object',
+        children: ['name', 'image', 'ports', 'env', 'resources', 'livenessProbe', 'readinessProbe'],
+        info: 'Cấu hình container'
+      },
+      image: {
+        title: 'Image',
+        desc: 'Container image',
+        type: 'text',
+        suggestions: ['myapp:latest', 'nginx:alpine', 'postgres:15'],
+        required: true,
+        info: 'Tên image container'
+      },
+      ports: {
+        title: 'Ports',
+        desc: 'Container ports',
+        type: 'text',
+        suggestions: ['3000', '80', '8080', '5432'],
+        multi: true,
+        info: 'Các port mà container expose'
+      },
+      env: {
+        title: 'Environment',
+        desc: 'Biến môi trường',
+        type: 'textarea',
+        suggestions: ['- name: NODE_ENV\n  value: "production"\n- name: PORT\n  value: "3000"'],
+        multi: true,
+        info: 'Các biến môi trường cho container'
+      },
+      resources: {
+        title: 'Resources',
+        desc: 'Resource limits và requests',
+        type: 'textarea',
+        suggestions: 'limits:\n  cpu: "500m"\n  memory: "512Mi"\nrequests:\n  cpu: "250m"\n  memory: "256Mi"',
+        info: 'Giới hạn và yêu cầu tài nguyên'
+      },
+      livenessProbe: {
+        title: 'Liveness Probe',
+        desc: 'Liveness probe configuration',
+        type: 'textarea',
+        suggestions: 'httpGet:\n  path: /health\n  port: 3000\ninitialDelaySeconds: 30\nperiodSeconds: 10',
+        info: 'Probe kiểm tra container còn sống'
+      },
+      readinessProbe: {
+        title: 'Readiness Probe',
+        desc: 'Readiness probe configuration',
+        type: 'textarea',
+        suggestions: 'httpGet:\n  path: /ready\n  port: 3000\ninitialDelaySeconds: 5\nperiodSeconds: 5',
+        info: 'Probe kiểm tra container sẵn sàng nhận traffic'
+      },
+      service: {
+        title: 'Service',
+        desc: 'Kubernetes Service',
+        type: 'object',
+        children: ['apiVersion', 'kind', 'metadata', 'spec'],
+        multi: false,
+        info: 'Service để expose deployment'
+      },
+      serviceType: {
+        title: 'Service Type',
+        desc: 'Loại service',
+        type: 'select',
+        suggestions: ['ClusterIP', 'NodePort', 'LoadBalancer', 'ExternalName'],
+        info: 'Loại Kubernetes service'
+      }
+    }
+  };
+
+  // Mẫu có sẵn
+  const templates = {
+    docker: [
+      {
+        name: 'Node.js Production',
+        desc: 'Tối ưu cho ứng dụng Node.js production với multi-stage build',
+        fields: {
+          baseImage: 'node:18-alpine',
+          workdir: '/app',
+          port: '3000',
+          user: 'node',
+          copyFiles: 'package*.json ./',
+          runCommands: 'npm ci --only=production',
+          env: 'NODE_ENV=production\nPORT=3000',
+          healthcheck: 'CMD curl -f http://localhost:3000/health || exit 1'
+        }
+      },
+      {
+        name: 'Python Django',
+        desc: 'Ứng dụng Python Django với PostgreSQL và Redis',
+        fields: {
+          baseImage: 'python:3.11-slim',
+          workdir: '/app',
+          port: '8000',
+          copyFiles: 'requirements.txt ./',
+          runCommands: 'pip install --no-cache-dir -r requirements.txt',
+          env: 'DJANGO_SETTINGS_MODULE=config.settings.production',
+          entrypoint: 'entrypoint.sh'
+        }
+      },
+      {
+        name: 'React/Next.js',
+        desc: 'Ứng dụng React/Next.js với Nginx reverse proxy',
+        fields: {
+          baseImage: 'node:18-alpine AS builder',
+          workdir: '/app',
+          port: '3000',
+          copyFiles: '. ./\npackage*.json ./',
+          runCommands: 'npm ci && npm run build',
+          env: 'NODE_ENV=production'
+        }
+      },
+      {
+        name: 'Go Application',
+        desc: 'Ứng dụng Go với multi-stage build tối ưu kích thước',
+        fields: {
+          baseImage: 'golang:1.21-alpine AS builder',
+          workdir: '/app',
+          port: '8080',
+          copyFiles: 'go.mod go.sum ./\n. .',
+          runCommands: 'go mod download && CGO_ENABLED=0 GOOS=linux go build -o main .',
+          env: 'GO111MODULE=on\nCGO_ENABLED=0'
+        }
+      },
+      {
+        name: 'Java Spring Boot',
+        desc: 'Ứng dụng Java Spring Boot với Gradle/Maven',
+        fields: {
+          baseImage: 'openjdk:17-jdk-slim AS builder',
+          workdir: '/app',
+          port: '8080',
+          copyFiles: 'gradlew ./\nbuild.gradle .\nsrc/ ./src/',
+          runCommands: './gradlew build -x test',
+          user: '1001',
+          env: 'JAVA_OPTS=-Xmx512m'
+        }
+      }
+    ],
+    compose: [
+      {
+        name: 'Full Stack App',
+        desc: 'Ứng dụng full-stack với React frontend và Node.js backend',
+        fields: {
+          services: [
+            {
+              service: {
+                image: 'nginx:alpine',
+                ports: '80:80',
+                networks: 'app-network'
+              }
+            },
+            {
+              service: {
+                build: '.',
+                ports: '3000:3000',
+                environment: 'NODE_ENV=production',
+                depends_on: 'db redis',
+                networks: 'app-network'
+              }
+            },
+            {
+              service: {
+                image: 'postgres:15-alpine',
+                ports: '5432:5432',
+                environment: 'POSTGRES_DB=mydb\nPOSTGRES_USER=user\nPOSTGRES_PASSWORD=pass',
+                volumes: './postgres-data:/var/lib/postgresql/data',
+                networks: 'app-network'
+              }
+            }
+          ],
+          networkConfig: {
+            network_name: 'app-network',
+            driver: 'bridge'
+          }
+        }
+      },
+      {
+        name: 'Microservices',
+        desc: 'Kiến trúc microservices với API gateway',
+        fields: {
+          services: [
+            {
+              service: {
+                image: 'nginx:alpine',
+                ports: '80:80',
+                volumes: './nginx.conf:/etc/nginx/nginx.conf',
+                depends_on: 'service1 service2',
+                networks: 'app-network'
+              }
+            },
+            {
+              service: {
+                build: './service1',
+                environment: 'PORT=3001',
+                deploy: 'replicas: 2',
+                networks: 'app-network'
+              }
+            },
+            {
+              service: {
+                build: './service2',
+                environment: 'PORT=3002',
+                deploy: 'replicas: 2',
+                networks: 'app-network'
+              }
+            }
+          ],
+          networkConfig: {
+            network_name: 'app-network',
+            driver: 'bridge'
+          }
+        }
+      }
+    ],
+    k8s: [
+      {
+        name: 'Production Web App',
+        desc: 'Deployment production với autoscaling và monitoring',
+        fields: {
+          deployment: {
+            apiVersion: 'apps/v1',
+            kind: 'Deployment',
+            metadata: {
+              name: 'web-app',
+              namespace: 'production',
+              labels: {
+                app: 'web-app',
+                version: 'v1.0.0'
+              }
+            },
+            spec: {
+              replicas: '3',
+              selector: {
+                matchLabels: {
+                  app: 'web-app'
+                }
+              },
+              template: {
+                metadata: {
+                  labels: {
+                    app: 'web-app'
+                  }
+                },
+                spec: {
+                  containers: [{
+                    name: 'web-app',
+                    image: 'myapp:latest',
+                    ports: '3000',
+                    env: '- name: NODE_ENV\n  value: "production"\n- name: PORT\n  value: "3000"',
+                    resources: 'limits:\n  cpu: "500m"\n  memory: "512Mi"\nrequests:\n  cpu: "250m"\n  memory: "256Mi"',
+                    livenessProbe: 'httpGet:\n  path: /health\n  port: 3000\ninitialDelaySeconds: 30'
+                  }]
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  };
+
+  let fields = [];
+
+  // Khởi tạo với cấu hình mặc định cho Dockerfile
+  function initDefaultFields() {
+    fields = [
+      {
+        id: 1,
+        type: 'baseImage',
+        value: 'node:18-alpine',
+        properties: {}
+      },
+      {
+        id: 2,
+        type: 'workdir',
+        value: '/app',
+        properties: {}
+      },
+      {
+        id: 3,
+        type: 'port',
+        value: '3000',
+        properties: {}
+      }
+    ];
+    renderFields();
+    updatePreview();
+  }
+
+  // Chuyển đổi giữa các stage
+  function switchStage(stage) {
+    currentStage = stage;
+
+    // Cập nhật nút active
+    document.querySelectorAll('.stage-btn').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    document.querySelector(`.${stage}-btn`).classList.add('active');
+
+    // Cập nhật title
+    document.getElementById('outputHeader').textContent =
+      stage === 'docker' ? 'Dockerfile' :
+        stage === 'compose' ? 'Docker Compose' : 'Kubernetes';
+
+    // Xóa tất cả field hiện tại
+    fields = [];
+
+    // Thêm field mặc định cho stage mới
+    const defaultFields = {
+      docker: ['baseImage', 'workdir', 'port'],
+      compose: ['service'],
+      k8s: ['deployment']
+    };
+
+    defaultFields[stage].forEach((fieldType, index) => {
+      const def = fieldDefinitions[stage][fieldType];
+      if (def) {
+        fields.push({
+          id: Date.now() + index,
+          type: fieldType,
+          value: def.title,
+          properties: {},
+          children: def.children || []
+        });
+      }
+    });
+
+    renderFields();
+    updatePreview();
+  }
+
+  function showFieldModal() {
+    const modal = document.getElementById('fieldModal');
+    const tabsContainer = document.getElementById('fieldTabs');
+    const optionsContainer = document.getElementById('fieldOptions');
+
+    // Tạo tabs
+    tabsContainer.innerHTML = '';
+    const categories = {
+      basic: 'Cơ bản',
+      advanced: 'Nâng cao',
+      network: 'Mạng',
+      storage: 'Lưu trữ',
+      security: 'Bảo mật'
+    };
+
+    Object.entries(categories).forEach(([key, label]) => {
+      const tab = document.createElement('div');
+      tab.className = `modal-tab ${key === 'basic' ? 'active' : ''}`;
+      tab.textContent = label;
+      tab.onclick = () => switchFieldTab(key);
+      tabsContainer.appendChild(tab);
+    });
+
+    // Hiển thị field options
+    renderFieldOptions('basic');
+
+    modal.classList.add('active');
+    selectedFields.clear();
+  }
+
+  function switchFieldTab(tab) {
+    document.querySelectorAll('.modal-tab').forEach(t => {
+      t.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    renderFieldOptions(tab);
+  }
+
+  function renderFieldOptions(category) {
+    const container = document.getElementById('fieldOptions');
+    container.innerHTML = '';
+
+    const stageFields = fieldDefinitions[currentStage];
+    const categorizedFields = {
+      basic: ['baseImage', 'workdir', 'port', 'service', 'deployment', 'metadata', 'spec'],
+      advanced: ['env', 'runCommands', 'entrypoint', 'resources', 'deploy', 'livenessProbe', 'template'],
+      network: ['ports', 'networks', 'containerPort', 'serviceType'],
+      storage: ['volumes', 'copyFiles', 'configMap'],
+      security: ['user', 'healthcheck', 'secrets']
+    };
+
+    const fieldIds = categorizedFields[category] || Object.keys(stageFields);
+
+    fieldIds.forEach(fieldId => {
+      if (stageFields[fieldId]) {
+        const field = stageFields[fieldId];
+        const isSelected = fields.find(f => f.type === fieldId);
+        const isMulti = field.multi;
+        const isDisabled = !field.multi && isSelected;
+
+        const option = document.createElement('div');
+        option.className = `field-option ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`;
+        option.onclick = () => {
+          if (!isDisabled) toggleFieldSelection(fieldId, option);
+        };
+        option.innerHTML = `
+          <div class="field-option-title">
+            ${field.title}
+            ${field.required ? '<span class="required-marker">*</span>' : ''}
+            ${isMulti ? '<span class="multi-badge">+ Multiple</span>' : ''}
+          </div>
+          <div class="field-option-desc">${field.desc}</div>
+          <div class="field-option-type">
+            ${field.type.toUpperCase()}
+            ${field.children ? ' (Has children)' : ''}
+          </div>
+        `;
+        container.appendChild(option);
+      }
+    });
+  }
+
+  function toggleFieldSelection(fieldId, element) {
+    const field = fieldDefinitions[currentStage][fieldId];
+    const isMulti = field.multi;
+
+    if (selectedFields.has(fieldId)) {
+      selectedFields.delete(fieldId);
+      element.classList.remove('selected');
+    } else {
+      selectedFields.add(fieldId);
+      element.classList.add('selected');
+
+      // Nếu là field single và không phải multi, disable các field single khác cùng loại
+      if (!isMulti) {
+        document.querySelectorAll('.field-option').forEach(opt => {
+          const optFieldId = opt.querySelector('.field-option-title').textContent.trim().split(' ')[0];
+          const optField = fieldDefinitions[currentStage][optFieldId];
+          if (optField && !optField.multi && optFieldId !== fieldId) {
+            if (fields.find(f => f.type === optFieldId)) {
+              opt.classList.add('disabled');
+            }
+          }
+        });
+      }
+    }
+  }
+
+  function addSelectedFields() {
+    selectedFields.forEach(fieldId => {
+      const fieldDef = fieldDefinitions[currentStage][fieldId];
+      const isMulti = fieldDef.multi;
+      const existingFields = fields.filter(f => f.type === fieldId);
+
+      if (existingFields.length === 0 || (isMulti && existingFields)) {
+        const newField = {
+          id: Date.now() + Math.random(),
+          type: fieldId,
+          value: fieldDef.title,
+          properties: {},
+          children: fieldDef.children || []
+        };
+
+        fields.push(newField);
+      }
+    });
+
+    renderFields();
+    updatePreview();
+    closeModal();
+  }
+
+  function closeModal() {
+    document.getElementById('fieldModal').classList.remove('active');
+  }
+
+  function showTemplateModal() {
+    const modal = document.getElementById('templateModal');
+    const container = document.getElementById('templateOptions');
+    container.innerHTML = '';
+
+    const stageTemplates = templates[currentStage] || [];
+
+    stageTemplates.forEach((template, index) => {
+      const card = document.createElement('div');
+      card.className = 'template-card';
+      card.onclick = () => applyTemplate(template);
+      card.innerHTML = `
+        <div class="template-card-title">${template.name}</div>
+        <div class="template-card-desc">${template.desc}</div>
+        <div class="template-card-stack">
+          <span class="template-badge">${currentStage.toUpperCase()}</span>
+          <span class="template-badge">Production</span>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    modal.classList.add('active');
+  }
+
+  function applyTemplate(template) {
+    fields = [];
+
+    // Xử lý template fields
+    if (template.fields) {
+      Object.entries(template.fields).forEach(([type, value], index) => {
+        const fieldDef = fieldDefinitions[currentStage][type];
+
+        if (Array.isArray(value)) {
+          // Nếu là mảng (nhiều services)
+          value.forEach((item, idx) => {
+            const fieldId = Date.now() + index + idx;
+            if (item.service) {
+              const serviceField = {
+                id: fieldId,
+                type: 'service',
+                value: 'Service',
+                properties: item.service,
+                children: fieldDefinitions[currentStage].service?.children || []
+              };
+              fields.push(serviceField);
+            }
+          });
+        } else if (typeof value === 'object') {
+          // Nếu là object (deployment, networkConfig)
+          const field = {
+            id: Date.now() + index,
+            type: type,
+            value: fieldDef?.title || type,
+            properties: value,
+            children: fieldDef?.children || []
+          };
+          fields.push(field);
+        } else {
+          // Nếu là giá trị đơn giản
+          const field = {
+            id: Date.now() + index,
+            type: type,
+            value: value,
+            properties: {},
+            children: fieldDef?.children || []
+          };
+          fields.push(field);
+        }
+      });
+    }
+
+    renderFields();
+    updatePreview();
+    closeTemplateModal();
+  }
+
+  function closeTemplateModal() {
+    document.getElementById('templateModal').classList.remove('active');
+  }
+
+  function removeField(id) {
+    fields = fields.filter(f => f.id !== id);
+    renderFields();
+    updatePreview();
+  }
+
+  function updateProperty(nodeId, propertyKey, value) {
+    const node = fields.find(f => f.id === nodeId);
+    if (node) {
+      if (!node.properties) node.properties = {};
+      node.properties[propertyKey] = value;
+      updatePreview();
+    }
+  }
+
+  function removeProperty(nodeId, propertyKey) {
+    const node = fields.find(f => f.id === nodeId);
+    if (node && node.properties) {
+      delete node.properties[propertyKey];
+      renderFields();
+      updatePreview();
+    }
+  }
+
+  function renderFields() {
+    const container = document.getElementById('fieldsContainer');
+    container.innerHTML = '';
+
+    if (fields.length === 0) {
+      container.innerHTML = '<p class="info-text">Chưa có cấu hình. Hãy thêm cấu hình hoặc chọn mẫu có sẵn.</p>';
+      return;
+    }
+
+    fields.forEach(field => {
+      const def = fieldDefinitions[currentStage][field.type];
+      if (!def) return;
+
+      const hasChildren = def.children && def.children.length > 0;
+      const properties = field.properties || {};
+
+      const node = document.createElement('div');
+      node.className = 'yaml-node';
+      node.id = `node-${field.id}`;
+
+      // Tạo header
+      const header = document.createElement('div');
+      header.className = 'yaml-header';
+      header.onclick = () => {
+        header.classList.toggle('expanded');
+      };
+
+      header.innerHTML = `
+        <div class="yaml-title">
+          <div class="yaml-icon">▶</div>
+          <span>${def.title}</span>
+        </div>
+        <div class="yaml-actions">
+          ${hasChildren ? `
+            <button class="add-property-btn" onclick="event.stopPropagation(); showPropertyOptions(${field.id})">
+              + Thêm thuộc tính
+            </button>
+          ` : ''}
+          <button class="remove-node-btn" onclick="event.stopPropagation(); removeField(${field.id})">✕</button>
+        </div>
+      `;
+
+      // Tạo content
+      const content = document.createElement('div');
+      content.className = 'yaml-content';
+
+      if (hasChildren) {
+        const propertyList = document.createElement('div');
+        propertyList.className = 'property-list';
+
+        // Hiển thị các properties hiện có
+        Object.entries(properties).forEach(([key, value]) => {
+          const childDef = fieldDefinitions[currentStage][key];
+          const propertyItem = createPropertyItem(field.id, key, value, childDef);
+          propertyList.appendChild(propertyItem);
+        });
+
+        // Nếu chưa có properties, hiển thị thông báo
+        if (Object.keys(properties).length === 0) {
+          propertyList.innerHTML = '<p class="info-text" style="text-align: left; margin: 10px 0;">Chưa có thuộc tính. Nhấn "Thêm thuộc tính" để thêm.</p>';
+        }
+
+        content.appendChild(propertyList);
+      } else {
+        // Nếu không có children, hiển thị input trực tiếp
+        const inputField = document.createElement('div');
+        inputField.className = 'property-item';
+        inputField.innerHTML = `
+          <div class="property-key">${def.title}</div>
+          <div class="property-value">
+            ${createInputField(field.id, field.type, field.value)}
+            ${def.info ? `<div class="property-info">${def.info}</div>` : ''}
+          </div>
+        `;
+        content.appendChild(inputField);
+      }
+
+      node.appendChild(header);
+      node.appendChild(content);
+      container.appendChild(node);
+    });
+  }
+
+  function createPropertyItem(nodeId, propertyKey, propertyValue, propertyDef) {
+    const item = document.createElement('div');
+    item.className = 'property-item';
+
+    const keyTitle = propertyDef?.title || propertyKey;
+    const keyDesc = propertyDef?.desc || '';
+    const keyInfo = propertyDef?.info || '';
+
+    item.innerHTML = `
+      <div class="property-key">
+        <div>${keyTitle}</div>
+        ${keyDesc ? `<div style="font-size: 0.85em; color: #888; margin-top: 3px;">${keyDesc}</div>` : ''}
+      </div>
+      <div class="property-value">
+        ${createInputField(nodeId, propertyKey, propertyValue, propertyDef)}
+        ${keyInfo ? `<div class="property-info">${keyInfo}</div>` : ''}
+      </div>
+      <div class="property-actions">
+        <button class="property-remove-btn" onclick="removeProperty(${nodeId}, '${propertyKey}')">✕</button>
+      </div>
+    `;
+
+    return item;
+  }
+
+  function createInputField(nodeId, fieldType, value, def = null) {
+    const fieldDef = def || fieldDefinitions[currentStage][fieldType];
+    if (!fieldDef) {
+      return `<input type="text" value="${value}" onchange="updateProperty(${nodeId}, '${fieldType}', this.value)">`;
+    }
+
+    switch (fieldDef.type) {
+      case 'textarea':
+        return `<textarea onchange="updateProperty(${nodeId}, '${fieldType}', this.value)">${value || ''}</textarea>`;
+
+      case 'select':
+        const options = fieldDef.suggestions.map(s =>
+          `<option value="${s}" ${s === value ? 'selected' : ''}>${s}</option>`
+        ).join('');
+        return `<select onchange="updateProperty(${nodeId}, '${fieldType}', this.value)">${options}</select>`;
+
+      default:
+        return `<input type="text" value="${value || ''}" onchange="updateProperty(${nodeId}, '${fieldType}', this.value)" placeholder="${fieldDef.desc || ''}">`;
+    }
+  }
+
+  function showPropertyOptions(nodeId) {
+    // Đóng modal hiện tại nếu có
+    if (showPropertyModal) {
+      document.body.removeChild(showPropertyModal);
+    }
+
+    const node = fields.find(f => f.id === nodeId);
+    if (!node) return;
+
+    const def = fieldDefinitions[currentStage][node.type];
+    if (!def || !def.children) return;
+
+    const nodeElement = document.getElementById(`node-${nodeId}`);
+    const addButton = nodeElement.querySelector('.add-property-btn');
+
+    const modal = document.createElement('div');
+    modal.className = 'property-modal';
+    modal.style.position = 'absolute';
+    modal.style.top = `${addButton.offsetTop + addButton.offsetHeight + 5}px`;
+    modal.style.left = `${addButton.offsetLeft}px`;
+
+    const existingProperties = Object.keys(node.properties || {});
+    const availableChildren = def.children.filter(child => !existingProperties.includes(child));
+
+    if (availableChildren.length === 0) {
+      modal.innerHTML = `
+        <div class="property-modal-header">Không có thuộc tính nào để thêm</div>
+        <div class="property-options">
+          <div style="padding: 10px; color: #888; text-align: center;">
+            Tất cả các thuộc tính đã được thêm
+          </div>
+        </div>
+      `;
+    } else {
+      modal.innerHTML = `
+        <div class="property-modal-header">Chọn thuộc tính để thêm</div>
+        <div class="property-options">
+          ${availableChildren.map(child => {
+        const childDef = fieldDefinitions[currentStage][child];
+        if (!childDef) return '';
+
+        return `
+              <div class="property-option" onclick="addProperty(${nodeId}, '${child}')">
+                <div class="property-option-title">${childDef.title}</div>
+                <div class="property-option-desc">${childDef.desc}</div>
+              </div>
+            `;
+      }).join('')}
+        </div>
+      `;
+    }
+
+    document.body.appendChild(modal);
+    showPropertyModal = modal;
+    showPropertyModalForNode = nodeId;
+
+    // Đóng modal khi click bên ngoài
+    setTimeout(() => {
+      const closeHandler = (e) => {
+        if (!modal.contains(e.target) && e.target !== addButton) {
+          document.body.removeChild(modal);
+          showPropertyModal = null;
+          showPropertyModalForNode = null;
+          document.removeEventListener('click', closeHandler);
+        }
+      };
+      document.addEventListener('click', closeHandler);
+    }, 100);
+  }
+
+  function addProperty(nodeId, propertyKey) {
+    const node = fields.find(f => f.id === nodeId);
+    if (!node) return;
+
+    const propertyDef = fieldDefinitions[currentStage][propertyKey];
+    if (!propertyDef) return;
+
+    if (!node.properties) node.properties = {};
+
+    // Set giá trị mặc định
+    if (propertyDef.suggestions && propertyDef.suggestions.length > 0) {
+      node.properties[propertyKey] = propertyDef.suggestions[0];
+    } else {
+      node.properties[propertyKey] = '';
+    }
+
+    renderFields();
+    updatePreview();
+
+    // Đóng modal
+    if (showPropertyModal) {
+      document.body.removeChild(showPropertyModal);
+      showPropertyModal = null;
+      showPropertyModalForNode = null;
+    }
+
+    // Mở node sau khi thêm property
+    const nodeElement = document.getElementById(`node-${nodeId}`);
+    const header = nodeElement.querySelector('.yaml-header');
+    header.classList.add('expanded');
+  }
+
+  function updatePreview() {
+    switch (currentStage) {
+      case 'docker':
+        generateDocker();
+        break;
+      case 'compose':
+        generateCompose();
+        break;
+      case 'k8s':
+        generateK8s();
+        break;
+    }
+  }
+
+  function generateDocker() {
+    let dockerfile = `# Dockerfile Generated by Docker Gen\n`;
+    dockerfile += `# Optimized for production\n\n`;
+
+    fields.forEach(field => {
+      const def = fieldDefinitions[currentStage][field.type];
+      if (!def) return;
+
+      if (field.type === 'baseImage') {
+        dockerfile += `FROM ${field.value || 'node:18-alpine'}\n\n`;
+      } else if (field.type === 'workdir') {
+        dockerfile += `WORKDIR ${field.value || '/app'}\n\n`;
+      } else if (field.type === 'port') {
+        dockerfile += `EXPOSE ${field.value || '3000'}\n\n`;
+      } else if (field.properties) {
+        // Xử lý các properties
+        Object.entries(field.properties).forEach(([key, value]) => {
+          if (value && value.trim()) {
+            const propDef = fieldDefinitions[currentStage][key];
+            if (!propDef) return;
+
+            switch (key) {
+              case 'copyFiles':
+                dockerfile += `COPY ${value}\n`;
+                break;
+              case 'runCommands':
+                dockerfile += `RUN ${value}\n`;
+                break;
+              case 'env':
+                value.split('\n').forEach(line => {
+                  if (line.trim()) dockerfile += `ENV ${line.trim()}\n`;
+                });
+                break;
+              case 'entrypoint':
+                dockerfile += `ENTRYPOINT ["${value}"]\n`;
+                break;
+              case 'user':
+                dockerfile += `USER ${value}\n`;
+                break;
+              case 'healthcheck':
+                dockerfile += `HEALTHCHECK ${value}\n`;
+                break;
+            }
+          }
+        });
+      }
+    });
+
+    dockerfile += `\n# Default command\n`;
+    dockerfile += `CMD ["npm", "start"]`;
+
+    document.getElementById('outputContent').textContent = dockerfile;
+  }
+
+  function generateCompose() {
+    let compose = `# docker-compose.yml\n`;
+    compose += `# Generated by Docker Gen\n\n`;
+    compose += `version: '3.8'\n\n`;
+
+    // Collect services
+    const services = fields.filter(f => f.type === 'service');
+    const networkConfig = fields.find(f => f.type === 'networkConfig');
+
+    if (services.length > 0) {
+      compose += `services:\n`;
+
+      services.forEach((service, index) => {
+        const serviceName = `service-${index + 1}`;
+        compose += `  ${serviceName}:\n`;
+
+        const props = service.properties || {};
+
+        // Image or build
+        if (props.image) {
+          compose += `    image: ${props.image}\n`;
+        } else if (props.build) {
+          compose += `    build: ${props.build}\n`;
+        }
+
+        // Ports
+        if (props.ports) {
+          compose += `    ports:\n`;
+          props.ports.split('\n').forEach(port => {
+            if (port.trim()) compose += `      - "${port.trim()}"\n`;
+          });
+        }
+
+        // Environment
+        if (props.environment) {
+          compose += `    environment:\n`;
+          props.environment.split('\n').forEach(env => {
+            if (env.trim()) compose += `      - ${env.trim()}\n`;
+          });
+        }
+
+        // Volumes
+        if (props.volumes) {
+          compose += `    volumes:\n`;
+          props.volumes.split('\n').forEach(vol => {
+            if (vol.trim()) compose += `      - ${vol.trim()}\n`;
+          });
+        }
+
+        // Networks
+        if (props.networks) {
+          compose += `    networks:\n`;
+          props.networks.split(' ').forEach(net => {
+            if (net.trim()) compose += `      - ${net.trim()}\n`;
+          });
+        } else if (networkConfig && networkConfig.properties.network_name) {
+          compose += `    networks:\n`;
+          compose += `      - ${networkConfig.properties.network_name}\n`;
+        }
+
+        // Depends on
+        if (props.depends_on) {
+          compose += `    depends_on:\n`;
+          props.depends_on.split(' ').forEach(dep => {
+            if (dep.trim()) compose += `      - ${dep.trim()}\n`;
+          });
+        }
+
+        // Restart
+        if (props.restart) {
+          compose += `    restart: ${props.restart}\n`;
+        }
+
+        // Deploy
+        if (props.deploy) {
+          compose += `    deploy:\n`;
+          compose += `      ${props.deploy}\n`;
+        }
+
+        compose += `\n`;
+      });
+    }
+
+    // Network configuration
+    if (networkConfig && networkConfig.properties.network_name) {
+      compose += `networks:\n`;
+      compose += `  ${networkConfig.properties.network_name}:\n`;
+      if (networkConfig.properties.driver) {
+        compose += `    driver: ${networkConfig.properties.driver}\n`;
+      } else {
+        compose += `    driver: bridge\n`;
+      }
+    }
+
+    document.getElementById('outputContent').textContent = compose;
+  }
+
+  function generateK8s() {
+    let k8s = `# Kubernetes manifests\n`;
+    k8s += `# Generated by Docker Gen\n\n`;
+
+    fields.forEach(field => {
+      if (field.type === 'deployment') {
+        const props = field.properties || {};
+
+        // Deployment
+        k8s += `apiVersion: ${props.apiVersion || 'apps/v1'}\n`;
+        k8s += `kind: ${props.kind || 'Deployment'}\n`;
+        k8s += `metadata:\n`;
+
+        // Metadata properties
+        if (props.metadata) {
+          const metadata = props.metadata;
+          k8s += `  name: ${metadata.name || 'web-deployment'}\n`;
+          if (metadata.namespace && metadata.namespace !== 'default') {
+            k8s += `  namespace: ${metadata.namespace}\n`;
+          }
+          if (metadata.labels) {
+            k8s += `  labels:\n`;
+            const labels = metadata.labels;
+            if (labels.app) k8s += `    app: ${labels.app}\n`;
+            if (labels.version) k8s += `    version: ${labels.version}\n`;
+          }
+        } else {
+          k8s += `  name: web-deployment\n`;
+        }
+
+        k8s += `spec:\n`;
+
+        // Spec properties
+        if (props.spec) {
+          const spec = props.spec;
+          k8s += `  replicas: ${spec.replicas || 1}\n`;
+
+          // Selector
+          k8s += `  selector:\n`;
+          k8s += `    matchLabels:\n`;
+          if (spec.selector && spec.selector.matchLabels && spec.selector.matchLabels.app) {
+            k8s += `      app: ${spec.selector.matchLabels.app}\n`;
+          } else if (props.metadata && props.metadata.labels && props.metadata.labels.app) {
+            k8s += `      app: ${props.metadata.labels.app}\n`;
+          } else {
+            k8s += `      app: web-app\n`;
+          }
+
+          // Template
+          k8s += `  template:\n`;
+          k8s += `    metadata:\n`;
+          k8s += `      labels:\n`;
+          if (spec.selector && spec.selector.matchLabels && spec.selector.matchLabels.app) {
+            k8s += `        app: ${spec.selector.matchLabels.app}\n`;
+          } else if (props.metadata && props.metadata.labels && props.metadata.labels.app) {
+            k8s += `        app: ${props.metadata.labels.app}\n`;
+          } else {
+            k8s += `        app: web-app\n`;
+          }
+
+          k8s += `    spec:\n`;
+          k8s += `      containers:\n`;
+          k8s += `      - name: ${props.metadata?.name || 'web-deployment'}\n`;
+
+          // Container properties
+          if (spec.template && spec.template.spec && spec.template.spec.containers) {
+            const container = spec.template.spec.containers[0] || {};
+            if (container.image) k8s += `        image: ${container.image}\n`;
+            if (container.ports) {
+              k8s += `        ports:\n`;
+              k8s += `        - containerPort: ${container.ports}\n`;
+            }
+            if (container.env) {
+              k8s += `        env:\n`;
+              k8s += container.env;
+              k8s += `\n`;
+            }
+            if (container.resources) {
+              k8s += `        resources:\n`;
+              k8s += container.resources.split('\n').map(line => `          ${line}`).join('\n');
+              k8s += `\n`;
+            }
+            if (container.livenessProbe) {
+              k8s += `        livenessProbe:\n`;
+              k8s += container.livenessProbe.split('\n').map(line => `          ${line}`).join('\n');
+              k8s += `\n`;
+            }
+            if (container.readinessProbe) {
+              k8s += `        readinessProbe:\n`;
+              k8s += container.readinessProbe.split('\n').map(line => `          ${line}`).join('\n');
+              k8s += `\n`;
+            }
+          } else {
+            k8s += `        image: myapp:latest\n`;
+            k8s += `        ports:\n`;
+            k8s += `        - containerPort: 3000\n`;
+          }
+        } else {
+          k8s += `  replicas: 1\n`;
+          k8s += `  selector:\n`;
+          k8s += `    matchLabels:\n`;
+          k8s += `      app: web-app\n`;
+          k8s += `  template:\n`;
+          k8s += `    metadata:\n`;
+          k8s += `      labels:\n`;
+          k8s += `        app: web-app\n`;
+          k8s += `    spec:\n`;
+          k8s += `      containers:\n`;
+          k8s += `      - name: web-deployment\n`;
+          k8s += `        image: myapp:latest\n`;
+          k8s += `        ports:\n`;
+          k8s += `        - containerPort: 3000\n`;
+        }
+
+        k8s += `\n---\n\n`;
+
+        // Service
+        k8s += `apiVersion: v1\n`;
+        k8s += `kind: Service\n`;
+        k8s += `metadata:\n`;
+        k8s += `  name: ${props.metadata?.name || 'web-deployment'}-service\n`;
+        if (props.metadata?.namespace && props.metadata.namespace !== 'default') {
+          k8s += `  namespace: ${props.metadata.namespace}\n`;
+        }
+        k8s += `spec:\n`;
+        k8s += `  selector:\n`;
+        if (props.metadata && props.metadata.labels && props.metadata.labels.app) {
+          k8s += `    app: ${props.metadata.labels.app}\n`;
+        } else {
+          k8s += `    app: web-app\n`;
+        }
+        k8s += `  ports:\n`;
+        k8s += `  - port: 80\n`;
+        k8s += `    targetPort: 3000\n`;
+        k8s += `  type: ${props.serviceType || 'ClusterIP'}\n`;
+      }
+    });
+
+    document.getElementById('outputContent').textContent = k8s;
+  }
+
+  function copyContent() {
+    const content = document.getElementById('outputContent').textContent;
+    navigator.clipboard.writeText(content).then(() => {
+      alert('Đã copy nội dung!');
+    });
+  }
+
+  // Khởi tạo
+  document.addEventListener('DOMContentLoaded', () => {
+    initDefaultFields();
+
+    // Close modals when clicking outside
+    document.addEventListener('click', (e) => {
+      // Close property modal
+      if (showPropertyModal && !showPropertyModal.contains(e.target)) {
+        const addButtons = document.querySelectorAll('.add-property-btn');
+        let isAddButton = false;
+        addButtons.forEach(btn => {
+          if (btn.contains(e.target)) isAddButton = true;
+        });
+
+        if (!isAddButton) {
+          document.body.removeChild(showPropertyModal);
+          showPropertyModal = null;
+          showPropertyModalForNode = null;
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>

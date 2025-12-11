@@ -13,8 +13,8 @@ public class EnumValidConstraint implements ConstraintValidator<EnumValid, Strin
     @Override
     public void initialize(EnumValid constraintAnnotation) {
         values = Stream.of(constraintAnnotation.enumClass().getEnumConstants())
-                .map(Enum::name)
-                .collect(Collectors.toSet());
+            .map(Enum::name)
+            .collect(Collectors.toSet());
     }
 
     @Override

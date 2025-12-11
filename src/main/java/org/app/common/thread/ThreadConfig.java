@@ -16,7 +16,7 @@ public class ThreadConfig {
 
     @Bean
     public Executor taskExecutor() {
-        return taskPool();
+        return taskPool("app-thread-", null);
     }
 
     // Core pool size

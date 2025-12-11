@@ -1,6 +1,7 @@
 package org.app.common.notification;
 
 import lombok.extern.slf4j.Slf4j;
+import org.app.common.constant.JType;
 import org.app.common.utils.JacksonUtils;
 
 import java.net.URI;
@@ -110,7 +111,7 @@ public class Telegram {
      */
     private static boolean parseTelegramResponse(String responseBody) {
         try {
-            Map<String, Object> responseMap = JacksonUtils.readValue(responseBody);
+            Map<String, Object> responseMap = JacksonUtils.readValue(responseBody, JType.MAP_STR_OBJ);
             Boolean ok = (Boolean) responseMap.get("ok");
             return Boolean.TRUE.equals(ok);
         } catch (Exception ex) {

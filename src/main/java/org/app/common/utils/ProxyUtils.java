@@ -23,7 +23,7 @@ public class ProxyUtils {
     }
 
     // Security Proxy (mocked simple check)
-    public static <T> T secProxy(Class<T> interfaceType, T target, Supplier<Boolean> hasPermission) {
+    public static <T> T securityProxy(Class<T> interfaceType, T target, Supplier<Boolean> hasPermission) {
         return createProxy(interfaceType, (proxy, method, args) -> {
             if (!hasPermission.get()) {
                 throw new SecurityException("Access denied to method: " + method.getName());
