@@ -53,8 +53,6 @@ public class JooqConfig {
                 return SQLDialect.MYSQL;
             case "postgres":
                 return SQLDialect.POSTGRES;
-            case "oracle":
-                return SQLDialect.MARIADB;
             default:
                 throw new IllegalArgumentException("Unsupported database type: " + databaseType);
         }

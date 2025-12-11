@@ -3,4 +3,16 @@ pluginManagement {
         id 'org.jetbrains.kotlin.jvm' version '2.1.20'
     }
 }
+
+// settings.gradle
+buildCache {
+  local {
+    // Enable local build cache
+    enabled = true
+
+    // Optional: custom directory
+//    directory = file("$rootDir/.gradle/build-cache")
+  }
+}
+
 rootProject.name = 'Common'

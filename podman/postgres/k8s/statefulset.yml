@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres18
+  namespace: database
+  labels:
+    app: postgres18
+spec:
+  serviceName: postgres18-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres18
+  template:
+    metadata:
+      labels:
+        app: postgres18
+    spec:
+      containers:
+        - name: postgres18
+          image: docker.io/library/postgres:18
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 5432
+              name: postgres18
+          env:
+            - name: PGDATA
+              value: /data/pgdata
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /data
+            - name: postgres-config
+              mountPath: /etc/postgresql/conf.d
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          command: [ "postgres" ]
+          args: [ "-c", "config_file=/etc/postgresql/conf.d/postgresql.conf" ]
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - admin
+                - -d
+                - postgres
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - admin
+                - -d
+                - postgres
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "256m"
+              memory: "256Mi"
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: s1
+        resources:
+          requests:
+            storage: 5Gi

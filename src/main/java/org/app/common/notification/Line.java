@@ -2,7 +2,9 @@ package org.app.common.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.app.common.utils.HttpClientUtils;
+import org.app.common.client.http.HttpClientUtils;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +17,7 @@ public class Line {
         this.notificationInfo = notificationInfo;
     }
 
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000))
     public void notify(String message) {
         NotifyMessage notifyMessage = new NotifyMessage(notificationInfo.getTopic(), message);
 

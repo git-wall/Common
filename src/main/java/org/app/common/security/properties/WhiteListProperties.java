@@ -4,9 +4,12 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@Setter
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
+@Setter
 @ConfigurationProperties(prefix = "security.whitelist")
 public class WhiteListProperties {
-    private String whiteList;
+    private List<String> whiteList = new ArrayList<>();
 }

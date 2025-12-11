@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-initdb 
+  namespace: database
+data: 
+  init.sql: |
+    CREATE EXTENSION IF NOT EXIT pg_stat_statements;
+  

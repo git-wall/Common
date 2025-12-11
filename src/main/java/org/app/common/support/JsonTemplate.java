@@ -3,7 +3,7 @@ package org.app.common.support;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.app.common.design.legacy.FluentApi;
+import org.app.common.design.legacy.Fluent;
 import org.app.common.utils.JacksonUtils;
 import org.springframework.util.Assert;
 
@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
 
-public class JsonTemplate extends FluentApi<JsonTemplate> {
+public class JsonTemplate implements Fluent<JsonTemplate> {
     @Getter
     private String template;
     @Getter
@@ -30,16 +30,8 @@ public class JsonTemplate extends FluentApi<JsonTemplate> {
         return new JsonTemplate(template);
     }
 
-    public JsonTemplate addObject(Object... os) {
-        if (objects == null) objects = new ArrayList<>();
-        objects.addAll(List.of(os));
-        return self();
-    }
-
-    public JsonTemplate addObject(Object object) {
-        if (objects == null) objects = new ArrayList<>();
-        objects.add(object);
-        return self();
+    public JsonTemplate object(Object... os) {
+        return chain(() -> objects.addAll(List.of(os)));
     }
 
     public JsonTemplate build() {
@@ -63,8 +55,8 @@ public class JsonTemplate extends FluentApi<JsonTemplate> {
 
             var val = field.get(o);
             var newVal = Optional.ofNullable(val)
-                    .map(Object::toString)
-                    .orElse("null");
+                .map(Object::toString)
+                .orElse("null");
 
             fields.put(fieldName, newVal);
 

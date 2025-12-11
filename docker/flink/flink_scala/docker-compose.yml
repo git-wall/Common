@@ -1,0 +1,23 @@
+services:
+  jobmanager:
+    image: flink:latest-scala_2.12 # Or a specific version like flink:1.18-scala_2.12
+    ports:
+      - "8081:8081" # Flink Web UI
+      - "6123:6123" # Flink RPC port
+    command: jobmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager # This should match the service name
+    volumes:
+      - ./flink-data:/opt/flink/data # Optional: for persistent state/checkpoints
+
+  taskmanager:
+    image: flink:latest-scala_2.12 # Must match the JobManager image
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    environment:
+      - JOB_MANAGER_RPC_ADDRESS=jobmanager
+    volumes:
+      - ./flink-data:/opt/flink/data # Optional: for persistent state/checkpoints
+    deploy:
+      replicas: 1 # Adjust for more TaskManagers

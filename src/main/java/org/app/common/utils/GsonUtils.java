@@ -2,6 +2,9 @@ package org.app.common.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 
 public class GsonUtils {
     private static final Gson GSON;
@@ -25,5 +28,9 @@ public class GsonUtils {
     public String prettyPrintUsingGson(String uglyJsonString) {
         var o = GSON.fromJson(uglyJsonString, Object.class);
         return GSON.toJson(o);
+    }
+
+    public static Type typeOf(Class<?> raw, Type... args) {
+        return TypeToken.getParameterized(raw, args).getType();
     }
 }

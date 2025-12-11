@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,9 +32,9 @@ public class Mail {
     public boolean sendMail(String from, String to, String subject, String content) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, 
+            MimeMessageHelper helper = new MimeMessageHelper(message,
                 StandardCharsets.UTF_8.name());
-            
+
             helper.setFrom(from);
             helper.setTo(to);
             helper.setSubject(subject);
@@ -47,6 +48,17 @@ public class Mail {
         }
     }
 
+    public void sendHtmlMail(String from, String to, String subject, String content, String fileName) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(content, true);
+        helper.setFrom(from);
+        helper.addAttachment(fileName, new File(fileName));
+        mailSender.send(mimeMessage);
+    }
+
     /**
      * Sends an email asynchronously.
      *
@@ -56,9 +68,9 @@ public class Mail {
      * @param content Email content (HTML supported)
      * @return CompletableFuture containing the send result
      */
-    public CompletableFuture<Boolean> sendMailAsync(String from, String to, 
+    public CompletableFuture<Boolean> sendMailAsync(String from, String to,
             String subject, String content) {
-        return CompletableFuture.supplyAsync(() -> 
+        return CompletableFuture.supplyAsync(() ->
             sendMail(from, to, subject, content)
         );
     }
@@ -74,12 +86,12 @@ public class Mail {
      * @param fileNames   Array of attachment file names
      * @return true if sent successfully, false otherwise
      */
-    public boolean sendMailWithAttachments(String from, String to, String subject, 
+    public boolean sendMailWithAttachments(String from, String to, String subject,
             String content, byte[][] attachments, String[] fileNames) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
-            
+
             helper.setFrom(from);
             helper.setTo(to);
             helper.setSubject(subject);
@@ -113,10 +125,10 @@ public class Mail {
      * @param fileNames   Array of attachment file names
      * @return CompletableFuture containing the send result
      */
-    public CompletableFuture<Boolean> sendMailWithAttachmentsAsync(String from, 
-            String to, String subject, String content, byte[][] attachments, 
+    public CompletableFuture<Boolean> sendMailWithAttachmentsAsync(String from,
+            String to, String subject, String content, byte[][] attachments,
             String[] fileNames) {
-        return CompletableFuture.supplyAsync(() -> 
+        return CompletableFuture.supplyAsync(() ->
             sendMailWithAttachments(from, to, subject, content, attachments, fileNames)
         );
     }

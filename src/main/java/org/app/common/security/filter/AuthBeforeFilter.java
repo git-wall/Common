@@ -45,7 +45,6 @@ public class AuthBeforeFilter extends OncePerRequestFilter {
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                     });
-
         } catch (SecurityFilterException ex) {
             log.info("Cannot set user authentication: {}", ex.getMessage());
         } catch (Exception e) {

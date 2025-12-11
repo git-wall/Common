@@ -1,16 +1,33 @@
 package org.app.common.thread;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.*;
 
+/**
+ * <pre>
+ * Threads ≈ CPU Cores × (1 + Wait Time IO/Handling Time)
+ * If you have 4 CPU cores:
+ * - the average wait time for IO is two times the handling time
+ * - the wait time for IO usually is above 2 the handling time
+ * - 4 x (1 + 2) = 12 threads
+ * - you can have around 12 threads running concurrently.
+ * */
+@Slf4j
+@NoArgsConstructor
 public class ThreadUtils {
+
     public static final int CORE_AVAILABLE;
 
     static {
         CORE_AVAILABLE = Runtime.getRuntime().availableProcessors();
+        log.info("Core CPU available: {}", CORE_AVAILABLE);
     }
+
     public static int getActiveCount() {
         // Returns the number of active threads in the current thread's thread group
         return Thread.activeCount();
@@ -20,13 +37,20 @@ public class ThreadUtils {
         return Runtime.getRuntime().availableProcessors();
     }
 
+    @NoArgsConstructor
     public static class CompileBuilder {
-        public static Executor taskPool() {
+
+        public static Executor taskPool(String threadNamePrefix, TaskDecorator taskDecorator) {
             ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
             executor.setCorePoolSize(CORE_AVAILABLE);
             executor.setMaxPoolSize(CORE_AVAILABLE << 1);
             executor.setQueueCapacity(500);
             executor.initialize();
+            executor.setAllowCoreThreadTimeOut(true);
+            executor.setThreadNamePrefix(threadNamePrefix);
+
+            // Set the TaskDecorator if you need MDC move in threads
+            executor.setTaskDecorator(taskDecorator);
             return executor;
         }
 
@@ -67,6 +91,7 @@ public class ThreadUtils {
         }
     }
 
+    @NoArgsConstructor
     public static class RuntimeBuilder {
 
         public static Executor taskPool() {
@@ -89,7 +114,7 @@ public class ThreadUtils {
                     availableProcessors,                        // Core pool size
                     availableProcessors << 1,                   // Max pool size
                     keepAliveTime, unit,                        // Keep-alive time
-                    new LinkedBlockingQueue<>(1000),   // Queue capacity
+                    new LinkedBlockingQueue<>(1000),    // Queue capacity
                     new ThreadFactoryBuilder()
                             .setNameFormat("cpu-pool-%d")
                             .build()

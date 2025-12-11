@@ -8,10 +8,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class StringUtils {
+    private StringUtils() {
+    }
+
     public static final String FORMAT_IS = "%s:%s";
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[1-9][0-9]{7,14}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[1-9]\\d{7,14}$");
 
     public static boolean isEmpty(String str) {
         return str == null || str.trim().isEmpty();
@@ -45,10 +48,10 @@ public class StringUtils {
         String noAccents = pattern.matcher(normalized).replaceAll("");
 
         return noAccents.toLowerCase()
-                .replaceAll("[^a-z0-9\\s-]", "")
-                .replaceAll("\\s+", "-")
-                .replaceAll("-+", "-")
-                .trim();
+            .replaceAll("[^a-z0-9\\s-]", "")
+            .replaceAll("\\s+", "-")
+            .replaceAll("-+", "-")
+            .trim();
     }
 
     public static String truncate(String text, int maxLength, String suffix) {
@@ -66,15 +69,15 @@ public class StringUtils {
         String initials;
         String[] nameParts = fullName.split("\\s+");
         initials = Arrays.stream(nameParts)
-                .filter(part -> !part.isEmpty())
-                .map(part -> String.valueOf(Character.toUpperCase(part.charAt(0))))
-                .collect(Collectors.joining());
+            .filter(part -> !part.isEmpty())
+            .map(part -> String.valueOf(Character.toUpperCase(part.charAt(0))))
+            .collect(Collectors.joining());
 
         return initials;
     }
 
     // New utility methods
-    public static String generateUUID() {
+    public static String genUUID() {
         return UUID.randomUUID().toString();
     }
 
@@ -85,8 +88,8 @@ public class StringUtils {
 
         List<String> words = Arrays.asList(input.toLowerCase().split("\\s+"));
         return words.stream()
-                .map(word -> word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1))
-                .collect(Collectors.joining(" "));
+            .map(word -> word.isEmpty() ? word : Character.toUpperCase(word.charAt(0)) + word.substring(1))
+            .collect(Collectors.joining(" "));
     }
 
     public static String maskEmail(String email) {
@@ -123,20 +126,6 @@ public class StringUtils {
         return input.replaceAll("[^a-zA-Z0-9\\s]", "");
     }
 
-    public static String padLeft(String input, int length, char padChar) {
-        if (input == null) {
-            return null;
-        }
-        return String.format("%" + length + "s", input).replace(' ', padChar);
-    }
-
-    public static String padRight(String input, int length, char padChar) {
-        if (input == null) {
-            return null;
-        }
-        return String.format("%-" + length + "s", input).replace(' ', padChar);
-    }
-
     public static String reverseString(String input) {
         if (input == null) {
             return null;
@@ -148,7 +137,7 @@ public class StringUtils {
         if (input == null) {
             return null;
         }
-        return input.replaceAll("[^0-9]", "");
+        return input.replaceAll("\\D", "");
     }
 
     public static String extractLetters(String input) {
@@ -158,7 +147,11 @@ public class StringUtils {
         return input.replaceAll("[^a-zA-Z]", "");
     }
 
-    public static String format(String format, Object... args) {
-        return String.format(format, args);
+    public static String maskCard(String creditCard, int visibleDigits) {
+        if (creditCard == null || creditCard.length() < visibleDigits) {
+            return creditCard;
+        }
+        String maskedPart = "*".repeat(creditCard.length() - visibleDigits);
+        return maskedPart + creditCard.substring(creditCard.length() - visibleDigits);
     }
 }

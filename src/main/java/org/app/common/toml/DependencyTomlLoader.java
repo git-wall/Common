@@ -104,7 +104,7 @@ public class DependencyTomlLoader {
      */
     private Map<String, DependencyInfo> loadDependencies() {
         Map<String, DependencyInfo> result = new HashMap<>();
-        TomlConfig depsSection = tomlConfig.getSection("dependencies");
+        TomlConfig depsSection = tomlConfig.getSection("resources/dependencies");
 
         if (depsSection == null) {
             return result;

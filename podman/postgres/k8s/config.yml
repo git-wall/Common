@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: database
+data:
+  POSTGRES_PORT: "5432"
+  POSTGRES_MAX_CONNECTIONS: "20"
+  TZ: "UTC"
+  postgresql.conf: |
+    shared_preload_libraries = 'pg_stat_statements'
+    max_connections = 20
+    statement_timeout = 30000
+    idle_in_transaction_session_timeout = 30000

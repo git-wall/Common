@@ -9,6 +9,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExpressionParser {
+    private ExpressionParser() {
+    }
+
     private static final Pattern TOKEN_PATTERN = Pattern.compile(
             "\\d+(\\.\\d+)?|SUM|SUB|MUL|DIV\\d+|[A-Z_]+|\\(|\\)|,"
     );
@@ -41,6 +44,7 @@ public class ExpressionParser {
             for (Field field : object.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
                 template = template.replace(field.getName().toUpperCase(), String.valueOf(field.get(object)));
+                field.setAccessible(false);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

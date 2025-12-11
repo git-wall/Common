@@ -10,6 +10,9 @@ import java.util.concurrent.Callable;
 @Slf4j
 public class Travel {
 
+    private Travel() {
+    }
+
     @SneakyThrows
     public static void around(Runnable runnable) {
         runnable.run();
@@ -35,6 +38,10 @@ public class Travel {
         return result;
     }
 
+    /**
+     * @param callable The callable to be executed
+     * &#064;Returns Tuple2 where _1 is the result and _2 is the time taken in milliseconds
+     * */
     @SneakyThrows
     public static <T> Tuple2<T, Long> result$timer(Callable<T> callable) {
         var s = System.currentTimeMillis();

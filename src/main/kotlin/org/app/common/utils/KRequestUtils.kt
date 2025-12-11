@@ -71,7 +71,7 @@ object KRequestUtils {
     fun getRemoteAddr(): String? = getRemoteAddr(this.getHttpServletRequest())
 
     fun getRemoteAddr(request: HttpServletRequest?): String? {
-        return request?.findFirstValidHeader(IP_HEADER_CANDIDATES)
+        return request?.findFirstValidHeader(*IP_HEADER_CANDIDATES)
             ?.split(",")
             ?.firstOrNull()
             ?.trim()
@@ -95,7 +95,7 @@ object KRequestUtils {
     fun getDomain(): String? = getDomain(this.getHttpServletRequest())
 
     fun getDomain(request: HttpServletRequest?): String? {
-        val host = request?.findFirstValidHeader(HOST_HEADER)
+        val host = request?.findFirstValidHeader(*HOST_HEADER)
 
         return host?.takeIf { it.contains(":") }?.substring(0, host.indexOf(':'))
     }

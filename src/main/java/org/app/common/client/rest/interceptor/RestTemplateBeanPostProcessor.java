@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * Init for all RestTemplate beans to add the LogRequestInterceptor for monitoring HTTP requests.
- * */
+ */
 @Component
 @RequiredArgsConstructor
 public class RestTemplateBeanPostProcessor implements BeanPostProcessor {
@@ -26,6 +26,9 @@ public class RestTemplateBeanPostProcessor implements BeanPostProcessor {
             RestTemplate restTemplate = (RestTemplate) bean;
 
             List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
+            if (interceptors.contains(logRequestInterceptor)) {
+                return bean; // If the interceptor is already present, do not add it again
+            }
             interceptors.add(logRequestInterceptor);
             restTemplate.setInterceptors(interceptors);
         }

@@ -2,6 +2,7 @@ package org.app.common.client.rest.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.app.common.context.TracingContext;
+import org.app.common.utils.RequestUtils;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -18,9 +19,9 @@ public class LogRequestInterceptor implements ClientHttpRequestInterceptor {
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
         String requestId = TracingContext.getRequestId();
+        request.getHeaders().add(RequestUtils.REQUEST_ID, requestId);
 
-
-        String start = String.format(
+        String requestInfo = String.format(
             "Request{URI: %s, Method: %s, Body: %s} ",
             request.getURI(),
             request.getMethod(),
@@ -31,11 +32,13 @@ public class LogRequestInterceptor implements ClientHttpRequestInterceptor {
         ClientHttpResponse response = execution.execute(request, body);
         long endTime = System.currentTimeMillis();
 
-        String end = String.format("Response{Status: %s, Body: %s}",
+        String responseInfo = String.format(
+            "Response{Status: %s, Body: %s}",
             response.getStatusCode(),
-            StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8));
+            StreamUtils.copyToString(response.getBody(), StandardCharsets.UTF_8)
+        );
 
-        log.info("{} - Duration:{} - {} - {}", requestId, (endTime - startTime) , start, end);
+        log.info("{} - Duration:{} - {} - {}", requestId, (endTime - startTime), requestInfo, responseInfo);
 
         return response;
     }

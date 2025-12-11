@@ -20,7 +20,7 @@ import java.util.Optional;
 /**
  * Fluent API for making REST calls
  * Provides a builder pattern for configuring and executing REST requests
- * 
+ *
  * @param <T> The type of response expected from the API call
  */
 public class RestfulApi<T> {
@@ -46,7 +46,7 @@ public class RestfulApi<T> {
 
     /**
      * Constructor with headers and client
-     * 
+     *
      * @param headers HTTP headers to use for requests
      * @param client RestTemplate client to use for requests
      */
@@ -57,7 +57,7 @@ public class RestfulApi<T> {
 
     /**
      * Creates a RestfulApi instance with the default configuration
-     * 
+     *
      * @param restTemplate RestTemplate to use, or null to create a new one
      * @return RestfulApi instance
      */
@@ -73,7 +73,7 @@ public class RestfulApi<T> {
 
     /**
      * Creates a RestfulApi instance with authentication token
-     * 
+     *
      * @param restTemplate RestTemplate to use, or null to create a new one
      * @param authToken Authentication token to use
      * @return RestfulApi instance with authentication
@@ -91,7 +91,7 @@ public class RestfulApi<T> {
 
     /**
      * Creates a RestfulApi instance with token refresh capability
-     * 
+     *
      * @param authTokenInfo Information about the authentication token
      * @param clientInfo Information about the client
      * @return RestfulApi instance with token refresh capability
@@ -187,7 +187,7 @@ public class RestfulApi<T> {
     }
 
     public <R> R sinkToList(Class<R> clazz) {
-        return JacksonUtils.fromObjectToList(response.toString(), clazz);
+        return JacksonUtils.readValue(response.toString(), clazz);
     }
 
     public Optional<T> getOptional() {

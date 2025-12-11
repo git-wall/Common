@@ -1,6 +1,7 @@
 package org.app.common.cassandra;
 
 public class CassandraException extends RuntimeException {
+    private static final long serialVersionUID = -2139561247799478541L;
     private final String errorCode;
 
     public CassandraException(String message) {

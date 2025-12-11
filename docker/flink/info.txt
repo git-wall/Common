@@ -1,0 +1,3 @@
+https://gordonmurray.com/data/2023/11/02/deploying-flink-cdc-jobs-with-docker-compose.html
+
+flink sql

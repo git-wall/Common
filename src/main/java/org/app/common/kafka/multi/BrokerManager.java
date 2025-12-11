@@ -46,7 +46,7 @@ public class BrokerManager {
     }
 
     public void producerSend(String brokerId, String topic, String key, Object value) {
-        var val = JacksonUtils.toString(value);
+        var val = JacksonUtils.toJson(value);
         ProducerRecord<String, String> record = new ProducerRecord<>(topic, key, val);
         producers.get(brokerId).send(record);
     }

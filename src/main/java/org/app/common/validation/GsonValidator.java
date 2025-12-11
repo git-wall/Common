@@ -6,6 +6,10 @@ import java.io.IOException;
 
 public class GsonValidator {
 
+    private GsonValidator () {
+        // Private constructor to prevent instantiation
+    }
+
     private static final TypeAdapter<JsonElement> strictAdapter = new Gson().getAdapter(JsonElement.class);
 
     public static boolean isValid(String json) {

@@ -13,10 +13,11 @@ public class JpaUtils {
 
     public static final int TIMEOUT_DEFAULT = 30; // 30s
 
-    public static EntityManagerFactory buildEntityManagerFactory(DataSource dataSource,
-                                                                 String persistenceUnitName,
-                                                                 String packageNameEntity,
-                                                                 boolean generateDdl) {
+    public static EntityManagerFactory buildEntityManagerFactory(
+            DataSource dataSource,
+            String persistenceUnitName,
+            String packageNameEntity,
+            boolean generateDdl) {
         HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         vendorAdapter.setGenerateDdl(generateDdl);
 
@@ -35,7 +36,8 @@ public class JpaUtils {
         return buildTransactionManager(entityManagerFactory, TIMEOUT_DEFAULT);
     }
 
-    public static PlatformTransactionManager buildTransactionManager(EntityManagerFactory entityManagerFactory, int timeout) {
+    public static PlatformTransactionManager buildTransactionManager(EntityManagerFactory entityManagerFactory,
+            int timeout) {
         JpaTransactionManager txManager = new JpaTransactionManager();
         txManager.setEntityManagerFactory(entityManagerFactory);
         txManager.setDefaultTimeout(timeout);

@@ -8,6 +8,7 @@ import org.app.common.notification.NotificationInfo;
 
 @RequiredArgsConstructor
 public class HttpApiSink<T> implements Sink<T> {
+    private static final long serialVersionUID = 6666460143303659329L;
     private final String url;
     private final String token;
     private final NotificationInfo notificationInfo;

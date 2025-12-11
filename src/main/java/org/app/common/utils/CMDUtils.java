@@ -1,9 +1,10 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CMDUtils {
-    private CMDUtils() {
-        // Utility class, prevent instantiation
-    }
 
     /**
      * Executes a command in the system shell.

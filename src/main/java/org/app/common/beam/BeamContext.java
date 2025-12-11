@@ -5,6 +5,9 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 
 public class BeamContext {
+
+    private BeamContext() {}
+
     public static Pipeline createPipeline() {
         PipelineOptions options = PipelineOptionsFactory.create();
         return Pipeline.create(options);

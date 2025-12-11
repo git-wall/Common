@@ -1,9 +1,8 @@
 package org.app.common.flow;
 
-import org.app.common.design.legacy.FluentApi;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Pattern: Dynamic Workflow Engine
@@ -57,19 +56,40 @@ import java.util.List;
  *      Error Handling : Each step can handle errors independently, making debugging easier.
  * </pre>
  */
-public class Flow<T> extends FluentApi<Flow<T>> {
-    private final List<Step<T>> steps = new ArrayList<>(8);
+public class Flow<T> {
+    private List<Step<T>> steps;
 
-    public Flow<T> step(Step<T> step) {
+    public Flow<T> begin(int size) {
+        steps = new ArrayList<Step<T>>(size);
+        return this;
+    }
+
+    public Flow<T> next(Step<T> step) {
         steps.add(step);
         return this;
     }
 
-    public T execute(T input) throws Exception {
-        T result = input;
+    public void doing(T input) {
         for (Step<T> step : steps) {
-            result = step.execute(result);
+            step.execute(input);
         }
-        return result;
+    }
+
+    public T execute(T input) {
+        for (Step<T> step : steps) {
+            input = step.execute(input);
+        }
+        return input;
+    }
+
+    public <R> R sink(T input, Function<T, R> function) {
+        for (Step<T> step : steps) {
+            input = step.execute(input);
+        }
+        return function.apply(input);
+    }
+
+    public interface Step<T> {
+        T execute(T input);
     }
 }

@@ -45,14 +45,14 @@ public abstract class AbstractServiceCDC<E extends IDEntity<ID> & CDC, ID>
     @Override
     @Transactional
     public E update(E r) {
-        Optional<E> entity = findById(r.getId());
+        Optional<E> entity = this.findById(r.getId());
         Assert.isTrue(entity.isPresent(), String.format("Not found object by id: %s", r.getId()));
         return entity
                 .filter(e -> e.getCdcVersion().equals(r.getCdcVersion()))
                 .map(repository::save)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Error update, version is change. Pls reload and update again"
-                );
+                ));
     }
 
     @Override

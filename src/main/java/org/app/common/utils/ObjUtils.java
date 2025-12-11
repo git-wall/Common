@@ -1,5 +1,7 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.util.Assert;
 
 import java.lang.reflect.Field;
@@ -8,13 +10,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ObjUtils {
 
     public static Object getValFromField(Object request, String fieldName) {
         try {
             Field field = request.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
-            return field.get(request);
+            var v =  field.get(request);
+            field.setAccessible(false);
+            return v;
         } catch (Exception e) {
             throw new RuntimeException("Cannot access field: " + fieldName);
         }
@@ -28,17 +33,6 @@ public class ObjUtils {
         throw new IllegalArgumentException("Values are not comparable");
     }
 
-    public static <T> T nonNull(T obj, String message) {
-        if (obj == null) {
-            throw new NullPointerException(message);
-        }
-        return obj;
-    }
-
-    public static <T> T nonNull(T obj) {
-        return nonNull(obj, "Object cannot be null");
-    }
-
     public static <T> T nonNullElse(T obj, T defaultObj) {
         return (obj != null) ? obj : defaultObj;
     }
@@ -48,18 +42,21 @@ public class ObjUtils {
     }
 
     public static <T, R> Map<T, R> isMap(Object obj) {
+        Assert.notNull(obj, "Object cannot be null");
         String errorMessage = String.format("Error when converting %s to Map", obj.getClass().getSimpleName());
         Assert.isInstanceOf(Map.class, obj, errorMessage);
         return convert(Map.class, obj);
     }
 
     public static <T> List<T> isList(Object obj) {
+        Assert.notNull(obj, "Object cannot be null");
         String errorMessage = String.format("Error when converting %s to List", obj.getClass().getSimpleName());
         Assert.isInstanceOf(List.class, obj, errorMessage);
         return convert(List.class, obj);
     }
 
     public static <T> Set<T> isSet(Object obj) {
+        Assert.notNull(obj, "Object cannot be null");
         String errorMessage = String.format("Error when converting %s to Set", obj.getClass().getSimpleName());
         Assert.isInstanceOf(Set.class, obj, errorMessage);
         return convert(Set.class, obj);

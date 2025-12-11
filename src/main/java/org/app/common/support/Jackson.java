@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +27,7 @@ public class Jackson {
 
     private final ObjectMapper mapper;
 
-    public ObjectMapper map() {
+    public ObjectMapper mapper() {
         return mapper;
     }
 
@@ -78,11 +78,6 @@ public class Jackson {
     }
 
     @SneakyThrows
-    public <T> T fromJson(URL url, Class<T> clazz) {
-        return mapper.readValue(url, clazz);
-    }
-
-    @SneakyThrows
     public <T> T fromJson(byte[] bytes, Class<T> clazz) {
         return mapper.readValue(bytes, clazz);
     }
@@ -129,7 +124,7 @@ public class Jackson {
         return mapper.convertValue(object, javaType);
     }
 
-    // Update existing object with JSON
+    // Update an existing object with JSON
     @SneakyThrows
     public <T> T updateValue(T objectToUpdate, String json) {
         return mapper.readerForUpdating(objectToUpdate).readValue(json);
@@ -175,16 +170,16 @@ public class Jackson {
     public JavaType typeOf(Class<?> mainType, Class<?>... parameterTypes) {
         if (parameterTypes == null || parameterTypes.length == 0) {
             // No generics, just a simple type
-            return typeOf(mainType);
+            return typeFactory().constructType(mainType);
         }
 
         // Recursively resolve nested generics
         JavaType[] javaParamTypes = new JavaType[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
-            javaParamTypes[i] = mapper.getTypeFactory().constructType(parameterTypes[i]);
+            javaParamTypes[i] = typeFactory().constructType(parameterTypes[i]);
         }
 
-        return mapper.getTypeFactory().constructParametricType(mainType, javaParamTypes);
+        return typeFactory().constructParametricType(mainType, javaParamTypes);
     }
 
     // Byte array methods
@@ -204,6 +199,10 @@ public class Jackson {
     public <T> T clone(T object, TypeReference<T> typeReference) {
         String json = toJsonCompact(object);
         return fromJson(json, typeReference);
+    }
+
+    public TypeFactory typeFactory() {
+        return mapper.getTypeFactory();
     }
 }
 

@@ -1,6 +1,9 @@
 package org.app.common.utils;
 
-import lombok.Getter;
+import lombok.SneakyThrows;
+import org.apache.commons.lang.ArrayUtils;
+import org.app.common.wrap.WrapBodyHttpServletRequest;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
@@ -10,15 +13,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for handling HTTP request-related operations.
@@ -33,11 +34,19 @@ public class RequestUtils {
     // auth
     public static final String TOKEN_PREFIX = "Bearer ";
 
-    // device id
     public static final String DCM_GU_ID = "x-dcmguid";
     public static final String SUB_NO = " x-up-subno";
     public static final String J_PHONE_UID = "x-jphone-uid";
     public static final String EM_UID = "x-em-uid";
+    public static final String EM_GUID = "x-em-guid";
+    public static final String EM_NAME = "x-em-name";
+    public static final String EM_EMAIL = "x-em-email";
+    public static final String X_APP_VERSION = "X-App-Version";
+
+    public static final String USER_AGENT = "User-Agent";
+    public static final String USER_ID = "x-user-id";
+    public static final String USER_NAME = "x-user-name";
+    public static final String USER_EMAIL = "x-user-email";
 
     // user remote ip
     private static final String[] IP_HEADER_CANDIDATES = {
@@ -79,6 +88,12 @@ public class RequestUtils {
 
     public static String getToken() {
         return getToken(Objects.requireNonNull(getHttpServletRequest()));
+    }
+
+    public static String getRequestIdOrElse(HttpServletRequest request, Supplier<String> another) {
+        return Optional.ofNullable(request)
+            .map(RequestUtils::getRequestId)
+            .orElse(another.get());
     }
 
     public static String getRequestId(HttpServletRequest request) {
@@ -172,6 +187,7 @@ public class RequestUtils {
     }
 
     public static String getDomain(HttpServletRequest request) {
+        if (request == null) return "";
         String host = request.getHeader("host");
         if (host != null && host.contains(":")) {
             return host.substring(0, host.indexOf(':'));
@@ -218,10 +234,10 @@ public class RequestUtils {
     }
 
     public static String getCurl() {
-        return toCurl(getHttpServletRequest());
+        return curlOf(getHttpServletRequest());
     }
 
-    public static String toCurl(HttpServletRequest request) {
+    public static String curlOf(HttpServletRequest request) {
         if (request == null) return "";
 
         StringBuilder curl = new StringBuilder("curl");
@@ -245,7 +261,7 @@ public class RequestUtils {
         if ("GET".equalsIgnoreCase(request.getMethod())) {
             String queryString = request.getQueryString();
             if (queryString != null && !queryString.isEmpty()) {
-                curl.append(" '").append(getFullURL(request)).append("'");
+                curl.append(" '").append(getFullUri(request)).append("'");
             } else {
                 curl.append(" '").append(request.getRequestURL()).append("'");
             }
@@ -275,7 +291,7 @@ public class RequestUtils {
         return curl.toString();
     }
 
-    private static String getFullURL(HttpServletRequest request) {
+    public static String getFullUri(HttpServletRequest request) {
         StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
         String queryString = request.getQueryString();
         if (queryString != null) {
@@ -284,7 +300,7 @@ public class RequestUtils {
         return requestURL.toString();
     }
 
-    private static String getRequestBody(HttpServletRequest request) {
+    public static String getRequestBody(HttpServletRequest request) {
         try {
             WrapBodyHttpServletRequest cachedRequest = new WrapBodyHttpServletRequest(request);
             return cachedRequest.getBody();
@@ -293,56 +309,21 @@ public class RequestUtils {
         }
     }
 
-    @Getter
-    private static class WrapBodyHttpServletRequest extends HttpServletRequestWrapper {
-        private final String body;
+    public static String requestAsString(ProceedingJoinPoint joinPoint) {
+        return Optional.of(joinPoint.getArgs())
+            .filter(ArrayUtils::isNotEmpty)
+            .map(RequestUtils::requestAsString)
+            .orElse("");
+    }
 
-        public WrapBodyHttpServletRequest(HttpServletRequest request) throws IOException {
-            super(request);
-            StringBuilder stringBuilder = new StringBuilder();
-            BufferedReader bufferedReader = null;
-            try {
-                InputStream inputStream = request.getInputStream();
-                if (inputStream != null) {
-                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-                    char[] charBuffer = new char[128];
-                    int bytesRead;
-                    while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-                        stringBuilder.append(charBuffer, 0, bytesRead);
-                    }
-                }
-            } finally {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-            }
-            body = stringBuilder.toString();
-        }
-
-        @Override
-        public ServletInputStream getInputStream() {
-            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes());
-            return new ServletInputStream() {
-                @Override
-                public boolean isFinished() {
-                    return false;
-                }
-
-                @Override
-                public boolean isReady() {
-                    return true;
-                }
-
-                @Override
-                public void setReadListener(ReadListener readListener) {
-                    throw new UnsupportedOperationException();
-                }
-
-                @Override
-                public int read() {
-                    return byteArrayInputStream.read();
-                }
-            };
-        }
+    @SneakyThrows
+    private static String requestAsString(Object[] args) {
+        return Arrays.stream(args)
+            .map(e -> String.format(
+                "(request) %s : [%s]",
+                e.getClass().getName(),
+                JacksonUtils.toJson(e))
+            )
+            .collect(Collectors.joining("\n\r"));
     }
 }

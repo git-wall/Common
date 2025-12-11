@@ -1,0 +1,41 @@
+﻿Thank you for installing {{ .Chart.Name }}!
+
+Your PgBouncer release is named {{ .Release.Name }}.
+
+To get the connection details:
+
+1. Get the service endpoint:
+{{- if eq .Values.service.type "NodePort" }}
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "pgbouncer.fullname" . }})
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo "PgBouncer is available at: $NODE_IP:$NODE_PORT"
+
+   For Kind cluster: localhost:5001 (mapped from NodePort {{ .Values.service.nodePort }})
+{{- else if eq .Values.service.type "LoadBalancer" }}
+   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "pgbouncer.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+   echo "PgBouncer is available at: $SERVICE_IP:{{ .Values.service.port }}"
+{{- else if eq .Values.service.type "ClusterIP" }}
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "pgbouncer.fullname" . }} 5432:{{ .Values.service.port }}
+   echo "PgBouncer is available at: localhost:5432"
+{{- end }}
+
+2. Connect using psql:
+   psql -h localhost -p 5001 -U {{ .Values.auth.username }} -d postgres
+
+3. Check the status:
+   kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "pgbouncer.name" . }},app.kubernetes.io/instance={{ .Release.Name }}"
+
+4. View logs:
+   kubectl logs --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "pgbouncer.name" . }}" -f
+
+Backend PostgreSQL: {{ .Values.postgresql.host }}:{{ .Values.postgresql.port }}
+Pool Mode: {{ .Values.pgbouncer.poolMode }}
+Max Connections: {{ .Values.pgbouncer.maxClientConn }}
+
+{{- if not .Values.auth.existingSecret }}
+
+WARNING: You are using default credentials!
+   For production, create a secret manually and set auth.existingSecret
+{{- end }}
+
+For more information, visit: https://www.pgbouncer.org/

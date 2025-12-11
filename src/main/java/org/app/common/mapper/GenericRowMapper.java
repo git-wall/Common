@@ -1,6 +1,7 @@
 package org.app.common.mapper;
 
 import lombok.SneakyThrows;
+import org.app.common.utils.ArrayUtils;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.lang.NonNull;
 
@@ -37,8 +38,8 @@ public class GenericRowMapper<T> implements RowMapper<T> {
             String columnName = metaData.getColumnName(i).toLowerCase(); // Normalize column name
             Object columnValue = rs.getObject(i);
 
-            // Find the corresponding field in the entity class
-            Field field = findField(clazz, columnName);
+            Field[] fields = clazz.getDeclaredFields();
+            Field field = ArrayUtils.findFirst(fields, f -> f.getName().equalsIgnoreCase(columnName));
             if (field != null) {
                 field.setAccessible(true);      // Allow access to private fields
                 field.set(entity, columnValue); // Set the value
@@ -47,16 +48,5 @@ public class GenericRowMapper<T> implements RowMapper<T> {
         }
 
         return entity;
-    }
-
-    /**
-     * Finds a field in the given class by matching its name (case-insensitive).
-     */
-    private Field findField(Class<?> clazz, String fieldName) {
-        Field[] fields = clazz.getDeclaredFields();
-        return Arrays.stream(fields)
-                .filter(field -> field.getName().equalsIgnoreCase(fieldName))
-                .findFirst()
-                .orElse(null);
     }
 }

@@ -22,8 +22,14 @@ public class HazelcastConfig {
     @Value("${hazelcast.network.port}")
     private int port;
 
-    @Value("hazelcast.tcp.members")
+    @Value("${hazelcast.tcp.members}")
     private String members;
+    
+    @Value("${hazelcast.backup.sync-count:2}")
+    private int syncBackupCount;
+    
+    @Value("${hazelcast.backup.async-count:0}")
+    private int asyncBackupCount;
 
     @Bean
     public Config hazelcastConfig() {
@@ -36,6 +42,12 @@ public class HazelcastConfig {
         JoinConfig join = network.getJoin();
         join.getMulticastConfig().setEnabled(false);
         join.getTcpIpConfig().setEnabled(true).setMembers(Arrays.asList(members.split(",")));
+
+        // Dynamic backup configuration based on properties
+        config.getMapConfig("default")
+                .setBackupCount(syncBackupCount) // Dynamic synchronous replicas
+                .setAsyncBackupCount(asyncBackupCount); // Dynamic asynchronous replicas
+
         return config;
     }
 

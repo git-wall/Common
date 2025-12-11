@@ -9,12 +9,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 /**
  * <img src="https://java-design-patterns.com/assets/img/poison-pill-sequence-diagram.1fd1a9ed.png" alt="PoisonPill">
  * <br>
- * <img src="https://java-design-patterns.com/assets/img/producer-consumer-sequence-diagram.70492f95.png" alt"Producer-Consumer ></>
+ * <img src="https://java-design-patterns.com/assets/img/producer-consumer-sequence-diagram.70492f95.png" alt"Producer-Consumer"></>
  * Mix PoisonPill And Producer-Consumer
  */
 @AutoRun(detail = "This class PoisonPill is auto-registered and stop if have any data in queue like POISON")
@@ -25,17 +26,18 @@ public class PoisonPill<T> extends RunnableProvider {
     private String name;
     private Queue<T> queue;
     private Consumer<T> consumer;
-    public T POISON; // special object
+    private T poison; // special object
 
+    @SuppressWarnings({"unchecked"})
     public static <T> PoisonPill<T> beanPrototype() {
         return SpringContext.getContext().getBean(PoisonPill.class);
     }
 
-    public void setting(String name, T poison, Queue<T> queue, Consumer<T> consumer) {
+    public void setting(String name, T poison, Consumer<T> consumer) {
         this.name = name.toUpperCase();
-        this.queue = queue;
+        this.queue = new ConcurrentLinkedQueue<>(); // use for high through put, non-blocking, lock-free producer, consumer
         this.consumer = consumer;
-        this.POISON = poison;
+        this.poison = poison;
     }
 
     public void offer(T item) {
@@ -49,9 +51,9 @@ public class PoisonPill<T> extends RunnableProvider {
 
     @Override
     protected void now() {
-        T item = queue.poll();
+        var item = queue.poll();
         if (item == null) return;
-        if (item.equals(POISON)) {
+        if (item.equals(poison)) {
             log.info("{} received poison pill, exiting", name);
             hook.shutdown();
             return;

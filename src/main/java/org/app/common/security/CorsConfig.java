@@ -26,6 +26,9 @@ public class CorsConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(CorsProperties corsProperties) {
         CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.applyPermitDefaultValues();
+
         // allow domain you want
         configuration.setAllowedOrigins(corsProperties.getOrigins());
         // allow cookie/session
@@ -34,6 +37,12 @@ public class CorsConfig {
         configuration.addAllowedMethod(List.of("GET", "POST", "PUT", "DELETE").toString());
         // allow header
         configuration.addAllowedHeader("*");
+
+        configuration.setAllowedOriginPatterns(List.of(
+            "http://localhost:*",
+            "https://*._.com",
+            "https://_.com"
+        ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

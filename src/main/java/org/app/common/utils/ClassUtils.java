@@ -8,7 +8,9 @@ import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ClassUtils {
 
@@ -45,25 +47,32 @@ public class ClassUtils {
 
     @SneakyThrows
     public static Object invokeGetMethod(Object oj, String field) {
-        String fieldName = "get" + org.apache.commons.lang3.StringUtils.capitalize(field);
+        String fieldName = String.format("get%s", org.apache.commons.lang3.StringUtils.capitalize(field));
         return MethodUtils.invokeMethod(oj, fieldName);
     }
 
     @SneakyThrows
     public static Object invokeGetMethod(Object oj, Field field) {
-        String fieldName = "get" + org.apache.commons.lang3.StringUtils.capitalize(field.getName());
+        String fieldName = String.format("get%s", field.getName());
         return MethodUtils.invokeMethod(oj, fieldName);
     }
 
     @SneakyThrows
     public static void invokeSetMethod(Object oj, String field, Object fieldValue) {
-        String fieldName = "set" + org.apache.commons.lang3.StringUtils.capitalize(field);
+        String fieldName = String.format("set%s", org.apache.commons.lang3.StringUtils.capitalize(field));
         MethodUtils.invokeMethod(oj, fieldName, fieldValue);
     }
 
     @SneakyThrows
     public static void invokeSetMethod(Object oj, Field field, Object fieldValue) {
-        String fieldName = "set" + org.apache.commons.lang3.StringUtils.capitalize(field.getName());
+        String fieldName = String.format("set%s", field.getName());
         MethodUtils.invokeMethod(oj, fieldName, fieldValue);
+    }
+
+    public static List<String> getClassFieldNames(Class<?> clazz) {
+        Field[] fields = clazz.getDeclaredFields();
+        return java.util.Arrays.stream(fields)
+            .map(Field::getName)
+            .collect(Collectors.toList());
     }
 }

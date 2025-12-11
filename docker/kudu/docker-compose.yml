@@ -1,0 +1,29 @@
+services:
+  kudu-master:
+    image: apache/kudu:latest
+    command: [ "kudu-master" ]
+    ports:
+      - "8050:8050"
+      - "8051:8051"
+    environment:
+      KUDU_MASTER_IP: kudu-master
+      KUDU_MASTER_RPC_BIND_ADDR: 0.0.0.0:7051
+      KUDU_MASTER_RPC_ADVERTISED_ADDR: kudu-master:7051
+    volumes:
+      - kudu-master-data:/var/lib/kudu
+  
+  kudu-tserver:
+    image: apache/kudu:latest
+    command: [ "kudu-tserver" ]
+    ports:
+      - "8052:8052"
+    environment:
+      KUDU_MASTER_ADDRS: kudu-master:7051
+    volumes:
+      - kudu-tserver-data:/var/lib/kudu
+    depends_on:
+      - kudu-master
+
+volumes:
+  kudu-master-data:
+  kudu-tserver-data:
