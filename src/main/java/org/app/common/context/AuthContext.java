@@ -1,5 +1,6 @@
 package org.app.common.context;
 
+import lombok.NoArgsConstructor;
 import org.app.common.utils.JacksonUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,12 +21,8 @@ import java.util.Optional;
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*\
             AUTHENTICATION
 \*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class AuthContext {
-
-    private AuthContext() {
-        //Get info client from token
-    }
-
     public static String getUserName() {
         Authentication auth = getAuthHolder();
         return Optional.ofNullable(auth.getPrincipal())

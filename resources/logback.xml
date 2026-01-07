@@ -1,9 +1,10 @@
 <configuration>
     <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    // [%X{requestId}] add requestId vào trước mỗi log để truy vết
+    <appender name="STDOUT" class="ch.qos.logback.classic.AsyncAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{requestId}] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
@@ -23,11 +24,11 @@
             <includeLevelName>true</includeLevelName>
 
             <shortPatternLayout class="ch.qos.logback.classic.PatternLayout">
-                <pattern>%logger{35} - %msg%n</pattern>
+                <pattern>[%X{requestId}] - %logger{35} - %msg%n</pattern>
             </shortPatternLayout>
 
             <fullPatternLayout class="ch.qos.logback.classic.PatternLayout">
-                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{requestId}] %-5level %logger{35} - %msg%n</pattern>
             </fullPatternLayout>
         </encoder>
     </appender>

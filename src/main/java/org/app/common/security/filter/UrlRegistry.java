@@ -23,7 +23,7 @@ public class UrlRegistry implements Customizer<AuthorizeHttpRequestsConfigurer<H
 
     private final WhiteListProperties whiteListProperties;
 
-    public static final String[] WHITE_LIST = new String[]{
+    public static final String[] WHITE_LIST_ADMIN = new String[]{
         // Actuator endpoints ADMIN only
         "/actuator/**",
         // Monitoring
@@ -56,6 +56,6 @@ public class UrlRegistry implements Customizer<AuthorizeHttpRequestsConfigurer<H
     }
 
     private String[] combineWhiteList() {
-        return ArrayUtils.addAll(WHITE_LIST, whiteListProperties.getWhiteList().toArray(new String[0]));
+        return ArrayUtils.addAll(WHITE_LIST_ADMIN, whiteListProperties.getWhiteList().toArray(new String[0]));
     }
 }

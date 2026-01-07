@@ -7,6 +7,7 @@ import org.app.common.health.DbHealthCheck;
 import org.app.common.health.SystemHealthCheck;
 import org.app.common.interceptor.log.InterceptorLog;
 import org.springframework.boot.actuate.health.Health;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +21,7 @@ public class HealCheckController {
 
     private final SystemHealthCheck systemHealthCheck;
 
-    @GetMapping(TagURL.HEALTH)
+    @GetMapping(value = TagURL.HEALTH, consumes = MediaType.APPLICATION_JSON_VALUE)
     @InterceptorLog
     public Health health() {
         return Health.up()

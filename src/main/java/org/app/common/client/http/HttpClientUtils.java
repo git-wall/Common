@@ -1,6 +1,7 @@
 package org.app.common.client.http;
 
 import com.fasterxml.jackson.databind.JavaType;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.app.common.client.http.request.HttpRequestUtils;
 import org.app.common.client.http.response.HttpResponseUtils;
@@ -12,12 +13,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class HttpClientUtils {
-
-    private HttpClientUtils() {
-        // Utility class, no instantiation
-    }
-
     public static <T> T read(Object obj, String url, JavaType javaType) {
         return decode(bodyAsString(HttpRequestUtils.post(JacksonUtils.toJson(obj), url)), javaType);
     }
@@ -63,12 +60,8 @@ public class HttpClientUtils {
         return JacksonUtils.readValue(response, javaType);
     }
 
+    @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
     public static class Auth {
-
-        private Auth() {
-            // Utility class, no instantiation
-        }
-
         public static Authenticator basic(String username, String password) {
             return new Authenticator() {
                 @Override
@@ -79,37 +72,38 @@ public class HttpClientUtils {
         }
     }
 
+    @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
     public static class Async {
-
-        private Async() {
-            // Utility class, no instantiation
-        }
-
         public static void send(HttpClient client, Object request, String url) {
             nobody(client, HttpRequestUtils.post(JacksonUtils.toJson(request), url));
         }
 
         private static void nobody(HttpClient client, HttpRequest request) {
-            client.sendAsync(request, HttpResponse.BodyHandlers.discarding());
-        }
-
-        public static <T> T read(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
-            return client.sendAsync(request, responseBodyHandler).join().body();
+            read(client, request, HttpResponse.BodyHandlers.discarding());
         }
 
         public static <T> T read(HttpClient client, HttpRequest request, JavaType javaType) {
-            return client
-                .<T>sendAsync(request, HttpResponseUtils.generic(javaType))
-                .join()
-                .body();
+            HttpResponse.BodyHandler<T> responseBodyHandler = HttpResponseUtils.generic(javaType);
+            return read(client, request, responseBodyHandler);
         }
 
-        public static <T> HttpResponse<T> call(HttpClient client, HttpRequest request, HttpResponse.BodyHandler<T> responseBodyHandler) {
+        public static <T> T read(HttpClient client,
+                                 HttpRequest request,
+                                 HttpResponse.BodyHandler<T> responseBodyHandler) {
+            return call(client, request, responseBodyHandler).body();
+        }
+
+        public static <T> HttpResponse<T> call(HttpClient client,
+                                               HttpRequest request,
+                                               JavaType javaType) {
+            HttpResponse.BodyHandler<T> responseBodyHandler = HttpResponseUtils.generic(javaType);
+            return call(client, request, responseBodyHandler);
+        }
+
+        public static <T> HttpResponse<T> call(HttpClient client,
+                                               HttpRequest request,
+                                               HttpResponse.BodyHandler<T> responseBodyHandler) {
             return client.sendAsync(request, responseBodyHandler).join();
-        }
-
-        public static <T> HttpResponse<T> call(HttpClient client, HttpRequest request, JavaType javaType) {
-            return client.<T>sendAsync(request, HttpResponseUtils.generic(javaType)).join();
         }
     }
 }

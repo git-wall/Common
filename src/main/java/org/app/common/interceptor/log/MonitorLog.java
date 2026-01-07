@@ -2,23 +2,28 @@ package org.app.common.interceptor.log;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.app.common.context.TracingContext;
-import org.app.common.design.revisited.PoisonPill;
 import org.app.common.entities.log.RequestLog;
 import org.app.common.entities.log.TracingLog;
+import org.app.common.job.ExecutorFactory;
+import org.app.common.job.GrayLogJob;
+import org.app.common.job.JobRunner;
+import org.app.common.job.KafkaLogJob;
 import org.app.common.kafka.multi.BrokerManager;
 import org.app.common.support.Travel;
 import org.app.common.trace.Trace;
-import org.app.common.utils.JacksonUtils;
 import org.app.common.utils.RequestUtils;
-import org.app.common.utils.TokenUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PreDestroy;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*\
 |        M O N I T O R   L O G        |
@@ -26,31 +31,33 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Slf4j
-public class MonitorLog {
-
-    @Value("${spring.application.name}")
-    private String application;
-
-    @Value("${monitor.log.kafka.topic}")
-    private String topic;
-
-    @Value("${monitor.log.kafka.brokerId}")
-    private String brokerId;
-
-    private final KafkaProducer<String, String> kafkaProducer;
-
+public class MonitorLog implements DisposableBean {
+    private final String application;
     private final Trace trace;
+    private final JobRunner jobRunner;
+    private final BlockingQueue<RequestLog> queue = new LinkedBlockingQueue<>();
 
-    private final PoisonPill<RequestLog> pill;
-
-    private final boolean isKafkaReady;
-
-    public MonitorLog(Trace trace, BrokerManager brokerManager) {
+    public MonitorLog(
+        Trace trace,
+        BrokerManager brokerManager,
+        @Value("${spring.application.name}") String application,
+        @Value("${monitor.log.kafka.topic}") String topic,
+        @Value("${monitor.log.kafka.brokerId}") String brokerId) {
         this.trace = trace;
-        this.kafkaProducer = brokerManager.getProducer(brokerId);
-        this.isKafkaReady = topic != null && kafkaProducer != null;
-        this.pill = PoisonPill.beanPrototype(); // new prototype instance
-        this.pill.setting(MonitorLog.class.getSimpleName(), RequestLog.EMPTY, this::offer);
+        this.application = application;
+
+        ExecutorService executor = ExecutorFactory.create();
+        this.jobRunner = new JobRunner(executor);
+
+        if (topic != null) {
+            jobRunner.submit(
+                new KafkaLogJob(queue, brokerManager.getProducer(brokerId), topic, application)
+            );
+        } else {
+            jobRunner.submit(
+                new GrayLogJob(queue, application)
+            );
+        }
     }
 
     @Around("@annotation(interceptorLog)")
@@ -58,7 +65,7 @@ public class MonitorLog {
     public Object monitorApi(ProceedingJoinPoint jp, InterceptorLog interceptorLog) {
         if (interceptorLog == null) return jp.proceed();
 
-        var hsr = RequestUtils.getHttpServletRequest();
+        var hsr = RequestUtils.getCurrentHttpRequest();
         TracingContext.extractRequestId(hsr, trace::getId);
 
         var tracingLog = TracingLog.of(hsr, jp, interceptorLog, trace);
@@ -74,22 +81,15 @@ public class MonitorLog {
             tracingLog.enrich(0L, e);
             throw e;
         } finally {
-            pill.offer(entity);
+            queue.add(entity);
         }
     }
 
-    private void offer(RequestLog entity) {
-        var token = TokenUtils.generateId("log_user", 16);
-        var key = String.format("%s:%s", application, token);
-
-        if (isKafkaLog(entity)) {
-            kafkaProducer.send(new ProducerRecord<>(topic, key, JacksonUtils.toJson(entity)));
-        } else {
-            log.info("Key {} Info {}", key, entity);
-        }
-    }
-
-    private boolean isKafkaLog(RequestLog entity) {
-        return InterceptorLog.Check.isKafka(entity.getTracingLogType()) && isKafkaReady;
+    @Override
+    @PreDestroy
+    public void destroy() {
+        log.info("Shutting down MonitorLog...");
+        queue.add(RequestLog.EMPTY);
+        jobRunner.close();
     }
 }

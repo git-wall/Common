@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,12 +17,12 @@ public class JsonNodeConversionUtil {
         return items;
     }
 
-    static <T> Map<String, T> convertToMap(JsonNode objectNode, JsonNodeToObjectConverter<T> converter) {
-        Map<String, T> map = new HashMap<>();
-        objectNode.properties()
-            .forEach(node -> map.put(node.getKey(), converter.convert(node.getValue())));
-        return map;
-    }
+//    static <T> Map<String, T> convertToMap(JsonNode objectNode, JsonNodeToObjectConverter<T> converter) {
+//        Map<String, T> map = new HashMap<>();
+//        objectNode.properties()
+//            .forEach(node -> map.put(node.getKey(), converter.convert(node.getValue())));
+//        return map;
+//    }
 
     static <T> List<T> readToList(JsonNode arrayNode, TypeReference<List<T>> typeReference) throws IOException {
         return JacksonUtils.mapper().readValue(arrayNode.toString(), typeReference);

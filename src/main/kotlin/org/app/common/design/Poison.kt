@@ -1,8 +1,7 @@
 package org.app.common.design
 
-import mu.KotlinLogging
 import org.app.common.thread.ThreadAction
-import java.util.Queue
+import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
 class Poison<T>(
@@ -11,7 +10,7 @@ class Poison<T>(
     private val consumer: (T) -> Unit
 ) : ThreadAction() {
 
-    private val logger = KotlinLogging.logger {}
+//    private val logger = KotlinLogging.logger {}
 
     val queue: Queue<T> = LinkedBlockingQueue<T>()
 
@@ -20,13 +19,13 @@ class Poison<T>(
     }
 
     override fun before() {
-        logger.info("$name ready to run")
+//        logger.info("$name ready to run")
     }
 
     override fun now() {
         val item = queue.poll() ?: return
         if (item == poison) {
-            logger.error("$name received poison, shutting down")
+//            logger.error("$name received poison, shutting down")
             stop()
         } else {
             consumer(item)
@@ -34,6 +33,6 @@ class Poison<T>(
     }
 
     override fun after() {
-        logger.info("$name is shutting down")
+//        logger.info("$name is shutting down")
     }
 }

@@ -23,11 +23,13 @@ public class NetworkUtils {
     }
 
     @SneakyThrows(value = UnknownHostException.class)
-    public static byte[] getAddress() {return InetAddress.getLocalHost().getAddress();}
+    public static byte[] getAddress() {
+        return InetAddress.getLocalHost().getAddress();
+    }
 
     public static List<HttpHost> getHosts(String strHosts, int port, String protocol) {
         String[] hosts = Objects.requireNonNull(strHosts).split(",");
 
-        return ArrayUtils.map(hosts,host -> new HttpHost(host, port, protocol));
+        return ArrayUtils.map(hosts, host -> new HttpHost(host, port, protocol));
     }
 }

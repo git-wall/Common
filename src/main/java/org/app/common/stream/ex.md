@@ -13,18 +13,10 @@ var groups = DataStream.FROM(people)
         .toList();
 
 // Condition-based filtering
-DataStream.
-
-FROM(people)
-    .
-
-WHERE("age",Condition.GREATER_THAN(25))
-        .
-
-WHERE("department",Condition.IN(Arrays.asList("Engineering", "Sales")))
-        .
-
-toList();
+var g = DataStream.FROM(people)
+    .WHERE("age",Condition.GREATER_THAN(25))
+    .WHERE("department",Condition.IN(Arrays.asList("Engineering", "Sales")))
+    .toList();
 
 // Aggregations
 double avgAge = DataStream.FROM(people)

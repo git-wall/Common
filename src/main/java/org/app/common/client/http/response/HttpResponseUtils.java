@@ -1,26 +1,18 @@
 package org.app.common.client.http.response;
 
 import com.fasterxml.jackson.databind.JavaType;
+import lombok.NoArgsConstructor;
 import org.app.common.utils.JacksonUtils;
 
+import java.io.InputStream;
 import java.net.http.HttpResponse;
 
-import static jdk.internal.net.http.common.Utils.charsetFrom;
-
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class HttpResponseUtils {
-
-    private HttpResponseUtils () {
-        // Utility class, no instantiation
-    }
-
-    @SuppressWarnings("unchecked")
     public static <T> HttpResponse.BodyHandler<T> generic(JavaType type) {
         return responseInfo -> {
-            HttpResponse.BodySubscriber<String> upstream = HttpResponse.BodySubscribers.ofString(charsetFrom(responseInfo.headers()));
-            return HttpResponse.BodySubscribers.mapping(upstream, (String body) -> {
-                if (type.hasRawClass(String.class)) {
-                    return (T) body;
-                }
+            HttpResponse.BodySubscriber<InputStream> upstream = HttpResponse.BodySubscribers.ofInputStream();
+            return HttpResponse.BodySubscribers.mapping(upstream, body -> {
                 return JacksonUtils.readValue(body, type);
             });
         };

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Profile Viewer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <span style="font-size: 28px;">🚀</span>
+    <h1>API Profile Viewer</h1>
+  </div>
+  <div class="header-center">
+    <input type="file" id="folderInput" webkitdirectory directory multiple onchange="loadProfiles()">
+    <button class="btn btn-load" onclick="document.getElementById('folderInput').click()">
+      📁 Load Folder
+    </button>
+  </div>
+  <div class="header-right">
+    <button class="btn btn-guide" onclick="showGuide()">
+      📖 Guide
+    </button>
+  </div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+  <!-- Sidebar - API List -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h3>📋 DANH SÁCH APIs</h3>
+      <p style="font-size: 12px; color: #8b949e; margin-top: 5px;">Click để chọn API</p>
+    </div>
+    <div class="api-list" id="apiList"></div>
+  </div>
+
+  <!-- Content Area -->
+  <div class="content-area">
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+      </svg>
+      <h3>Chưa có dữ liệu</h3>
+      <p>Click nút "Load Folder" để bắt đầu</p>
+    </div>
+
+    <!-- Version Selector -->
+    <div class="version-section" id="versionSection">
+      <h3>📦 Chọn versions để so sánh (tối đa 3) - Version đầu tiên là baseline</h3>
+      <div class="version-list" id="versionList"></div>
+    </div>
+
+    <!-- Compare Button -->
+    <div class="compare-section" id="compareSection">
+      <button class="btn btn-secondary" onclick="showComparison()" id="compareBtn" disabled>
+        📊 So sánh <span id="selectedCount">0</span> Versions
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs" id="tabs">
+      <div class="tab active" onclick="switchTab('avg')">📊 Average</div>
+      <div class="tab" onclick="switchTab('min')">⚡ Min (Best)</div>
+      <div class="tab" onclick="switchTab('max')">🔥 Max (Worst)</div>
+      <div class="tab" onclick="switchTab('summary')">📈 Tổng Kết</div>
+    </div>
+
+    <!-- Views -->
+    <div class="view-container" id="viewContainer">
+      <div id="avgView" class="view">
+        <div class="tree-comparison" id="avgTrees"></div>
+      </div>
+
+      <div id="minView" class="view">
+        <div class="tree-comparison" id="minTrees"></div>
+      </div>
+
+      <div id="maxView" class="view">
+        <div class="tree-comparison" id="maxTrees"></div>
+      </div>
+
+      <div id="summaryView" class="view">
+        <div class="summary-grid">
+          <div class="summary-card">
+            <h3>⏱️ Ranking by Time</h3>
+            <table id="timeRankingTable">
+              <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Version</th>
+                <th>Avg (ms)</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="summary-card">
+            <h3>💾 Ranking by Memory</h3>
+            <table id="memoryRankingTable">
+              <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Version</th>
+                <th>Avg (KB)</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="summary-card">
+            <h3>📉 Time Comparison (ms)</h3>
+            <table id="timeDetailsTable">
+              <thead>
+              <tr>
+                <th>Version</th>
+                <th>Min</th>
+                <th>Avg</th>
+                <th>Max</th>
+                <th>Range</th>
+              </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="summary-card">
+            <h3>💽 Memory Comparison (KB)</h3>
+            <table id="memoryDetailsTable">
+              <thead>
+              <tr>
+                <th>Version</th>
+                <th>Min</th>
+                <th>Avg</th>
+                <th>Max</th>
+                <th>Range</th>
+              </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="info-note" id="recommendationNote"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Guide Modal -->
+<div id="guideModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📖 Hướng dẫn sử dụng</h3>
+      <button class="modal-close" onclick="closeGuide()">✕</button>
+    </div>
+    <div class="modal-body">
+      <h4 style="color: #58a6ff; margin-bottom: 10px;">📁 Cấu trúc folder yêu cầu:</h4>
+      <pre>profiles/
+├── OrderAPI/
+│   ├── v1/
+│   │   ├── avg.json
+│   │   ├── min.json
+│   │   ├── max.json
+│   │   └── metadata.json
+│   ├── v2/
+│   │   └── ... (4 files tương tự)
+│   └── v3/
+│       └── ... (4 files tương tự)
+└── PaymentAPI/
+    └── v1/
+        └── ... (4 files tương tự)</pre>
+
+      <h4 style="color: #58a6ff; margin: 20px 0 10px;">🚀 Cách sử dụng:</h4>
+      <ol>
+        <li><strong>Click "Load Folder"</strong> → Chọn thư mục <code>profiles/</code></li>
+        <li><strong>Chọn API</strong> từ sidebar bên trái</li>
+        <li><strong>Chọn versions</strong> cần so sánh (tối đa 3, version đầu là baseline)</li>
+        <li><strong>Click "So sánh"</strong> để xem kết quả</li>
+        <li><strong>Chuyển tabs</strong> để xem Average/Min/Max/Tổng Kết</li>
+      </ol>
+
+      <h4 style="color: #58a6ff; margin: 20px 0 10px;">💡 Giải thích kết quả:</h4>
+      <ul>
+        <li><span style="color: #3fb950;">↓ Màu xanh + ✓</span> = Giảm so với baseline (TỐT - performance cải thiện)</li>
+        <li><span style="color: #f85149;">↑ Màu đỏ + ✗</span> = Tăng so với baseline (XẤU - performance giảm)</li>
+        <li><span style="color: #d29922;">= Màu vàng</span> = Không đổi</li>
+        <li><strong>Range</strong> = Max - Min (khoảng dao động, số càng nhỏ = ổn định)</li>
+      </ul>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeGuide()">Đã hiểu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" class="modal">
+  <div class="modal-content error">
+    <div class="modal-header">
+      <h3 id="errorTitle" style="color: #f85149;">❌ Lỗi</h3>
+      <button class="modal-close" onclick="closeErrorModal()">✕</button>
+    </div>
+    <div class="modal-body" id="errorBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeErrorModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

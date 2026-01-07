@@ -1,14 +1,23 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ArrayUtils {
-    private ArrayUtils() {
+
+    public static boolean isBetween(Object[] array, int s, int e) {
+        return array.length > s || array.length < e;
+    }
+
+    public static boolean isNotBetween(Object[] array, int s, int e) {
+        return array.length < s || array.length > e;
     }
 
     /**
@@ -37,20 +46,6 @@ public class ArrayUtils {
         return false;
     }
 
-    public static <T> boolean anyMatch(Collection<T> collection, Predicate<T> predicate) {
-        if (collection == null) {
-            return false;
-        }
-
-        for (T item : collection) {
-            if (predicate.test(item)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static <T> T findFirst(T[] array, Predicate<T> condition) {
         if (array == null || condition == null) {
             return null;
@@ -65,30 +60,6 @@ public class ArrayUtils {
         return null;
     }
 
-    public static <T> T findFirst(Collection<T> collection, Predicate<T> condition) {
-        if (collection == null || condition == null) {
-            return null;
-        }
-
-        for (T item : collection) {
-            if (condition.test(item)) {
-                return item;
-            }
-        }
-
-        return null;
-    }
-
-    public static <T> List<T> filter(Collection<T> collection, Predicate<T> predicate) {
-        List<T> list = new ArrayList<>();
-        for (T item : collection) {
-            if (predicate.test(item)) {
-                list.add(item);
-            }
-        }
-        return list;
-    }
-
     public static <T, R> List<R> map(T[] array, Function<T, R> map) {
         if (array == null || map == null) {
             return null;
@@ -100,15 +71,6 @@ public class ArrayUtils {
             list.add(r);
         }
 
-        return list;
-    }
-
-    public static <T, R> List<R> map(Collection<T> collection, Function<T, R> map) {
-        List<R> list = new ArrayList<>(collection.size());
-        for (T item : collection) {
-            R r = map.apply(item);
-            list.add(r);
-        }
         return list;
     }
 

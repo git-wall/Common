@@ -102,10 +102,15 @@ securityContext:
   runAsNonRoot: true
   runAsUser: 1000
   fsGroup: 1000
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
   capabilities:
     drop:
       - ALL
-
+  # Kubernetes sẽ dùng seccomp mặc định (chặn nhiều syscall nguy hiểm)
+  seccompProfile:
+    type: RuntimeDefault
+    
 # Annotations KHÔNG ảnh hưởng đến cách Pod chạy, nhưng có thể dùng bởi:
 #Monitoring tools (Prometheus, Datadog, etc.)
 #Sidecar injectors (như Istio, Linkerd)

@@ -11,5 +11,5 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
     setterVisibility = JsonAutoDetect.Visibility.NONE,
     creatorVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class SecurityDetect {
+public interface SecurityDetect {
 }

@@ -10,7 +10,7 @@ buildCache {
     // Enable local build cache
     enabled = true
 
-    // Optional: custom directory
+    // Optional: custom directory remote folder
 //    directory = file("$rootDir/.gradle/build-cache")
   }
 }

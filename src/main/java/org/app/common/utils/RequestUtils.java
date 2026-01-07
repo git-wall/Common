@@ -1,7 +1,10 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.lang.ArrayUtils;
+import org.app.common.entities.ApiResponse;
 import org.app.common.wrap.WrapBodyHttpServletRequest;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.jetbrains.annotations.NotNull;
@@ -10,8 +13,10 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.thymeleaf.util.ListUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +25,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Utility class for handling HTTP request-related operations.
@@ -27,6 +33,7 @@ import java.util.stream.Collectors;
  * such as tokens, request IDs, device IDs, remote addresses, and URLs.
  * {@link org.apache.http.HttpHeaders HttperHeaders} is used for standard HTTP headers.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RequestUtils {
 
     public static final String REQUEST_ID = "X-Request-ID";
@@ -34,6 +41,7 @@ public class RequestUtils {
     // auth
     public static final String TOKEN_PREFIX = "Bearer ";
 
+    public static final String DEVICE_ID = "device-id";
     public static final String DCM_GU_ID = "x-dcmguid";
     public static final String SUB_NO = " x-up-subno";
     public static final String J_PHONE_UID = "x-jphone-uid";
@@ -48,46 +56,50 @@ public class RequestUtils {
     public static final String USER_NAME = "x-user-name";
     public static final String USER_EMAIL = "x-user-email";
 
+    public static final String SERVICE_ID = "X-Service-Id";
+
     // user remote ip
     private static final String[] IP_HEADER_CANDIDATES = {
-            "X-Forwarded-For",
-            "Proxy-Client-IP",
-            "WL-Proxy-Client-IP",
-            "HTTP_X_FORWARDED_FOR",
-            "HTTP_X_FORWARDED",
-            "HTTP_X_CLUSTER_CLIENT_IP",
-            "HTTP_CLIENT_IP",
-            "HTTP_FORWARDED_FOR",
-            "HTTP_FORWARDED",
-            "HTTP_VIA",
-            "REMOTE_ADDR"
+        "X-Forwarded-For",
+        "Proxy-Client-IP",
+        "WL-Proxy-Client-IP",
+        "HTTP_X_FORWARDED_FOR",
+        "HTTP_X_FORWARDED",
+        "HTTP_X_CLUSTER_CLIENT_IP",
+        "HTTP_CLIENT_IP",
+        "HTTP_FORWARDED_FOR",
+        "HTTP_FORWARDED",
+        "HTTP_VIA",
+        "REMOTE_ADDR"
     };
 
-    private RequestUtils() {
-        throw new IllegalStateException("Utility class");
-    }
+    public static HttpServletRequest getCurrentHttpRequest() {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (requestAttributes != null) {
+            if (requestAttributes instanceof ServletRequestAttributes) {
+                return ((ServletRequestAttributes) requestAttributes).getRequest();
+            }
+        }
 
-    public static HttpServletRequest getHttpServletRequest() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        return attributes != null ? attributes.getRequest() : null;
+        return null;
     }
 
     public static String getToken(HttpServletRequest request) {
         return Optional.of(request.getHeader(HttpHeaders.AUTHORIZATION))
-                .filter(token -> StringUtils.hasText(token) && token.startsWith(TOKEN_PREFIX))
-                .map(token -> token.replace(TOKEN_PREFIX, ""))
-                .orElse(null);
+            .filter(token -> StringUtils.hasText(token) && token.startsWith(TOKEN_PREFIX))
+            .map(token -> token.replace(TOKEN_PREFIX, ""))
+            .orElse(null);
     }
 
     public static Optional<String> getTokenBy(HttpServletRequest request) {
         return Optional.of(request.getHeader(HttpHeaders.AUTHORIZATION))
-                .filter(token -> StringUtils.hasText(token) && token.startsWith(TOKEN_PREFIX))
-                .map(token -> token.replace(TOKEN_PREFIX, ""))
-                .or(Optional::empty);
+            .filter(token -> StringUtils.hasText(token) && token.startsWith(TOKEN_PREFIX))
+            .map(token -> token.replace(TOKEN_PREFIX, ""))
+            .or(Optional::empty);
     }
 
     public static String getToken() {
-        return getToken(Objects.requireNonNull(getHttpServletRequest()));
+        return getToken(Objects.requireNonNull(getCurrentHttpRequest()));
     }
 
     public static String getRequestIdOrElse(HttpServletRequest request, Supplier<String> another) {
@@ -102,32 +114,25 @@ public class RequestUtils {
     }
 
     public static String getRequestId() {
-        return getRequestId(getHttpServletRequest());
+        return getRequestId(getCurrentHttpRequest());
     }
 
     public static String getDeviceId() {
-        return getDeviceId(getHttpServletRequest());
+        return getDeviceId(getCurrentHttpRequest());
     }
 
     public static String getDeviceId(HttpServletRequest request) {
         if (request == null) return null;
 
-        String deviceId = request.getHeader(DCM_GU_ID);
-
-        if (deviceId == null)
-            deviceId = request.getHeader(SUB_NO);
-
-        if (deviceId == null)
-            deviceId = request.getHeader(J_PHONE_UID);
-
-        if (deviceId == null)
-            deviceId = request.getHeader(EM_UID);
-
-        return deviceId;
+        return Stream.of(DCM_GU_ID, SUB_NO, J_PHONE_UID, EM_UID, DEVICE_ID)
+            .map(request::getHeader)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
     }
 
     public static String getRemoteAddress() {
-        return getRemoteAddress(getHttpServletRequest());
+        return getRemoteAddress(getCurrentHttpRequest());
     }
 
     public static String getRemoteAddress(HttpServletRequest request) {
@@ -144,7 +149,7 @@ public class RequestUtils {
     }
 
     public static String getUrlNoParams() {
-        return getUrlNoParams(getHttpServletRequest());
+        return getUrlNoParams(getCurrentHttpRequest());
     }
 
     public static String getUrlNoParams(HttpServletRequest request) {
@@ -164,7 +169,7 @@ public class RequestUtils {
     }
 
     public static String getUrl() {
-        return getUrl(getHttpServletRequest());
+        return getUrl(getCurrentHttpRequest());
     }
 
     public static String getUrl(HttpServletRequest request) {
@@ -174,7 +179,7 @@ public class RequestUtils {
     }
 
     public static String getFullUrl() {
-        return getFullUrl(getHttpServletRequest());
+        return getFullUrl(getCurrentHttpRequest());
     }
 
     public static String getFullUrl(HttpServletRequest request) {
@@ -183,7 +188,7 @@ public class RequestUtils {
     }
 
     public static String getDomain() {
-        return getDomain(getHttpServletRequest());
+        return getDomain(getCurrentHttpRequest());
     }
 
     public static String getDomain(HttpServletRequest request) {
@@ -196,7 +201,7 @@ public class RequestUtils {
     }
 
     public static String getRequestHeaders() {
-        return getRequestHeaders(getHttpServletRequest());
+        return getRequestHeaders(getCurrentHttpRequest());
     }
 
     public static String getRequestHeaders(HttpServletRequest request) {
@@ -226,15 +231,41 @@ public class RequestUtils {
     }
 
     public static void authEntryPointHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        try {
+            ApiResponse<?> apiResponse = ApiResponse.error(
+                String.valueOf(HttpStatus.UNAUTHORIZED.value()),
+                "Unauthorized: " + ex.getMessage()
+            );
+
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(JacksonUtils.toJson(apiResponse));
+            response.flushBuffer();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
     public static void accessDeniedHandler(HttpServletRequest request, HttpServletResponse response, Exception ex) {
-        response.setStatus(HttpStatus.FORBIDDEN.value());
+        try {
+            ApiResponse<?> apiResponse = ApiResponse.error(
+                String.valueOf(HttpStatus.FORBIDDEN.value()),
+                "Unauthorized: " + ex.getMessage()
+            );
+
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(JacksonUtils.toJson(apiResponse));
+            response.flushBuffer();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
     public static String getCurl() {
-        return curlOf(getHttpServletRequest());
+        return curlOf(getCurrentHttpRequest());
     }
 
     public static String curlOf(HttpServletRequest request) {
@@ -325,5 +356,13 @@ public class RequestUtils {
                 JacksonUtils.toJson(e))
             )
             .collect(Collectors.joining("\n\r"));
+    }
+
+    public static boolean isServiceAllowed(HttpServletRequest request, List<String> allowedServiceIds) {
+        if (request == null || ListUtils.isEmpty(allowedServiceIds))
+            return false;
+
+        String serviceId = request.getHeader(SERVICE_ID);
+        return serviceId != null && allowedServiceIds.contains(serviceId);
     }
 }

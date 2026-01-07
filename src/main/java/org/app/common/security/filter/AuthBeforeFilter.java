@@ -2,7 +2,6 @@ package org.app.common.security.filter;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.exception.SecurityFilterException;
 import org.app.common.security.provider.JwtProvider;
 import org.app.common.utils.RequestUtils;
 import org.springframework.lang.NonNull;
@@ -31,26 +30,25 @@ public class AuthBeforeFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain) throws ServletException, IOException {
+        @NonNull HttpServletRequest request,
+        @NonNull HttpServletResponse response,
+        @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
             RequestUtils.getTokenBy(request)
-                    .flatMap(jwtProvider::validJwtToken$getClaims)
-                    .ifPresent(payload -> {
-                        String username = payload.getSubject();
-                        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                .flatMap(jwtProvider::validJwtToken$getClaims)
+                .ifPresent(payload -> {
+                    String username = payload.getSubject();
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
-                    });
-        } catch (SecurityFilterException ex) {
-            log.info("Cannot set user authentication: {}", ex.getMessage());
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                });
+            filterChain.doFilter(request, response);
         } catch (Exception e) {
-            log.info("Cannot set user authentication with error: {}", e.getMessage());
+            SecurityContextHolder.clearContext();
+            log.warn("JWT authentication failed: {}", e.getMessage());
+            throw e;
         }
-
-        filterChain.doFilter(request, response);
     }
 }

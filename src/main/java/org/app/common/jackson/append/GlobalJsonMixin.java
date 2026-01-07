@@ -6,8 +6,7 @@ import org.app.common.utils.RequestUtils;
 @JsonAppend(
     attrs = {
         @JsonAppend.Attr(RequestUtils.REQUEST_ID),
-        @JsonAppend.Attr(VirtualProps.TRACE_ID),
-        @JsonAppend.Attr(VirtualProps.TIMESTAMP)
+        @JsonAppend.Attr(VirtualProps.TRACE_ID)
     }
 )
 public abstract class GlobalJsonMixin implements JsonMixin{

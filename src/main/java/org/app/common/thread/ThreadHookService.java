@@ -3,7 +3,6 @@ package org.app.common.thread;
 import lombok.extern.slf4j.Slf4j;
 import org.app.common.context.SpringContext;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
@@ -25,52 +24,53 @@ import java.util.List;
 public class ThreadHookService implements ApplicationRunner, DisposableBean {
 
     private final List<ThreadHook> hooks;
+    private Thread shutdownHookThread;
+    private volatile boolean shutdownExecuted = false;
 
-    /**
-     * Constructor that initializes the list of thread hooks and adds a shutdown hook to the JVM runtime.
-     */
-    @Autowired
     public ThreadHookService() {
         hooks = new ArrayList<>();
         addShutdownHook();
     }
 
-    /**
-     * Adds a shutdown hook to the JVM runtime to ensure proper cleanup of threads during application termination.
-     */
     protected void addShutdownHook() {
-        ShutdownDaemonHook shutdownHook = new ShutdownDaemonHook();
-        Runtime.getRuntime().addShutdownHook(shutdownHook);
+        shutdownHookThread = new ShutdownDaemonHook();
+        Runtime.getRuntime().addShutdownHook(shutdownHookThread);
     }
 
-    /**
-     * Invoked during application shutdown to start the shutdown daemon hook, which handles thread cleanup.
-     */
     @Override
     public void destroy() {
-        new ShutdownDaemonHook().start();
+        try {
+            Runtime.getRuntime().removeShutdownHook(shutdownHookThread);
+            log.debug("Removed JVM shutdown hook (Spring handling shutdown)");
+        } catch (IllegalStateException e) {
+            log.debug("Cannot remove hook, JVM already shutting down");
+        }
+
+        executeShutdown();
     }
 
-    /**
-     * A daemon thread that runs during application shutdown to execute all registered thread hooks.
-     */
+    private void executeShutdown() {
+        if (shutdownExecuted) {
+            log.warn("Shutdown already executed, skipping");
+            return;
+        }
+        shutdownExecuted = true;
+
+        log.info("_____________Running shutdown hooks_____________");
+        for (ThreadHook hook : hooks) {
+            log.info("Shutting down thread: {}", hook.getThread().getName());
+            hook.shutdown();
+        }
+        hooks.clear();
+    }
+
     public class ShutdownDaemonHook extends Thread {
         @Override
         public void run() {
-            log.info("_____________Running shutdown hooks_____________");
-            for (ThreadHook hook : hooks) {
-                log.info("Shutting down thread: {}", hook.getThread().getName());
-                hook.shutdown();
-            }
-            hooks.clear();
+            executeShutdown();
         }
     }
 
-    /**
-     * Invoked at application startup to register tasks annotated with {@code @AutoRun}.
-     *
-     * @param args The application arguments passed during startup.
-     */
     @Override
     public void run(ApplicationArguments args) {
         ApplicationContext context = SpringContext.getContext();
@@ -83,12 +83,6 @@ public class ThreadHookService implements ApplicationRunner, DisposableBean {
         }
     }
 
-    /**
-     * Extracts and registers a runnable task if the provided bean implements {@link RunnableProvider}.
-     *
-     * @param bean The bean to check and register.
-     * @return {@code true} if the bean was registered as a runnable task, {@code false} otherwise.
-     */
     private boolean extracted(Object bean) {
         if (bean instanceof RunnableProvider) {
             RunnableProvider runnable = (RunnableProvider) bean;

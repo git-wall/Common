@@ -19,7 +19,7 @@ public class RequestLog {
     private String deviceId;
     private String accessToken;
     private String username;
-    private String[] userAddress;
+    private String userAddress;
     private int level;
     private long time;
     private String application;
@@ -37,7 +37,7 @@ public class RequestLog {
         e.setDeviceId(RequestUtils.getDeviceId(hsr));
         e.setAccessToken(RequestUtils.getToken(hsr));
         e.setUsername(AuthContext.getUserName());
-        e.setUserAddress(new String[]{tracingLog.getUserAddress()});
+        e.setUserAddress(tracingLog.getUserAddress());
         e.setLevel(ordinal);
         e.setTime(new Date().getTime());
         e.setHeaders(RequestUtils.getRequestHeaders(hsr));

@@ -2,7 +2,7 @@ package org.app.common.jackson.append;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
@@ -25,7 +25,7 @@ public class MixinConfig implements ImportAware {
     }
 
     @Bean("MixinJackson")
-    @ConditionalOnMissingBean
+    @ConditionalOnBean
     public ObjectMapper objectMapper(ObjectMapper baseMapper) {
         if (mixinClass != null) {
             baseMapper.addMixIn(Object.class, mixinClass);

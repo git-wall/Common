@@ -8,8 +8,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 
 /**
@@ -24,9 +24,9 @@ import java.util.function.Consumer;
 @Slf4j
 public class PoisonPill<T> extends RunnableProvider {
     private String name;
-    private Queue<T> queue;
+    private BlockingQueue<T> queue;
     private Consumer<T> consumer;
-    private T poison; // special object
+    private T poison; // empty object
 
     @SuppressWarnings({"unchecked"})
     public static <T> PoisonPill<T> beanPrototype() {
@@ -35,13 +35,17 @@ public class PoisonPill<T> extends RunnableProvider {
 
     public void setting(String name, T poison, Consumer<T> consumer) {
         this.name = name.toUpperCase();
-        this.queue = new ConcurrentLinkedQueue<>(); // use for high through put, non-blocking, lock-free producer, consumer
+        this.queue = new LinkedBlockingQueue<>();
         this.consumer = consumer;
         this.poison = poison;
     }
 
     public void offer(T item) {
-        queue.offer(item);
+        if (item == null) {
+            log.warn("{}: Cannot offer null item", name);
+            return;
+        }
+        queue.add(item);
     }
 
     @Override
@@ -51,14 +55,20 @@ public class PoisonPill<T> extends RunnableProvider {
 
     @Override
     protected void now() {
-        var item = queue.poll();
-        if (item == null) return;
-        if (item.equals(poison)) {
-            log.info("{} received poison pill, exiting", name);
-            hook.shutdown();
-            return;
+        try {
+            T item = queue.take();
+            if (item.equals(poison)) {
+                log.info("{} received poison pill, exiting", name);
+                hook.shutdown();
+                return;
+            }
+
+            consumer.accept(item);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            log.error("{} error processing item", name, e);
         }
-        consumer.accept(item);
     }
 
     @Override

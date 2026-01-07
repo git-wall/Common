@@ -8,10 +8,17 @@ spring:
       username: admin
       password: admin
       minimum-idle: 5
-      idle-timeout: 30000
       maximum-pool-size: 10
-      max-lifetime: 1800000
-      connection-timeout: 300000
+      
+      connection-timeout: 30000       # 30s timeout
+      idle-timeout: 600000           # 10 phút
+      max-lifetime: 1800000          # 30 phút
+        
+      # Performance tuning
+      cache-prep-stmts: true
+      prep-stmt-cache-size: 250
+      prep-stmt-cache-sql-limit: 2048
+      
       leak-detection-threshold: 60000 # 60s log lỗi ai đó code ngu lụm mất connection khiến service và db gặp problem
       data-source-properties:
         statement_timeout: 5000 # 5s time out cho mỗi tiến trình tránh treo hoặc quá lâu nên xem sét lại câu query  set phía db

@@ -90,11 +90,11 @@ public class MetaData {
     }
 
     private <T, R> Object getVal(T val, Function<T, R> mapper) {
-        return val instanceof List ? StreamUtils.innerMapper((List) val, mapper) : OptionalUtils.mapper(val, mapper, "Can not map value from holder to meta data");
+        return val instanceof List ? StreamUtils.map((List) val, mapper) : OptionalUtils.mapper(val, mapper, "Can not map value from holder to meta data");
     }
 
     public <T> MetaData innerFilter(Object key, Predicate<T> predicate) {
-        Object value = StreamUtils.innerFilter(this.get(key), predicate);
+        Object value = StreamUtils.filter(this.get(key), predicate);
         this.data.put(key, value);
         return this;
     }

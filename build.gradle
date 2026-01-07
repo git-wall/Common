@@ -22,6 +22,7 @@ plugins {
 
 ext {
   //    sentryVersion = "6.28.0"
+  hazelcastVersion = '5.3.6'
 }
 
 apply plugin: 'java'
@@ -51,6 +52,16 @@ if (localPropsFile.exists()) {
   localProps.each { key, value ->
     project.ext.set(key, value)
   }
+}
+
+bootRun {
+  systemProperty "spring.profiles.active",
+    project.findProperty("springProfile") ?: "local"
+}
+
+test {
+  systemProperty "spring.profiles.active",
+    project.findProperty("springProfile") ?: "local"
 }
 
 println "NEXUS_USERNAME = ${project.NEXUS_USERNAME}"
@@ -104,9 +115,15 @@ dependencies {
   api "com.carrotsearch:hppc:0.10.0"
 
   // Kotlin Standard Library
-  api("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")
-  api("io.github.microutils:kotlin-logging-jvm:3.0.5")
+//  api("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")
+//  api("io.github.microutils:kotlin-logging-jvm:3.0.5")
   api("org.slf4j:slf4j-simple:2.0.12")
+
+  // ======================================================== ||
+  //                 Code quality dependencies                ||
+  // ======================================================== ||
+  // spotbugs
+  api 'com.github.spotbugs:spotbugs-annotations:4.9.8'
 
   // ======================================================== ||
   //                    Fix dependencies                      ||
@@ -181,13 +198,17 @@ dependencies {
   // 14 minio
   api 'io.minio:minio:8.5.17'
   // 15 migrate
-  api 'org.flywaydb:flyway-core'
+//  api 'org.flywaydb:flyway-core'
 
   //===============================================================\\
   //                  Cache & Memory dependencies                    \\
   //===================================================================\\
   // 1. hazelcast used to build distributed cache cluster
-  api 'com.hazelcast:hazelcast:4.2.5'
+  // ===== Hazelcast =====
+  api "com.hazelcast:hazelcast:${hazelcastVersion}"
+  api "com.hazelcast:hazelcast-spring:${hazelcastVersion}"
+  // ===== Hazelcast Eureka Discovery =====
+  api "com.hazelcast:hazelcast-eureka:5.3.0"
   // 2. caffeine
   api 'com.github.ben-manes.caffeine:caffeine:3.2.0'
   // 3. guava: cache
@@ -235,8 +256,14 @@ dependencies {
   api group: 'org.mapstruct', name: 'mapstruct', version: '1.6.0'
   api group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.6.0'
   // 5. jackson: support with json
-  api 'com.fasterxml.jackson.core:jackson-databind:2.20.0'
+  //  api 'com.fasterxml.jackson.core:jackson-databind:2.20.0' dong lai tranh xung dot version
+  api platform("com.fasterxml.jackson:jackson-bom:2.20.0") // manage jackson version
   api 'com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.20.0'
+  // Afterburner generates bytecode for:
+  // - Direct field access (no reflection)
+  // - Optimized type checking
+  // - Faster serialization/deserialization (10 - 30% speed improvement)
+  api 'com.fasterxml.jackson.module:jackson-module-afterburner'
   // 6. gson: support with json
   api 'com.google.code.gson:gson:2.11.0'
   // 7. model mapper: support mapper class with data use reflections | not faster but save time when manual mapper setter data
@@ -310,11 +337,11 @@ dependencies {
   // 27. datastax java-driver-core
   api 'com.datastax.oss:java-driver-core:4.17.0'
   // 28 parquet
-  api 'org.apache.parquet:parquet-avro:1.15.2'
+//  api 'org.apache.parquet:parquet-avro:1.15.2'
   // 29. hadoop
-  api 'org.apache.hadoop:hadoop-common:3.4.1'
+//  api 'org.apache.hadoop:hadoop-common:3.4.1'
   // 30. vertx
-  api 'io.vertx:vertx-web:4.5.1'
+//  api 'io.vertx:vertx-web:4.5.1'
   // 31. graphql
   api 'com.graphql-java:graphql-java:21.3'
   // 32. apache spark
@@ -324,7 +351,7 @@ dependencies {
   api 'com.netopyr.wurmloch:wurmloch-crdt:0.1.0'
   // 34. apche beam
   api 'org.apache.beam:beam-sdks-java-core:2.66.0'
-  api 'org.apache.beam:beam-runners-direct-java:2.66.0'
+//  api 'org.apache.beam:beam-runners-direct-java:2.66.0'
   api 'org.apache.beam:beam-sdks-java-io-kafka:2.66.0'
   // 35. Bytecode instrumentation (BCI) ASM (low-level, powerful)
   api 'org.ow2.asm:asm:9.8'
@@ -339,7 +366,7 @@ dependencies {
   compileOnlyApi 'com.google.auto.service:auto-service-annotations:1.1.1'
   annotationProcessor 'com.google.auto.service:auto-service:1.1.1'
   // 40. JavaPoet to generate source code
-  implementation 'com.squareup:javapoet:1.13.0'
+//  api 'com.squareup:javapoet:1.13.0'
   // 41. JNA to call native code
   api 'net.java.dev.jna:jna:5.13.0'
   api 'net.java.dev.jna:jna-platform:5.13.0'
@@ -352,23 +379,23 @@ dependencies {
   // 44. JLine to build command line interface
   api 'org.jline:jline:3.21.0'
   // 45. Apache Commons CLI to parse command line arguments
-  api 'commons-cli:commons-cli:1.5.0'
+//  api 'commons-cli:commons-cli:1.5.0'
   // 46. Apache Commons Configuration to handle configuration files
-  api 'org.apache.commons:commons-configuration2:2.9.0'
+//  api 'org.apache.commons:commons-configuration2:2.9.0'
   // 47. Apache Commons VFS to work with various file systems
-  api 'org.apache.commons:commons-vfs2:2.9.0'
+//  api 'org.apache.commons:commons-vfs2:2.9.0'
   // 48. Apache Commons Net for FTP, SFTP, SMTP, etc.
-  api 'commons-net:commons-net:3.9.0'
+//  api 'commons-net:commons-net:3.9.0'
   // 49. Apache Commons Imaging to work with image files
-  api 'org.apache.commons:commons-imaging:1.0-alpha2'
+//  api 'org.apache.commons:commons-imaging:1.0-alpha2'
   // 50. Apache Commons Text for advanced string manipulation
-  api 'org.apache.commons:commons-text:1.10.0'
+//  api 'org.apache.commons:commons-text:1.10.0'
   // 51. Apache Commons Math for advanced mathematical operations
-  api 'org.apache.commons:commons-math3:3.6.1'
+//  api 'org.apache.commons:commons-math3:3.6.1'
   // 52. Apache Commons Geometry for geometry operations
-  api 'org.apache.commons:commons-geometry-core:1.0'
-  api 'org.apache.commons:commons-geometry-euclidean:1.0'
-  api 'org.apache.commons:commons-geometry-spherical:1.0'
+//  api 'org.apache.commons:commons-geometry-core:1.0'
+//  api 'org.apache.commons:commons-geometry-euclidean:1.0'
+//  api 'org.apache.commons:commons-geometry-spherical:1.0'
   // 53. Apache Commons Collections for advanced collection handling
   api 'org.apache.commons:commons-collections4:4.5.0'
   // 54. Apache Commons BeanUtils for easy property manipulation
@@ -378,11 +405,11 @@ dependencies {
   // 56. Apache Commons CSV for handling CSV files
   api 'org.apache.commons:commons-csv:1.10.0'
   // 57. Apache Commons Email for sending emails
-  api 'org.apache.commons:commons-email:1.5'
+//  api 'org.apache.commons:commons-email:1.5'
   // 58. Apache Commons IO for advanced IO operations
   api 'commons-io:commons-io:2.11.0'
   // 59. Apache Commons JEXL for expression language
-  api 'org.apache.commons:commons-jexl3:3.2'
+//  api 'org.apache.commons:commons-jexl3:3.2'
   // 60. Apache Commons SCXML for state machine implementation
 //  api 'org.apache.commons:commons-scxml2:2.0'
   // 61. Apache Commons VFS for virtual file system
@@ -392,9 +419,9 @@ dependencies {
   // 63. Apache Commons Functor for functional programming
 //  api 'org.apache.commons:commons-functor2:2.0'
   // 64. Apache Commons JXPath for XPath expressions
-  api 'commons-jxpath:commons-jxpath:1.3'
+//  api 'commons-jxpath:commons-jxpath:1.3'
   // 65. Apache Commons Betwixt for XML to Java mapping
-  api 'commons-betwixt:commons-betwixt:0.8'
+//  api 'commons-betwixt:commons-betwixt:0.8'
   // 66. Apache Commons Jelly for XML-based scripting
 //  api 'commons-jelly:commons-jelly:1.0'
   // 67. Apache Commons OGNL for expression language
@@ -402,10 +429,10 @@ dependencies {
   // 68. Apache Commons JCS for caching
 //  api 'org.apache.commons:commons-jcs3-core:3.3.0'
   // 69. Apache Commons Crypto for cryptographic operations
-  api 'org.apache.commons:commons-crypto:1.1.0'
+//  api 'org.apache.commons:commons-crypto:1.1.0'
   // 70. Apache Commons RDF for RDF handling
-  api 'org.apache.commons:commons-rdf-api:0.5.0'
-  api 'org.apache.commons:commons-rdf-simple:0.5.0'
+//  api 'org.apache.commons:commons-rdf-api:0.5.0'
+//  api 'org.apache.commons:commons-rdf-simple:0.5.0'
   // 71. Apache Commons Compress for handling compressed files
   api 'org.apache.commons:commons-compress:1.21'
   // 72. Apache Commons IO
@@ -458,7 +485,7 @@ dependencies {
   // ===================================================================
   // Spring data
   // ===================================================================
-  api 'org.springframework.boot:spring-boot-starter-data-couchbase'
+//  api 'org.springframework.boot:spring-boot-starter-data-couchbase'
   api 'org.springframework.boot:spring-boot-starter-data-cassandra'
 
   // ===================================================================

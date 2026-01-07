@@ -1,5 +1,7 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.time.LocalDateTime;
@@ -8,10 +10,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Supplier;
 
+// Utility class for data handling and type safety
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DataUtils {
-    private DataUtils() {
-    }
-
     public static int of(Integer i) {
         return i == null ? 0 : i;
     }
@@ -40,7 +41,6 @@ public class DataUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> List<T> castCollection(Object o, Class<T> clazz) {
         try {
             Collection<?> raw = (Collection) o;
@@ -54,7 +54,7 @@ public class DataUtils {
         }
     }
 
-    public static <T> T parse(Map<String, Object> map, String key, Class<T> clazz) {
+    public static <T> T valueParse(Map<String, Object> map, String key, Class<T> clazz) {
         Object val = map.getOrDefault(key, null);
 
         if (val == null) {

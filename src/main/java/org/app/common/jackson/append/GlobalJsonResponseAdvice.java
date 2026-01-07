@@ -2,10 +2,10 @@ package org.app.common.jackson.append;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.app.common.context.SpringContext;
 import org.app.common.context.TracingContext;
 import org.app.common.utils.ClassUtils;
 import org.slf4j.MDC;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -24,8 +24,8 @@ public class GlobalJsonResponseAdvice implements ResponseBodyAdvice<Object> {
     private final ObjectMapper objectMapper;
     private final List<String> appendedFields;
 
-    public GlobalJsonResponseAdvice(MixinConfig mixinConfig) {
-        this.objectMapper = SpringContext.getBean("MixinJackson", ObjectMapper.class);
+    public GlobalJsonResponseAdvice(ApplicationContext context, MixinConfig mixinConfig) {
+        this.objectMapper = context.getBean("MixinJackson", ObjectMapper.class);
 
         // lookup from the registered mixin
         this.appendedFields = ClassUtils.getClassFieldNames(mixinConfig.getClass());
@@ -47,14 +47,11 @@ public class GlobalJsonResponseAdvice implements ResponseBodyAdvice<Object> {
         if (appendedFields.isEmpty()) return body;
 
         // Build attributes dynamically based on declared mixin fields
-        Map<Object, Object> attrs = new HashMap<>(3);
+        Map<Object, Object> attrs = new HashMap<>(2);
         for (String key : appendedFields) {
             switch (key) {
                 case VirtualProps.TRACE_ID:
                     attrs.put(key, MDC.get("traceId"));
-                    break;
-                case VirtualProps.TIMESTAMP:
-                    attrs.put(key, System.currentTimeMillis());
                     break;
                 case VirtualProps.REQUEST_ID:
                     attrs.put(key, TracingContext.getRequestId());
