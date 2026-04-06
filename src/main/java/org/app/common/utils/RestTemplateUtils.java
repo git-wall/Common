@@ -1,7 +1,7 @@
 package org.app.common.utils;
 
-import org.app.common.client.AuthTokenInfo;
 import org.app.common.client.ClientBasicAuthInfo;
+import org.app.common.client.TokenProvider;
 import org.app.common.client.rest.ClientBasicAuthFactory;
 import org.app.common.client.rest.interceptor.AuthRequestInterceptor;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
 public class RestTemplateUtils {
 
@@ -26,8 +25,11 @@ public class RestTemplateUtils {
      * @param clientInfo    Information about the client
      * @return RestTemplate configured with token authentication and refresh capability
      */
-    public static RestTemplate buildWithTokenRefresh(String baseUrl, String initialToken,
-                                                     Supplier<String> tokenSupplier, ClientBasicAuthInfo clientInfo) {
+    public static RestTemplate buildWithTokenRefresh(
+        String baseUrl, String initialToken,
+        TokenProvider tokenSupplier,
+        ClientBasicAuthInfo clientInfo
+    ) {
         ClientBasicAuthFactory basicAuthFactory = ClientBasicAuthFactory.of(clientInfo);
         AuthRequestInterceptor authInterceptor = new AuthRequestInterceptor(baseUrl, initialToken, tokenSupplier);
 
@@ -40,15 +42,15 @@ public class RestTemplateUtils {
      * Builds a RestTemplate with token authentication and automatic token refresh capability
      * using AuthTokenInfo and ClientInfo
      *
-     * @param authTokenInfo Information about the authentication token
+     * @param tokenProvider Information about the authentication token
      * @param clientInfo    Information about the client
      * @return RestTemplate configured with token authentication and refresh capability
      */
-    public static RestTemplate buildWithTokenRefresh(AuthTokenInfo authTokenInfo, ClientBasicAuthInfo clientInfo) {
+    public static RestTemplate buildWithTokenRefresh(TokenProvider tokenProvider, ClientBasicAuthInfo clientInfo) {
         ClientBasicAuthFactory basicAuthFactory = ClientBasicAuthFactory.of(clientInfo);
 
         AuthRequestInterceptor authInterceptor = new AuthRequestInterceptor(
-                clientInfo.getBaseUrl(), null, authTokenInfo::refreshToken
+                clientInfo.getBaseUrl(), null, tokenProvider
         );
 
         RestTemplate restTemplate = new RestTemplate(basicAuthFactory);

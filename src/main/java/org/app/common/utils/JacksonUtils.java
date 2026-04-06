@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -48,28 +49,30 @@ public class JacksonUtils {
         // - Direct field access (no reflection)
         // - Optimized type checking
         // - Faster serialization/deserialization (10 - 30% speed improvement)
+        // Java 8/11 is ok, Java > 17 no need this
         var afterburnerModule = new AfterburnerModule();
         afterburnerModule.setUseValueClassLoader(JavaVersionUtils.isJava8());
 
         // Initialize default mapper (only for DTO serialization/deserialization)
         DEFAULT_MAPPER = JsonMapper.builder(jsonFactory())
-                .addModule(afterburnerModule)
-                // SERIALIZATION
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-                // DESERIALIZATION
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-                .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
-                .disable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
-                .disable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
-                // Enable reading unknown enum values as null
-                .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
-                // FIELD, GETTER, SETTER, CREATOR ❌
-                .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-                // FIELD ✅
-                .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .build();
+            .addModule(afterburnerModule)
+            .addModule(new ParameterNamesModule())
+            // SERIALIZATION
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            // DESERIALIZATION
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
+            .disable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+            .disable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+            // Enable reading unknown enum values as null
+            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
+            // FIELD, GETTER, SETTER, CREATOR ❌
+            .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+            // FIELD ✅
+            .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            .build();
 
         DEFAULT_READER = DEFAULT_MAPPER.reader();
         DEFAULT_WRITER = DEFAULT_MAPPER.writer();
@@ -383,6 +386,17 @@ public class JacksonUtils {
     public static String writeValueAsString(Object o, String mapperName) {
         ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
         return mapper.writeValueAsString(o);
+    }
+
+    @SneakyThrows
+    public static byte[] writeValueAsBytes(Object o) {
+        return writeValueAsBytes(o, null);
+    }
+
+    @SneakyThrows
+    public static byte[] writeValueAsBytes(Object o, String mapperName) {
+        ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+        return mapper.writeValueAsBytes(o);
     }
 
     @SneakyThrows

@@ -1,7 +1,5 @@
 package org.app.common.optimize;
 
-import org.springframework.stereotype.Service;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +9,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-@Service
 public class FileProcessingService {
 
 //    // Process large CSV file

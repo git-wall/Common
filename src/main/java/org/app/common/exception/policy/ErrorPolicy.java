@@ -1,11 +1,14 @@
 package org.app.common.exception.policy;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.app.common.exception.base.AppException;
 import org.app.common.exception.constant.ErrorAction;
 import org.app.common.exception.constant.ErrorType;
 
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ErrorPolicy {
 
     private static final Map<ErrorType, ErrorAction> MAP;

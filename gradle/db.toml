@@ -1,0 +1,62 @@
+[versions]
+jooq = "3.16.18"
+couchbase = "3.7.8"
+ektorp = "1.5.0"
+vesoft = "5.0.0-rc2"
+elasticsearch = "7.17.29"
+opensearch = "1.3.20"
+mybatis = "3.5.6"
+mybatis_spring = "2.0.7"
+mapdb = "3.1.0"
+minio = "8.5.17"
+
+[libraries]
+# 1. Jooq 
+jooq = { group = "org.jooq", name = "jooq", version.ref = "jooq" }
+jooq_codegen = { group = "org.jooq", name = "jooq-codegen", version.ref = "jooq" }
+jooq_meta = { group = "org.jooq", name = "jooq-meta", version.ref = "jooq" }
+
+# 2. Couchbase Java client
+couchbase = { group = "com.couchbase.client", name = "java-client", version.ref = "couchbase" }
+
+# 3. Ektorp (CouchDB persistence)
+ektorp = { group = "org.ektorp", name = "org.ektorp", version.ref = "ektorp" }
+
+# 4. Nebula graph database (vesoft client)
+vesoft_client = { group = "com.vesoft", name = "client", version.ref = "vesoft" }
+
+# 5. Elasticsearch REST high-level client
+es_client = { group = "org.elasticsearch.client", name = "elasticsearch-rest-high-level-client", version.ref = "elasticsearch" }
+
+# 6. OpenSearch REST high-level client
+opensearch = { group = "org.opensearch.client", name = "opensearch-rest-high-level-client", version.ref = "opensearch" }
+
+# 7. MyBatis
+mybatis = { group = "org.mybatis", name = "mybatis", version.ref = "mybatis" }
+mybatis_spring = { group = "org.mybatis", name = "mybatis-spring", version.ref = "mybatis_spring" }
+
+# 8. MapDB
+mapdb = { group = "org.mapdb", name = "mapdb", version.ref = "mapdb" }
+
+# 9. MinIO
+minio = { group = "io.minio", name = "minio", version.ref = "minio" }
+
+[bundles]
+jooq = ["jooq", "jooq_codegen", "jooq_meta"]
+
+# Bundle that includes all libraries in this catalog for convenience
+all = [
+#  "jooq",
+#  "jooq_codegen",
+#  "jooq_meta",
+#  "couchbase",
+#  "ektorp",
+#  "vesoft_client",
+#  "es",
+#  "es_client",
+#  "opensearch_rest_high_level_client",
+  "mybatis",
+#  "mybatis_spring",
+  "mapdb",
+  "minio"
+]

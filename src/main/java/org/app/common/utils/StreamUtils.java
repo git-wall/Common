@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.function.Failable;
 import org.app.common.provider.Provider;
-import org.thymeleaf.util.ListUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -38,7 +37,7 @@ public class StreamUtils {
      * }</pre>
      */
     public static <T, K> Map<K, List<T>> groupBy(List<T> list, Function<T, K> transfer) {
-        if (ListUtils.isEmpty(list)) return Collections.emptyMap();
+        if (list == null || list.isEmpty()) return Collections.emptyMap();
         return list.stream().collect(Collectors.groupingBy(transfer));
     }
 
@@ -67,6 +66,19 @@ public class StreamUtils {
         return Failable.stream(list.stream())
             .map((o) -> (T) m.invoke(o, args))
             .collect(Collectors.toList());
+    }
+
+    public static <T, R> String flatMapJoin(
+        Collection<T> source,
+        Function<T, ? extends Collection<R>> flatMapper,
+        Function<R, String> mapper,
+        String delimiter
+    ) {
+        return source.stream()
+            .filter(Provider.isNotNull())
+            .flatMap(t -> flatMapper.apply(t).stream())
+            .map(Provider.thenToString(mapper))
+            .collect(Collectors.joining(delimiter));
     }
 
     public static <K, V> Map<K, V> filterThentoMap(Collection<V> list, Predicate<V> filter, Function<V, K> keyMapper) {

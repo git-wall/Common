@@ -1,0 +1,7 @@
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying $APP_NAME to $ENV"
+  rules:
+    - if: '$RUN_DEPLOY == "true"'
+  when: manual

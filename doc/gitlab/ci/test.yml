@@ -1,0 +1,6 @@
+test:
+  stage: test
+  script:
+    - echo "Testing $APP_NAME"
+  rules:
+    - if: '$RUN_TEST == "true"'

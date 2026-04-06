@@ -1,0 +1,42 @@
+[versions]
+bucket4j = "7.6.0"
+grpc = "1.70.0"
+reflections = "0.10.2"
+vavr = "1.0.0-alpha-4"
+byte_buddy = "1.15.10"
+modelmapper = "3.2.1"
+commons_lang3 = "3.14.0"
+graphql = "21.3"
+ignite = "2.17.0"
+
+[libraries]
+# --- bucket4j ---
+bucket4j-core = { group = "com.github.vladimir-bukhtoyarov", name = "bucket4j-core", version.ref = "bucket4j" }
+bucket4j-jcache = { group = "com.github.vladimir-bukhtoyarov", name = "bucket4j-jcache", version.ref = "bucket4j" }
+
+# --- grpc ---
+grpc-stub = { group = "io.grpc", name = "grpc-stub", version.ref = "grpc" }
+grpc-protobuf = { group = "io.grpc", name = "grpc-protobuf", version.ref = "grpc" }
+grpc-netty = { group = "io.grpc", name = "grpc-netty", version.ref = "grpc" }
+
+# --- integration libs converted from Gradle-style lines ---
+reflections = { group = "org.reflections", name = "reflections", version.ref = "reflections" }
+vavr = { group = "io.vavr", name = "vavr", version.ref = "vavr" }
+byte_buddy = { group = "net.bytebuddy", name = "byte-buddy", version.ref = "byte_buddy" }
+modelmapper = { group = "org.modelmapper", name = "modelmapper", version.ref = "modelmapper" }
+commons_lang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commons_lang3" }
+graphql_java = { group = "com.graphql-java", name = "graphql-java", version.ref = "graphql" }
+
+# --- Apache Ignite ---
+ignite_core = { group = "org.apache.ignite", name = "ignite-core", version.ref = "ignite" }
+ignite_spring = { group = "org.apache.ignite", name = "ignite-spring", version.ref = "ignite" }
+ignite_indexing = { group = "org.apache.ignite", name = "ignite-indexing", version.ref = "ignite" }
+
+[bundles]
+bucket4j = ["bucket4j-core", "bucket4j-jcache"]
+grpc = ["grpc-stub", "grpc-protobuf", "grpc-netty"]
+
+# Bundle grouping all integration helper libraries
+integration = ["reflections", "vavr", "byte_buddy", "commons_lang3", "graphql_java"]
+
+ignite = ["ignite_core", "ignite_indexing"]

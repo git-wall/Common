@@ -1,0 +1,54 @@
+stages:
+  - build
+  - image
+  - deploy
+
+variables:
+  APP_NAME: my-app
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+  DOCKER_TLS_CERT_DIR: ""
+
+# =======================
+# 1️⃣ BUILD JAR (CLEAN & STABLE)
+# =======================
+build-jar:
+  stage: build
+  image: eclipse-temurin:11-jdk
+  script:
+    - ./gradlew build -x test
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 2 hours
+
+# =======================
+# 2️⃣ BUILD + PUSH IMAGE
+# =======================
+build-image:
+  stage: image
+  image: docker:24
+  services:
+    - docker:24-dind
+  dependencies:
+    - build-jar
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
+
+# =======================
+# 3️⃣ DEPLOY TO K8S (PROD)
+# =======================
+deploy-prod:
+  stage: deploy
+  image: bitnami/kubectl:1.29
+  environment:
+    name: production
+  only:
+    - main
+  script:
+    - kubectl config use-context "$KUBE_CONTEXT"
+    - kubectl set image deployment/$APP_NAME \
+      $APP_NAME=$IMAGE_TAG \
+      -n production
+    - kubectl rollout status deployment/$APP_NAME -n production

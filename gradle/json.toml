@@ -1,0 +1,25 @@
+[versions]
+jackson = "2.20.0"
+gson = "2.11.0"
+
+[libraries]
+# jackson-bom is used to manage the versions of jackson dependencies
+jackson-bom = { group = "com.fasterxml.jackson", name = "jackson-bom", version.ref = "jackson" }
+
+# you can see the list of jackson dependencies here not managed version:
+jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind" }
+jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core" }
+jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations" }
+# manage jackson version
+# Afterburner generates bytecode for:
+# - Direct field access (no reflection)
+# - Optimized type checking
+# - Faster serialization/deserialization (10 - 30% speed improvement)
+jackson-afterburner = { group = "com.fasterxml.jackson.module", name = "jackson-module-afterburner"}
+jackson-datatype = { group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310" }
+
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+
+[bundles]
+jackson = ["jackson-databind", "jackson-core", "jackson-annotations", "jackson-afterburner", "jackson-datatype"]
+all = ["gson"]

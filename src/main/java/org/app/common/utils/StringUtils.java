@@ -1,5 +1,9 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
+
 import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.List;
@@ -7,21 +11,29 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class StringUtils {
-    private StringUtils() {
-    }
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public abstract class StringUtils {
     public static final String FORMAT_IS = "%s:%s";
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[1-9]\\d{7,14}$");
 
     public static boolean isEmpty(String str) {
-        return str == null || str.trim().isEmpty();
+        return str == null || str.isEmpty();
     }
 
-    public static boolean isNotEmpty(String str) {
-        return !isEmpty(str);
+    public static boolean hasText(@Nullable String str) {
+        return (str != null && !str.isEmpty() && containsText(str));
+    }
+
+    private static boolean containsText(CharSequence str) {
+        int strLen = str.length();
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String capitalize(String str) {

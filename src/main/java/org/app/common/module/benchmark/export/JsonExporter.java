@@ -2,6 +2,9 @@ package org.app.common.module.benchmark.export;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.app.common.module.benchmark.aggregate.AggNode;
 
@@ -10,11 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class JsonExporter {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-
-    private JsonExporter() {}
+    private static final ObjectMapper MAPPER = JsonMapper.builder()
+        .enable(SerializationFeature.INDENT_OUTPUT)
+        .build();
 
     public static void export(AggNode root, Path verDir) throws IOException {
 
@@ -36,7 +40,7 @@ public final class JsonExporter {
         String filename = mode.name().toLowerCase() + ".json";
         Path file = verDir.resolve(filename);
 
-        ProfileJsonNode json = JsonMapper.toJson(root, mode);
+        ProfileJsonNode json = JacksonMapper.toJson(root, mode);
 
         MAPPER.writeValue(file.toFile(), json);
     }

@@ -1,8 +1,9 @@
 package org.app.common.client.rest.interceptor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.app.common.context.TracingContext;
 import org.app.common.utils.RequestUtils;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.MDC;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -17,8 +18,12 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class LogRequestInterceptor implements ClientHttpRequestInterceptor {
     @Override
-    public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-        String requestId = TracingContext.getRequestId();
+    public @NotNull ClientHttpResponse intercept(
+        HttpRequest request,
+        byte @NotNull [] body,
+        ClientHttpRequestExecution execution
+    ) throws IOException {
+        String requestId = MDC.get(RequestUtils.REQUEST_ID);
         request.getHeaders().add(RequestUtils.REQUEST_ID, requestId);
 
         String requestInfo = String.format(

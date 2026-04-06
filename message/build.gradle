@@ -1,0 +1,22 @@
+group = 'platform'
+version = '2.0.0'
+
+dependencies {
+  api project(":observation")
+  api project(':jackson')
+  api messageLibs.bundles.kafka
+  api 'org.springframework.kafka:spring-kafka'
+  api 'org.springframework.cloud:spring-cloud-starter-config'
+  api("com.lmax:disruptor:4.0.0") // RingBuffer
+}
+
+
+// message
+dependencies {
+  // 1. rabbitmq
+//  api 'com.rabbitmq:amqp-client:5.16.0'
+//  // 2. activemq
+//  api 'org.apache.activemq:activemq-client:5.17.1'
+//  // 3. pulsar
+//  api 'org.apache.pulsar:pulsar-client:2.10.2'
+}

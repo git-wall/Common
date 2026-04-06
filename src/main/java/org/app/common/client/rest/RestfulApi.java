@@ -1,7 +1,7 @@
 package org.app.common.client.rest;
 
-import org.app.common.client.AuthTokenInfo;
 import org.app.common.client.ClientBasicAuthInfo;
+import org.app.common.client.TokenProvider;
 import org.app.common.utils.JacksonUtils;
 import org.app.common.utils.RestTemplateUtils;
 import org.slf4j.Logger;
@@ -92,12 +92,12 @@ public class RestfulApi<T> {
     /**
      * Creates a RestfulApi instance with token refresh capability
      *
-     * @param authTokenInfo Information about the authentication token
+     * @param tokenProvider Information about the authentication token
      * @param clientInfo Information about the client
      * @return RestfulApi instance with token refresh capability
      */
-    public static <T> RestfulApi<T> ofAuthWithRefresh(AuthTokenInfo authTokenInfo, ClientBasicAuthInfo clientInfo) {
-        RestTemplate client = RestTemplateUtils.buildWithTokenRefresh(authTokenInfo, clientInfo);
+    public static <T> RestfulApi<T> ofAuthWithRefresh(TokenProvider tokenProvider, ClientBasicAuthInfo clientInfo) {
+        RestTemplate client = RestTemplateUtils.buildWithTokenRefresh(tokenProvider, clientInfo);
 
         return new RestfulApi<>(
                 HeaderUtils.createHeaders(),  // Headers will be added by the interceptor

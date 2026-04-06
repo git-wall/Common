@@ -28,17 +28,16 @@ public class OrderController {
 }
 ```
 
-<function_calls>
-<invoke name="artifacts">
-<parameter name="command">update</parameter>
-<parameter name="id">profile_viewer</parameter>
-<parameter name="old_str">                </parameter>
-<parameter name="new_str">                <strong>💡 Khuyến nghị:</strong> Ưu tiên ${bestTime.version} nếu cần speed, hoặc ${bestMem.version} nếu giới hạn memory.<br><br>
-<strong>Range</strong> = Khoảng dao động (Max - Min). Số càng nhỏ = performance ổn định.
-`;
-}
-document.getElementById('recommendationNote').innerHTML = recommendation;
-}
-</script>
-</body>
-</html>
+Cấu trúc file sau các lần gọi khi bật app
+```yml
+├── OrderAPI/
+│   ├── v1/
+│   │   ├── avg.json
+│   │   ├── min.json
+│   │   ├── max.json
+│   │   └── metadata.json
+│   ├── v2/
+│   │   └── ... (4 files tương tự)
+│   └── v3/
+│       └── ... (4 files tương tự)
+```

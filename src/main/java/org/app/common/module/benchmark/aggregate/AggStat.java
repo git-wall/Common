@@ -1,6 +1,5 @@
 package org.app.common.module.benchmark.aggregate;
 
-
 public class AggStat {
 
     public long count = 0;
@@ -44,4 +43,3 @@ public class AggStat {
         );
     }
 }
-

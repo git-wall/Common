@@ -2,12 +2,13 @@
 // GLOBAL STATE
 // ============================================
 let profilesData = {};
-let currentApi = '';
-let selectedVersions = [];
+let selectedItems = [];
 
 // ============================================
 // LOAD PROFILES
 // ============================================
+document.getElementById('folderInput').addEventListener('change', loadProfiles);
+
 async function loadProfiles() {
   const input = document.getElementById('folderInput');
   const files = input.files;
@@ -18,13 +19,11 @@ async function loadProfiles() {
   document.getElementById('emptyState').innerHTML = '<div class="loading">⏳ Đang load và validate dữ liệu...</div>';
   document.getElementById('emptyState').style.display = 'flex';
   document.getElementById('sidebar').classList.remove('show');
-  document.getElementById('versionSection').classList.remove('show');
   document.getElementById('compareSection').classList.remove('show');
   document.getElementById('tabs').classList.remove('show');
 
   profilesData = {};
-  selectedVersions = [];
-  currentApi = '';
+  selectedItems = [];
 
   const errors = [];
   const stats = { validFiles: 0, invalidFiles: 0, apis: new Set(), versions: new Set() };
@@ -135,87 +134,118 @@ async function loadProfiles() {
 }
 
 // ============================================
-// API SELECTION
+// API LIST WITH EXPANDABLE VERSIONS
 // ============================================
 function populateApiList() {
   const container = document.getElementById('apiList');
   container.innerHTML = '';
 
   Object.keys(profilesData).sort().forEach(api => {
-    const div = document.createElement('div');
-    div.className = 'api-item';
-    div.textContent = api;
-    div.onclick = () => selectApi(api);
-    container.appendChild(div);
+    const apiGroup = document.createElement('div');
+    apiGroup.className = 'api-group';
+
+    // API Header
+    const apiHeader = document.createElement('div');
+    apiHeader.className = 'api-header';
+    apiHeader.innerHTML = `
+      <span class="api-icon">📦</span>
+      <span class="api-name">${api}</span>
+      <span class="expand-icon">▼</span>
+    `;
+    apiHeader.onclick = () => toggleApiExpand(apiHeader, api);
+
+    // Version List
+    const versionList = document.createElement('div');
+    versionList.className = 'version-list-sidebar';
+
+    const versions = Object.keys(profilesData[api]).sort((a, b) => {
+      return parseInt(a.substring(1)) - parseInt(b.substring(1));
+    });
+
+    versions.forEach(version => {
+      const versionItem = document.createElement('div');
+      versionItem.className = 'version-item-sidebar';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.id = `${api}-${version}`;
+
+      const label = document.createElement('label');
+      label.htmlFor = `${api}-${version}`;
+      label.textContent = version;
+
+      versionItem.appendChild(checkbox);
+      versionItem.appendChild(label);
+
+      // Add click handler to checkbox
+      checkbox.onchange = () => toggleSelection(api, version, checkbox.checked, versionItem);
+
+      // Make whole item clickable
+      versionItem.onclick = (e) => {
+        if (e.target !== checkbox) {
+          checkbox.checked = !checkbox.checked;
+          toggleSelection(api, version, checkbox.checked, versionItem);
+        }
+      };
+
+      versionList.appendChild(versionItem);
+    });
+
+    apiGroup.appendChild(apiHeader);
+    apiGroup.appendChild(versionList);
+    container.appendChild(apiGroup);
   });
 
   document.getElementById('sidebar').classList.add('show');
-}
-
-function selectApi(api) {
-  currentApi = api;
-  selectedVersions = [];
-
-  // Update active state
-  document.querySelectorAll('.api-item').forEach(item => {
-    item.classList.remove('active');
-    if (item.textContent === api) {
-      item.classList.add('active');
-    }
-  });
-
-  populateVersionList();
-  document.getElementById('versionSection').classList.add('show');
   document.getElementById('compareSection').classList.add('show');
-  document.getElementById('tabs').classList.remove('show');
 }
 
-// ============================================
-// VERSION SELECTION
-// ============================================
-function populateVersionList() {
-  const container = document.getElementById('versionList');
-  container.innerHTML = '';
+function toggleApiExpand(header, api) {
+  const versionList = header.nextElementSibling;
+  const expandIcon = header.querySelector('.expand-icon');
 
-  const versions = Object.keys(profilesData[currentApi]).sort((a, b) => {
-    return parseInt(a.substring(1)) - parseInt(b.substring(1));
-  });
-
-  versions.forEach(ver => {
-    const div = document.createElement('div');
-    div.className = 'version-item';
-    div.textContent = ver;
-    div.onclick = () => toggleVersion(ver, div);
-    container.appendChild(div);
-  });
-
-  updateSelectedCount();
-}
-
-function toggleVersion(version, element) {
-  if (element.classList.contains('selected')) {
-    element.classList.remove('selected');
-    selectedVersions = selectedVersions.filter(v => v !== version);
+  if (versionList.style.display === 'none' || versionList.style.display === '') {
+    versionList.style.display = 'block';
+    expandIcon.textContent = '▲';
+    header.classList.add('expanded');
   } else {
-    if (selectedVersions.length >= 3) {
-      alert('Chỉ được chọn tối đa 3 versions!');
+    versionList.style.display = 'none';
+    expandIcon.textContent = '▼';
+    header.classList.remove('expanded');
+  }
+}
+
+// ============================================
+// SELECTION MANAGEMENT
+// ============================================
+function toggleSelection(api, version, isChecked, versionItem) {
+  const key = `${api}::${version}`;
+
+  if (isChecked) {
+    if (selectedItems.length >= 5) {
+      alert('⚠️ Chỉ được chọn tối đa 5 items để so sánh!');
+      document.getElementById(`${api}-${version}`).checked = false;
       return;
     }
-    element.classList.add('selected');
-    selectedVersions.push(version);
+    selectedItems.push({ api, version, key });
+    versionItem.classList.add('checked');
+  } else {
+    selectedItems = selectedItems.filter(item => item.key !== key);
+    versionItem.classList.remove('checked');
   }
 
-  console.log('Selected:', selectedVersions);
   updateSelectedCount();
+  console.log('Selected items:', selectedItems);
 }
 
 function updateSelectedCount() {
-  document.getElementById('selectedCount').textContent = selectedVersions.length;
-  document.getElementById('compareBtn').disabled = selectedVersions.length === 0;
+  const count = selectedItems.length;
+  document.getElementById('selectedCount').textContent = count;
+  document.getElementById('compareBtn').disabled = count === 0;
 }
 
 function showComparison() {
-  if (selectedVersions.length === 0) return;
+  if (selectedItems.length === 0) return;
   document.getElementById('tabs').classList.add('show');
   switchTab('avg');
 }
@@ -224,10 +254,17 @@ function showComparison() {
 // TAB SWITCHING
 // ============================================
 function switchTab(mode) {
+  // Remove active from all tabs
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  event.target.classList.add('active');
 
+  // Add active to clicked tab
+  const clickedTab = event ? event.target : document.querySelector('.tab');
+  clickedTab.classList.add('active');
+
+  // Hide all views
   document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
+
+  // Show selected view
   document.getElementById(mode + 'View').classList.add('active');
 
   if (mode === 'summary') {
@@ -244,31 +281,38 @@ function renderTreeView(mode) {
   const container = document.getElementById(mode + 'Trees');
   container.innerHTML = '';
 
-  const baselineVersion = selectedVersions[0];
-  const baselineData = profilesData[currentApi][baselineVersion][mode];
+  if (selectedItems.length === 0) {
+    container.innerHTML = '<div class="empty-state">Chưa chọn item nào</div>';
+    return;
+  }
 
-  selectedVersions.forEach((version, idx) => {
-    const data = profilesData[currentApi][version][mode];
-    const metadata = profilesData[currentApi][version].metadata;
+  // First item is baseline
+  const baseline = selectedItems[0];
+  const baselineData = profilesData[baseline.api][baseline.version][mode];
+
+  selectedItems.forEach((item, idx) => {
+    const data = profilesData[item.api][item.version][mode];
+    const metadata = profilesData[item.api][item.version].metadata;
     const isBaseline = idx === 0;
 
     const panel = document.createElement('div');
     panel.className = 'tree-panel';
 
     const headerClass = isBaseline ? 'tree-panel-header baseline' : 'tree-panel-header';
+    const label = `${item.api} - ${item.version} (${mode.toUpperCase()})`;
     const headerLabel = isBaseline
-      ? `${version} - ${mode.toUpperCase()} (BASELINE ⭐)`
-      : `${version} - ${mode.toUpperCase()} (vs ${baselineVersion})`;
+      ? `${label} - BASELINE ⭐`
+      : `${label} - vs ${baseline.api}/${baseline.version}`;
 
     panel.innerHTML = `
-            <div class="${headerClass}">${headerLabel}</div>
-            <div class="tree-panel-body" id="${mode}-${version}-tree"></div>
-            <div class="tree-info">📊 Samples: ${metadata.count} calls</div>
-        `;
+      <div class="${headerClass}">${headerLabel}</div>
+      <div class="tree-panel-body" id="${mode}-${item.api}-${item.version}-tree"></div>
+      <div class="tree-info">📊 Samples: ${metadata.count} calls</div>
+    `;
 
     container.appendChild(panel);
 
-    const treeBody = document.getElementById(`${mode}-${version}-tree`);
+    const treeBody = document.getElementById(`${mode}-${item.api}-${item.version}-tree`);
     renderTree(data, treeBody, '', true, isBaseline ? null : baselineData);
   });
 }
@@ -328,19 +372,21 @@ function renderTree(node, container, prefix, isLast, baselineNode) {
 // SUMMARY VIEW RENDERING
 // ============================================
 function renderSummary() {
-  const versions = selectedVersions.map(ver => ({
-    version: ver,
-    ...profilesData[currentApi][ver].metadata
+  const items = selectedItems.map(item => ({
+    label: `${item.api} - ${item.version}`,
+    api: item.api,
+    version: item.version,
+    ...profilesData[item.api][item.version].metadata
   }));
 
-  const timeRanking = [...versions].sort((a, b) => a.avgTimeMs - b.avgTimeMs);
+  const timeRanking = [...items].sort((a, b) => a.avgTimeMs - b.avgTimeMs);
   renderRankingTable('timeRankingTable', timeRanking, 'avgTimeMs');
 
-  const memRanking = [...versions].sort((a, b) => a.avgMemKb - b.avgMemKb);
+  const memRanking = [...items].sort((a, b) => a.avgMemKb - b.avgMemKb);
   renderRankingTable('memoryRankingTable', memRanking, 'avgMemKb');
 
-  renderDetailsTable('timeDetailsTable', versions, 'Time');
-  renderDetailsTable('memoryDetailsTable', versions, 'Mem');
+  renderDetailsTable('timeDetailsTable', items, 'Time');
+  renderDetailsTable('memoryDetailsTable', items, 'Mem');
 
   renderRecommendation(timeRanking, memRanking);
 }
@@ -350,7 +396,7 @@ function renderRankingTable(tableId, data, field) {
   tbody.innerHTML = '';
 
   data.forEach((item, idx) => {
-    const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : 'rank-3';
+    const rankClass = idx === 0 ? 'rank-1' : idx === 1 ? 'rank-2' : idx === 2 ? 'rank-3' : '';
     let badge = '';
 
     if (idx === 0) {
@@ -361,35 +407,35 @@ function renderRankingTable(tableId, data, field) {
     }
 
     tbody.innerHTML += `
-            <tr>
-                <td><span class="${rankClass} rank-badge">${idx + 1}</span></td>
-                <td><strong>${item.version}</strong></td>
-                <td class="metric-cell">${item[field]}</td>
-                <td>${badge}</td>
-            </tr>
-        `;
+      <tr>
+        <td><span class="${rankClass} rank-badge">${idx + 1}</span></td>
+        <td><strong>${item.label}</strong></td>
+        <td class="metric-cell">${item[field]}</td>
+        <td>${badge}</td>
+      </tr>
+    `;
   });
 }
 
-function renderDetailsTable(tableId, versions, type) {
+function renderDetailsTable(tableId, items, type) {
   const tbody = document.getElementById(tableId).querySelector('tbody');
   tbody.innerHTML = '';
 
-  versions.forEach(v => {
-    const min = type === 'Time' ? v.minTimeMs : v.minMemKb;
-    const avg = type === 'Time' ? v.avgTimeMs : v.avgMemKb;
-    const max = type === 'Time' ? v.maxTimeMs : v.maxMemKb;
+  items.forEach(item => {
+    const min = type === 'Time' ? item.minTimeMs : item.minMemKb;
+    const avg = type === 'Time' ? item.avgTimeMs : item.avgMemKb;
+    const max = type === 'Time' ? item.maxTimeMs : item.maxMemKb;
     const range = max - min;
 
     tbody.innerHTML += `
-            <tr>
-                <td><strong>${v.version}</strong></td>
-                <td class="metric-cell">${min}</td>
-                <td class="metric-cell">${avg}</td>
-                <td class="metric-cell">${max}</td>
-                <td class="metric-cell">${range}</td>
-            </tr>
-        `;
+      <tr>
+        <td><strong>${item.label}</strong></td>
+        <td class="metric-cell">${min}</td>
+        <td class="metric-cell">${avg}</td>
+        <td class="metric-cell">${max}</td>
+        <td class="metric-cell">${range}</td>
+      </tr>
+    `;
   });
 }
 
@@ -399,20 +445,20 @@ function renderRecommendation(timeRanking, memRanking) {
 
   let recommendation = '';
 
-  if (bestTime.version === bestMem.version) {
+  if (bestTime.label === bestMem.label) {
     recommendation = `
-            <strong>🏆 Khuyến nghị:</strong> Version <strong>${bestTime.version}</strong>
-            là tốt nhất về cả Time và Memory. Nên sử dụng cho production.<br><br>
-            <strong>Range</strong> = Khoảng dao động (Max - Min). Số càng nhỏ = performance ổn định.
-        `;
+      <strong>🏆 Khuyến nghị:</strong> <strong>${bestTime.label}</strong>
+      là tốt nhất về cả Time và Memory. Nên sử dụng cho production.<br><br>
+      <strong>Range</strong> = Khoảng dao động (Max - Min). Số càng nhỏ = performance ổn định.
+    `;
   } else {
     recommendation = `
-            <strong>⚖️ Phân tích:</strong><br>
-            - <strong>${bestTime.version}</strong> nhanh nhất (${bestTime.avgTimeMs}ms)<br>
-            - <strong>${bestMem.version}</strong> tiết kiệm memory nhất (${bestMem.avgMemKb}KB)<br><br>
-            <strong>💡 Khuyến nghị:</strong> Ưu tiên ${bestTime.version} nếu cần speed, hoặc ${bestMem.version} nếu giới hạn memory.<br><br>
-            <strong>Range</strong> = Khoảng dao động (Max - Min). Số càng nhỏ = performance ổn định.
-        `;
+      <strong>⚖️ Phân tích:</strong><br>
+      - <strong>${bestTime.label}</strong> nhanh nhất (${bestTime.avgTimeMs}ms)<br>
+      - <strong>${bestMem.label}</strong> tiết kiệm memory nhất (${bestMem.avgMemKb}KB)<br><br>
+      <strong>💡 Khuyến nghị:</strong> Ưu tiên ${bestTime.label} nếu cần speed, hoặc ${bestMem.label} nếu giới hạn memory.<br><br>
+      <strong>Range</strong> = Khoảng dao động (Max - Min). Số càng nhỏ = performance ổn định.
+    `;
   }
 
   document.getElementById('recommendationNote').innerHTML = recommendation;

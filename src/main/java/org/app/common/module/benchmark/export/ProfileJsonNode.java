@@ -19,12 +19,7 @@ public class ProfileJsonNode {
 
     public long count;
 
-    public List<ProfileJsonNode> children = new ArrayList<>();
+    public Integer callCount;
 
-    public ProfileJsonNode(String method, long timeMs, long memoryKb, long count) {
-        this.method = method;
-        this.timeMs = timeMs;
-        this.memoryKb = memoryKb;
-        this.count = count;
-    }
+    public List<ProfileJsonNode> children = new ArrayList<>();
 }

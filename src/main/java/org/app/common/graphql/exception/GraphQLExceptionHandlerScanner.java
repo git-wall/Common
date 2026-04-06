@@ -42,9 +42,12 @@ public class GraphQLExceptionHandlerScanner {
 
     private void validateMethod(Method method, GraphQLExceptionHandler ann) {
         Class<?>[] params = method.getParameterTypes();
-        Verify.ifTrue(ArrayUtils.isNotBetween(params, 1, 2), "@GraphQLExceptionHandler method must have 1 or 2 params: " + method);
-        Verify.ifTrue(!Throwable.class.isAssignableFrom(params[0]), "First param must be Throwable: " + method);
-        Verify.ifTrue(!ann.value().isAssignableFrom(params[0]), "Exception type mismatch with annotation: " + method);
+        Verify.ifTrue(ArrayUtils.isNotBetween(params, 1, 2),
+            "@GraphQLExceptionHandler method must have 1 or 2 params: " + method);
+        Verify.ifTrue(!Throwable.class.isAssignableFrom(params[0]),
+            "First param must be Throwable: " + method);
+        Verify.ifTrue(!ann.value().isAssignableFrom(params[0]),
+            "Exception type mismatch with annotation: " + method);
         Verify.ifTrue(params.length == 2 && params[1] != DataFetcherExceptionHandlerParameters.class,
             "Second param (if present) must be DataFetcherExceptionHandlerParameters: " + method);
         Verify.ifTrue(!GraphQLError.class.isAssignableFrom(method.getReturnType()),

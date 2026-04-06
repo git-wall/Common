@@ -1,0 +1,16 @@
+[versions]
+jmh = "1.37"
+jol = "0.17"
+
+[libraries]
+# JMH - microbenchmarking
+jmh_core = { group = "org.openjdk.jmh", name = "jmh-core", version.ref = "jmh" }
+jmh_generator_annprocess = { group = "org.openjdk.jmh", name = "jmh-generator-annprocess", version.ref = "jmh" }
+
+# JOL - Java Object Layout
+jol_core = { group = "org.openjdk.jol", name = "jol-core", version.ref = "jol" }
+
+[bundles]
+analyze = ["jmh_core", "jol_core"]
+jmh_gen = ["jmh_generator_annprocess"]
+

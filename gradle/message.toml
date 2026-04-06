@@ -1,0 +1,26 @@
+[versions]
+kafka = "3.8.0"
+confluent = "7.4.0"
+parallelconsumer = "0.5.3.2"
+
+[libraries]
+# 8. Kafka: clients and streams
+kafka_clients = { group = "org.apache.kafka", name = "kafka-clients", version.ref = "kafka" }
+kafka_streams = { group = "org.apache.kafka", name = "kafka-streams", version.ref = "kafka" }
+
+# Confluent: Schema Registry and Avro serializer
+confluent_kafka_avro_serializer = { group = "io.confluent", name = "kafka-avro-serializer", version.ref = "confluent" }
+confluent_schema_registry_client = { group = "io.confluent", name = "kafka-schema-registry-client", version.ref = "confluent" }
+
+# 9. Parallel Consumer (Confluent parallel-consumer)
+parallel_consumer_core = { group = "io.confluent.parallelconsumer", name = "parallel-consumer-core", version.ref = "parallelconsumer" }
+
+[bundles]
+# Bundle common Kafka + Confluent messaging libraries together
+kafka = [
+  "kafka_clients",
+  "kafka_streams",
+  "confluent_kafka_avro_serializer",
+  "confluent_schema_registry_client",
+  "parallel_consumer_core"
+]

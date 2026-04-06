@@ -1,0 +1,11 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo "Building $APP_NAME"
+  rules:
+    - if: '$RUN_BUILD == "true"'

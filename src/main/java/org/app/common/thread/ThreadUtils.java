@@ -1,8 +1,9 @@
 package org.app.common.thread;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -18,7 +19,7 @@ import java.util.concurrent.*;
  * - you can have around 12 threads running concurrently.
  * */
 @Slf4j
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ThreadUtils {
 
     public static final int CORE_AVAILABLE;
@@ -59,14 +60,13 @@ public class ThreadUtils {
         }
 
         public static ExecutorService logicPool(long keepAliveTime, TimeUnit unit) {
+            ThreadFactory threadFactory = getThreadFactory("cpu-pool-%d");
             return new ThreadPoolExecutor(
                     CORE_AVAILABLE,                        // Core pool size
                     CORE_AVAILABLE << 1,                   // Max pool size
                     keepAliveTime, unit,                        // Keep-alive time
                     new LinkedBlockingQueue<>(1000),   // Queue capacity
-                    new ThreadFactoryBuilder()
-                            .setNameFormat("cpu-pool-%d")
-                            .build()
+                    threadFactory
             );
         }
 
@@ -75,14 +75,13 @@ public class ThreadUtils {
         }
 
         public static ExecutorService ioPool(long keepAliveTime, TimeUnit unit) {
+            ThreadFactory threadFactory = getThreadFactory("io-pool-%d");
             return new ThreadPoolExecutor(
                     CORE_AVAILABLE << 1,                // More threads for I/O
                     CORE_AVAILABLE << 2,                            // Max threads
                     keepAliveTime, unit,
                     new LinkedBlockingQueue<>(100),
-                    new ThreadFactoryBuilder()
-                            .setNameFormat("io-pool-%d")
-                            .build()
+                    threadFactory
             );
         }
 
@@ -110,14 +109,13 @@ public class ThreadUtils {
 
         public static ExecutorService logicPool(long keepAliveTime, TimeUnit unit) {
             int availableProcessors = getProcessors();
+            ThreadFactory threadFactory = getThreadFactory("cpu-pool-%d");
             return new ThreadPoolExecutor(
                     availableProcessors,                        // Core pool size
                     availableProcessors << 1,                   // Max pool size
                     keepAliveTime, unit,                        // Keep-alive time
                     new LinkedBlockingQueue<>(1000),    // Queue capacity
-                    new ThreadFactoryBuilder()
-                            .setNameFormat("cpu-pool-%d")
-                            .build()
+                    threadFactory
             );
         }
 
@@ -127,14 +125,13 @@ public class ThreadUtils {
 
         public static ThreadPoolExecutor ioPool(long keepAliveTime, TimeUnit unit) {
             int availableProcessors = getProcessors();
+            ThreadFactory threadFactory = getThreadFactory("io-pool-%d");
             return new ThreadPoolExecutor(
                     availableProcessors << 1,                // More threads for I/O
                     availableProcessors << 2,                            // Max threads
                     keepAliveTime, unit,
                     new LinkedBlockingQueue<>(100),
-                    new ThreadFactoryBuilder()
-                            .setNameFormat("io-pool-%d")
-                            .build()
+                    threadFactory
             );
         }
 
@@ -157,5 +154,13 @@ public class ThreadUtils {
         public static void addShutdownHook(Runnable runnable) {
             Runtime.getRuntime().addShutdownHook(new Thread(runnable));
         }
+    }
+
+    private static @NotNull ThreadFactory getThreadFactory(String name) {
+        return r -> {
+            Thread thread = Executors.defaultThreadFactory().newThread(r);
+            thread.setName(name);
+            return thread;
+        };
     }
 }

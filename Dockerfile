@@ -1,19 +1,29 @@
+# ================================
+# Stage 0: Build with Gradle
+# ================================
+FROM gradle:8.5-jdk11 AS builder
+
+WORKDIR /build
+
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle gradle
+RUN ./gradlew --no-daemon dependencies
+
+COPY src src
+
+RUN ./gradlew clean bootJar --no-daemon
+
 #==============================================================================
 #     Builder stage 1 : Compile the application and prepare dependencies
 #==============================================================================
 # Use version ap or
-FROM eclipse-temurin:11-jdk as build
+FROM eclipse-temurin:11-jdk as deps
 
 # set work app in docker
-WORKDIR /app
+WORKDIR /deps
 
 # Copy all project files (source code, Gradle files, etc.) to the container
-COPY . .
-
-# Run Gradle to build the application, skipping tests for faster builds
-# - 'clean' ensures a fresh build
-# - 'build -x test' skips unit tests (remove '-x test' if tests are critical)
-RUN ./gradlew clean build -x test
+COPY --from=builder /build/build/libs/*.jar app.jar
 
 # Analyze dependencies with jdeps to minimize runtime image size
 # - '--ignore-missing-deps': Ignores unresolved dependencies (useful for optional libs)
@@ -29,7 +39,7 @@ RUN jdeps  \
     --multi-release 11 \
     --class-path "build/libs/*" \
     --print-module-deps  \
-    build/libs/Common.jar > modules.txt \
+    app.jar > modules.txt
 
 # Create a custom JRE using jlink for a smaller runtime
 # - '--add-modules $(cat modules.txt),jdk.crypto.ec': Includes required modules from modules.txt plus jdk.crypto.ec (for SSL/TLS)
@@ -40,26 +50,35 @@ RUN jdeps  \
 # - '--output build/image': Outputs the custom JRE to build/image
 RUN jlink  \
     --add-modules $(cat modules.txt),jdk.crypto.ec \
-    --module-path $JAVA_HOME/jmods \
+    --module-path /opt/java/jmods \
     --strip-debug \
     --compress=2 \
     --no-header-files \
     --no-man-pages \
-    --output build/image
+    --output /appjre
 
 # ===========================================================================================================
 # Run stage 2 : Compile the application and run
 # ===========================================================================================================
 FROM debian:bullseye-slim
-WORKDIR /app
-COPY --from=builder /app/build/libs/Common-0.0.1-SNAPSHOT.jar app.jar
-COPY --from=builder /app/build/image /opt/java/openjdk
-ENV PATH="/opt/java/openjdk/bin:${PATH}"
-# ENV JAVA_OPTS=""
-# EXPOSE 8080
+# or bookworm-slim
 
-# use user with some role can be access for security
-RUN useradd -u 1000 -m thanh && chown -R thanh /app
+ENV JAVA_HOME=/opt/java
+ENV PATH="$JAVA_HOME/bin:$PATH"
+
+# -u	User ID	Giúp quản lý quyền ghi file chính xác.
+# -r	System account	Bảo mật hơn, gọn nhẹ vì không tạo home folder.
+# -m	Tự động tạo thư mục cá nhân tại /home/thanh ,	Cần thiết nếu bạn muốn lưu cài đặt cá nhân cho user.
+RUN useradd -r -u 1001 thanh
+# /appjre output from jlink
+COPY --from=deps /appjre $JAVA_HOME
+
+WORKDIR /app
+
+COPY --from=builder  /build/build/libs/*.jar app.jar
+# run app with user was create
+RUN chown -R thanh:thanh /app
+# active user
 USER thanh
 
 # Configure JVM with ZGC and NUMA awareness
@@ -71,18 +90,22 @@ USER thanh
 # - '-Xlog:gc': Logs GC activity to verify ZGC usage (optional, remove for production)
 # - 'org.springframework.boot.loader.JarLauncher': Entry point for Spring Boot layered JAR
 ENTRYPOINT ["java",
- "-XX:+UnlockExperimentalVMOptions", \
- "-XX:+UseZGC", \
- "-XX:+UseNUMA", \
+# "-XX:+UnlockExperimentalVMOptions", \
+ "-XX:+UseG1GC", \
+# "-XX:+UseNUMA", \
              # seting ram auto by percentage
-             "-XX:MaxRAMPercentage=75.0", \
-             "-XX:InitialRAMPercentage=50.0", \
-             "-XX:MinRAMPercentage=25.0", \
-             # if not want setup ram auto set number ram like under, just choose above and below
-#             "-Xms256m", \
-#             "-Xmx512m",
- "-XX:ActiveProcessorCount=4" , \
- "-XX:+UseContainerSupport", \
+#             "-XX:MaxRAMPercentage=75.0", \
+#             "-XX:InitialRAMPercentage=50.0", \
+#             "-XX:MinRAMPercentage=25.0", \
+             # but with setting dynamic make jvm will stop sometime for change setting for get more ram
+             # so you if you are good and controll ok setting all is same value
+             # if not you may be meet problem about OOM
+             # if me use one "-Xmx512m" is ok this like hard code but make everything fast and ok
+             # but what number you need to use => 50% of RAM in container
+             "-Xms256m", \
+             "-Xmx512m", \
+  "-XX:+UseContainerSupport", \
+ "-XX:+ExitOnOutOfMemoryError", \
  "-jar", "app.jar"
 # "-Xlog:gc", \
 # "org.springframework.boot.loader.JarLauncher"
@@ -103,12 +126,13 @@ ENTRYPOINT ["java",
 #     "org.springframework.boot.loader.JarLauncher"]
 
 # Config JVM with G1GC
-#ENTRYPOINT ["java",
-#  "-XX:+UseContainerSupport",
-#  "-XX:+UseG1GC",
-#  "-XX:InitialRAMPercentage=50.0",
-#  "-XX:MaxRAMPercentage=75",
-#  "org.springframework.boot.loader.JarLauncher"]
+
+#  "-XX:+UseContainerSupport"
+#  "-XX:+UseG1GC"
+#  "-Xms256m"
+#  "-Xmx512m"
+#  "-XX:+ExitOnOutOfMemoryError"
+
 
 # Optimization Notes:
 # - Memory Tuning:

@@ -35,13 +35,16 @@ public final class TreePrinter {
 
         String branch = isLast ? "└─ " : "├─ ";
 
+        String callInfo = node.callCount > 1 ? " [×" + node.callCount + "]" : "";
+
         log.info(
-            "{}{}{} ({} ms, {} KB){}",
+            "{}{}{} ({} ms, {} KB){}{}",
             prefix,
             branch,
             node.method,
             node.timeMs,
             node.memKb,
+            callInfo,
             warn
         );
 

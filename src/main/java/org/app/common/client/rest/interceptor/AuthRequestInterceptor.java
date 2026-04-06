@@ -1,6 +1,7 @@
 package org.app.common.client.rest.interceptor;
 
 import lombok.RequiredArgsConstructor;
+import org.app.common.client.TokenProvider;
 import org.app.common.client.rest.HeaderUtils;
 import org.app.common.utils.RequestUtils;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +14,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 public class AuthRequestInterceptor implements ClientHttpRequestInterceptor {
@@ -22,17 +22,21 @@ public class AuthRequestInterceptor implements ClientHttpRequestInterceptor {
 
     private String token;
 
-    private Supplier<String> refreshTokenSupplier;
+    private TokenProvider tokenProvider;
 
-    public AuthRequestInterceptor(String baseUrl, String token, Supplier<String> refreshTokenSupplier) {
+    public AuthRequestInterceptor(String baseUrl, String token, TokenProvider tokenProvider) {
         this.baseUrl = baseUrl;
-        this.token = StringUtils.hasText(token) ? token : refreshTokenSupplier.get();
-        this.refreshTokenSupplier = refreshTokenSupplier;
+        this.token = StringUtils.hasText(token) ? token : tokenProvider.getToken();
+        this.tokenProvider = tokenProvider;
     }
 
     @NonNull
     @Override
-    public ClientHttpResponse intercept(@NonNull HttpRequest request, @NonNull byte[] body, @NonNull ClientHttpRequestExecution execution) throws IOException {
+    public ClientHttpResponse intercept(
+        @NonNull HttpRequest request,
+        @NonNull byte[] body,
+        @NonNull ClientHttpRequestExecution execution
+    ) throws IOException {
         // Add the Authorization header if the token is present
         if (StringUtils.hasText(token)) {
             request.getHeaders().set(HttpHeaders.AUTHORIZATION, HeaderUtils.token(token));
@@ -46,7 +50,7 @@ public class AuthRequestInterceptor implements ClientHttpRequestInterceptor {
             request.getHeaders().remove(HttpHeaders.AUTHORIZATION);
 
             // Get a fresh token
-            token = refreshTokenSupplier.get();
+            token = tokenProvider.getToken();
 
             // Add the new token to the request
             if (StringUtils.hasText(token)) {

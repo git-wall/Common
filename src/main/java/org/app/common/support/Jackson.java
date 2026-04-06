@@ -5,9 +5,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
@@ -212,11 +213,13 @@ class JacksonConfig {
     public Jackson2ObjectMapperBuilderCustomizer customizer() {
         return builder ->
             builder.featuresToEnable(
-                    MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES,
                     JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES
                 )
+                .featuresToDisable(
+                    SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
+                )
                 .failOnUnknownProperties(true)
-                .serializationInclusion(JsonInclude.Include.NON_NULL)
-                .simpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                .modules(new JavaTimeModule())
+                .serializationInclusion(JsonInclude.Include.NON_NULL);
     }
 }

@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backend Architecture Pattern Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #0f1318;
+    --surface2: #151a22;
+    --border: #1e2633;
+    --border2: #2a3547;
+
+    --layer-api: #00d4ff;
+    --layer-app: #7c3aed;
+    --layer-domain: #f59e0b;
+    --layer-infra: #10b981;
+    --layer-cross: #ef4444;
+
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --accent: #00d4ff;
+
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* GRID BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 12px;
+    margin-bottom: 16px;
+    font-family: var(--font-mono);
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  /* LAYER */
+  .layer {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    position: relative;
+  }
+
+  .layer-label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+    width: 36px;
+    min-width: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    border-right: 2px solid;
+    flex-shrink: 0;
+  }
+
+  .layer-content {
+    flex: 1;
+    padding: 20px 20px 20px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+
+  /* LAYER THEMES */
+  .layer.api-layer .layer-label { color: var(--layer-api); border-color: var(--layer-api); background: rgba(0,212,255,0.04); }
+  .layer.api-layer .layer-content { background: rgba(0,212,255,0.02); }
+
+  .layer.app-layer .layer-label { color: var(--layer-app); border-color: var(--layer-app); background: rgba(124,58,237,0.04); }
+  .layer.app-layer .layer-content { background: rgba(124,58,237,0.02); }
+
+  .layer.domain-layer .layer-label { color: var(--layer-domain); border-color: var(--layer-domain); background: rgba(245,158,11,0.04); }
+  .layer.domain-layer .layer-content { background: rgba(245,158,11,0.02); }
+
+  .layer.infra-layer .layer-label { color: var(--layer-infra); border-color: var(--layer-infra); background: rgba(16,185,129,0.04); }
+  .layer.infra-layer .layer-content { background: rgba(16,185,129,0.02); }
+
+  /* ARROW BETWEEN LAYERS */
+  .layer-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 28px;
+    padding-left: 60px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    gap: 8px;
+    font-family: var(--font-mono);
+  }
+  .layer-arrow::before { content: ''; flex: 1; height: 1px; background: var(--border2); max-width: 60px; }
+  .layer-arrow::after { content: ''; flex: 1; height: 1px; background: var(--border2); max-width: 60px; }
+
+  /* PATTERN CARD */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 160px;
+    flex: 0 0 auto;
+  }
+
+  .card:hover {
+    border-color: var(--card-color, var(--accent));
+    background: var(--surface2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4), 0 0 0 1px var(--card-color, var(--accent));
+  }
+
+  .card-tag {
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--card-color, var(--muted));
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+
+  .card-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    font-family: var(--font-display);
+  }
+
+  .card-desc {
+    font-size: 10px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-family: var(--font-mono);
+  }
+
+  .card-code {
+    margin-top: 8px;
+    font-size: 9px;
+    color: var(--card-color, var(--accent));
+    opacity: 0.7;
+    font-style: italic;
+  }
+
+  /* CARD INDICATOR DOT */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--card-color, var(--muted));
+    opacity: 0.6;
+  }
+
+  /* SPECIAL: CROSS-CUTTING */
+  .cross-cutting {
+    background: var(--surface);
+    border: 1px dashed var(--layer-cross);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 24px 0;
+    position: relative;
+  }
+
+  .cross-cutting-label {
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    background: var(--bg);
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--layer-cross);
+    font-weight: 700;
+  }
+
+  .cross-cutting-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* FLOW CONNECTORS */
+  .connector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    font-size: 9px;
+    color: var(--muted);
+    height: fit-content;
+    align-self: center;
+    flex-shrink: 0;
+  }
+
+  .connector-arrow { color: var(--accent); font-size: 14px; }
+
+  /* REQUEST FLOW SECTION */
+  .flow-path {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 32px 0;
+  }
+
+  .flow-path-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    font-weight: 700;
+  }
+
+  .flow-steps {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .step-box {
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    border: 1px solid;
+  }
+
+  .step-arrow {
+    color: var(--muted);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .step-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .step-label {
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-align: center;
+    max-width: 90px;
+  }
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 11px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* TOOLTIP POPUP */
+  .popup {
+    display: none;
+    position: fixed;
+    background: #1a2233;
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 360px;
+    z-index: 1000;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    pointer-events: none;
+  }
+
+  .popup.active { display: block; }
+
+  .popup-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .popup-tag {
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  .popup-desc {
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .popup-example {
+    background: #0a0c10;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 10px;
+    color: #10b981;
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* GRID for 3-column pattern groups */
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    width: 100%;
+  }
+
+  /* Layer section header */
+  .layer-header-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .layer-name-big {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .layer-note {
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* Scrollable hint */
+  .scroll-hint {
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 48px;
+    letter-spacing: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="badge">Backend Architecture · Java · Design Patterns</div>
+    <h1>Pattern <span>Constellation</span> Map</h1>
+    <p class="subtitle">Toàn bộ pattern — đúng vị trí, đúng tầng, đúng luồng</p>
+  </header>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#00d4ff"></div> API / Presentation Layer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div> Application Layer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Domain Layer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Infrastructure Layer</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444; border-radius:50%"></div> Cross-cutting Concerns</div>
+    <div class="legend-item" style="margin-left:auto; color:#64748b; font-size:10px;">💡 Hover vào card để xem chi tiết</div>
+  </div>
+
+  <!-- ===== REQUEST FLOW PATH ===== -->
+  <div class="flow-path">
+    <div class="flow-path-title">⚡ Request Flow — Luồng đi từ ngoài vào trong</div>
+    <div class="flow-steps">
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(0,212,255,0.1);border-color:#00d4ff;color:#00d4ff">Client / HTTP</div>
+          <div class="step-label">REST / gRPC / MQ</div>
+        </div>
+        <div class="step-arrow">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(0,212,255,0.1);border-color:#00d4ff;color:#00d4ff">Controller</div>
+          <div class="step-label">Nhận request</div>
+        </div>
+        <div class="step-arrow">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(0,212,255,0.1);border-color:#00d4ff;color:#00d4ff">DTO</div>
+          <div class="step-label">Validate input</div>
+        </div>
+        <div class="step-arrow">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(0,212,255,0.1);border-color:#7c3aed;color:#a78bfa">Facade</div>
+          <div class="step-label">Điều phối</div>
+        </div>
+        <div class="step-arrow">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(124,58,237,0.1);border-color:#7c3aed;color:#a78bfa">UseCase</div>
+          <div class="step-label">Business logic</div>
+        </div>
+        <div class="step-arrow">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(245,158,11,0.1);border-color:#f59e0b;color:#f59e0b">Domain</div>
+          <div class="step-label">Entity / Rule</div>
+        </div>
+        <div class="step-arrow">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(16,185,129,0.1);border-color:#10b981;color:#10b981">Repository</div>
+          <div class="step-label">Persist / Query</div>
+        </div>
+        <div class="step-arrow">→</div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-wrap">
+          <div class="step-box" style="background:rgba(16,185,129,0.1);border-color:#10b981;color:#10b981">DB / Queue</div>
+          <div class="step-label">MySQL / Kafka</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== LAYER ARCHITECTURE ===== -->
+  <div class="section-title">Architecture Layers — Từng tầng, từng pattern</div>
+
+  <div class="flow">
+
+    <!-- ===== API LAYER ===== -->
+    <div class="layer api-layer">
+      <div class="layer-label" style="color:var(--layer-api); border-color:var(--layer-api)">API LAYER</div>
+      <div class="layer-content">
+        <div class="layer-header-row" style="width:100%">
+          <div class="layer-name-big" style="color:var(--layer-api)">Presentation / API Layer</div>
+          <div class="layer-note">— Điểm tiếp xúc với thế giới bên ngoài</div>
+        </div>
+
+        <div class="card" style="--card-color:#00d4ff"
+          data-name="Controller"
+          data-tag="API Layer"
+          data-desc="Nhận HTTP request, ủy thác ngay cho UseCase hoặc Facade. Không chứa logic nghiệp vụ. Chỉ làm 3 việc: nhận, convert, trả."
+          data-example="@PostMapping('/orders')
+public ResponseEntity<OrderResponse> create(
+    @Valid @RequestBody CreateOrderRequest req) {
+  return ok(orderFacade.createOrder(req));
+}">
+          <div class="card-tag">@RestController</div>
+          <div class="card-name">Controller</div>
+          <div class="card-desc">Điểm vào HTTP — nhận request, gọi usecase, trả response</div>
+          <div class="card-code">→ gọi Facade hoặc UseCase</div>
+        </div>
+
+        <div class="card" style="--card-color:#38bdf8"
+          data-name="DTO (Request/Response)"
+          data-tag="API Layer — Data Transfer"
+          data-desc="Data Transfer Object. Định nghĩa shape của input/output. Request DTO dùng @Valid. Response DTO chỉ expose những field cần thiết. KHÔNG dùng Entity làm DTO."
+          data-example="// Request DTO
+public record CreateOrderRequest(
+    @NotBlank String productId,
+    @Min(1) int quantity
+) {}
+
+// Response DTO
+public record OrderResponse(
+    String orderId,
+    String status,
+    BigDecimal total
+) {}">
+          <div class="card-tag">Input / Output Shape</div>
+          <div class="card-name">DTO</div>
+          <div class="card-desc">Request &amp; Response objects — tách biệt API contract với domain</div>
+          <div class="card-code">RequestDTO ≠ Entity ≠ ResponseDTO</div>
+        </div>
+
+        <div class="card" style="--card-color:#67e8f9"
+          data-name="Presenter"
+          data-tag="API Layer — Output Transform"
+          data-desc="Chuyển Domain Object / UseCase output → ResponseDTO. Chứa logic format: ngày tháng, currency, enum label. Tách biệt hoàn toàn concern 'hiển thị' ra khỏi domain."
+          data-example="@Component
+public class OrderPresenter {
+  public OrderResponse present(Order order) {
+    return new OrderResponse(
+      order.getId(),
+      order.getStatus().label(),
+      formatCurrency(order.getTotal())
+    );
+  }
+}">
+          <div class="card-tag">Output Transform</div>
+          <div class="card-name">Presenter</div>
+          <div class="card-desc">Domain → ResponseDTO. Format, label, currency, i18n</div>
+          <div class="card-code">→ nhận từ UseCase output</div>
+        </div>
+
+        <div class="card" style="--card-color:#a5f3fc"
+          data-name="Assembler"
+          data-tag="API Layer — Object Mapping"
+          data-desc="Lắp ráp object từ nhiều nguồn: combine nhiều domain object thành 1 response phức tạp. Khác Mapper ở chỗ: Assembler có logic lắp ghép, Mapper chỉ field-to-field."
+          data-example="@Component
+public class OrderDetailAssembler {
+  public OrderDetailResponse assemble(
+      Order order,
+      List<OrderItem> items,
+      Customer customer) {
+    return new OrderDetailResponse(
+      orderPresenter.present(order),
+      items.stream().map(itemPresenter::present)...,
+      customerPresenter.present(customer)
+    );
+  }
+}">
+          <div class="card-tag">Compose Complex Response</div>
+          <div class="card-name">Assembler</div>
+          <div class="card-desc">Ghép nhiều domain object → 1 response phức tạp</div>
+          <div class="card-code">≠ Mapper (có logic ghép)</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="layer-arrow">↓ Controller gọi Facade hoặc UseCase trực tiếp ↓</div>
+
+    <!-- ===== APPLICATION LAYER ===== -->
+    <div class="layer app-layer">
+      <div class="layer-label" style="color:var(--layer-app); border-color:var(--layer-app)">APP LAYER</div>
+      <div class="layer-content">
+        <div class="layer-header-row" style="width:100%">
+          <div class="layer-name-big" style="color:var(--layer-app)">Application Layer</div>
+          <div class="layer-note">— Điều phối luồng, orchestrate usecase</div>
+        </div>
+
+        <div class="card" style="--card-color:#a78bfa"
+          data-name="Facade"
+          data-tag="Application Layer — Orchestrator"
+          data-desc="Một entry point đơn giản cho Controller. Facade gom nhiều UseCase phức tạp lại thành 1 API dễ dùng. Giúp Controller không cần biết có bao nhiêu UseCase bên trong."
+          data-example="@Service
+public class OrderFacade {
+  public OrderResponse createOrder(CreateOrderRequest req) {
+    var cmd = assembler.toCommand(req);
+    var order = createOrderUseCase.execute(cmd);
+    inventoryUseCase.reserve(order);
+    notifyUseCase.sendConfirmation(order);
+    return presenter.present(order);
+  }
+}">
+          <div class="card-tag">Simplify Complex API</div>
+          <div class="card-name">Facade</div>
+          <div class="card-desc">Gom nhiều UseCase → 1 interface đơn giản cho Controller</div>
+          <div class="card-code">→ gọi N UseCase theo thứ tự</div>
+        </div>
+
+        <div class="card" style="--card-color:#c4b5fd"
+          data-name="UseCase"
+          data-tag="Application Layer — Business Flow"
+          data-desc="1 UseCase = 1 business action. Chứa application logic (transaction, security check, event publish). Không chứa domain rule (cái đó thuộc Domain). Implement interface, dễ test."
+          data-example="@UseCase
+public class CreateOrderUseCase {
+  @Transactional
+  public Order execute(CreateOrderCommand cmd) {
+    // 1. Validate business rule via Domain
+    var order = Order.create(cmd);
+    // 2. Persist
+    orderRepo.save(order);
+    // 3. Publish event
+    eventPublisher.publish(new OrderCreatedEvent(order));
+    return order;
+  }
+}">
+          <div class="card-tag">1 Action = 1 UseCase</div>
+          <div class="card-name">UseCase</div>
+          <div class="card-desc">Một business action. Transaction, event publish, auth check</div>
+          <div class="card-code">→ gọi Domain + Repository</div>
+        </div>
+
+        <div class="card" style="--card-color:#8b5cf6"
+          data-name="Command / Query"
+          data-tag="Application Layer — CQRS"
+          data-desc="CQRS: tách Command (ghi, thay đổi state) và Query (đọc, không thay đổi state). Command có thể trigger Event. Query có thể dùng ReadModel riêng. UseCase nhận Command/Query object thay vì raw params."
+          data-example="// Command (write)
+public record CreateOrderCommand(
+    String customerId,
+    List<LineItem> items
+) {}
+
+// Query (read)
+public record GetOrderQuery(
+    String orderId,
+    String requesterId
+) {}">
+          <div class="card-tag">CQRS</div>
+          <div class="card-name">Command / Query</div>
+          <div class="card-desc">Tách read/write intent. Command → state change. Query → read only</div>
+          <div class="card-code">DTO → Command/Query → UseCase</div>
+        </div>
+
+        <div class="card" style="--card-color:#6d28d9"
+          data-name="Event (Application Event)"
+          data-tag="Application Layer — Async Decoupling"
+          data-desc="UseCase publish event sau khi hoàn thành. Các handler khác lắng nghe và phản ứng. Decoupling: UseCase không cần biết ai dùng event. Spring @EventListener hoặc Kafka."
+          data-example="// Publish sau khi save
+eventPublisher.publish(
+  new OrderCreatedEvent(order.getId())
+);
+
+// Handler khác lắng nghe
+@EventListener
+public void onOrderCreated(OrderCreatedEvent e) {
+  emailService.sendConfirmation(e.orderId());
+  inventoryService.reserve(e.orderId());
+}">
+          <div class="card-tag">Async / Decoupling</div>
+          <div class="card-name">Event</div>
+          <div class="card-desc">UseCase publish → nhiều handler react độc lập. Loose coupling</div>
+          <div class="card-code">@EventListener / Kafka Consumer</div>
+        </div>
+
+        <div class="card" style="--card-color:#9333ea"
+          data-name="Messaging"
+          data-tag="Application Layer — Async Communication"
+          data-desc="Giao tiếp bất đồng bộ qua Message Broker (Kafka, RabbitMQ). Producer gửi message, Consumer xử lý. Dùng khi cần decouple service, xử lý background, hoặc event-driven architecture."
+          data-example="// Producer
+kafkaTemplate.send('order-events',
+  new OrderMessage(orderId, 'CREATED'));
+
+// Consumer
+@KafkaListener(topics = 'order-events')
+public void handle(OrderMessage msg) {
+  switch(msg.type()) {
+    case 'CREATED' -> processNew(msg);
+    case 'CANCELLED' -> refund(msg);
+  }
+}">
+          <div class="card-tag">Kafka / RabbitMQ</div>
+          <div class="card-name">Messaging</div>
+          <div class="card-desc">Producer → Broker → Consumer. Async, scalable, decoupled</div>
+          <div class="card-code">Outbox Pattern phòng dual-write</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="layer-arrow">↓ Application gọi Domain qua Port / Interface ↓</div>
+
+    <!-- ===== DOMAIN LAYER ===== -->
+    <div class="layer domain-layer">
+      <div class="layer-label" style="color:var(--layer-domain); border-color:var(--layer-domain)">DOMAIN</div>
+      <div class="layer-content">
+        <div class="layer-header-row" style="width:100%">
+          <div class="layer-name-big" style="color:var(--layer-domain)">Domain Layer</div>
+          <div class="layer-note">— Lõi nghiệp vụ, không phụ thuộc framework</div>
+        </div>
+
+        <div class="card" style="--card-color:#f59e0b"
+          data-name="Entity / Aggregate"
+          data-tag="Domain Layer — Core"
+          data-desc="Entity: object có identity (ID). Aggregate: cluster of entities với 1 root. Tất cả business rule nằm trong domain object. Không phụ thuộc Spring, JPA annotation ở tầng này nếu làm clean."
+          data-example="public class Order {
+  private OrderId id;
+  private List<LineItem> items;
+  private OrderStatus status;
+
+  // Business rule nằm đây
+  public void addItem(Product p, int qty) {
+    if (status != DRAFT) throw new OrderException();
+    items.add(new LineItem(p, qty));
+  }
+
+  public Money calculateTotal() { ... }
+}">
+          <div class="card-tag">Business Identity + Rule</div>
+          <div class="card-name">Entity / Aggregate</div>
+          <div class="card-desc">Lõi domain. Tự enforce rule. Không biết DB, không biết HTTP</div>
+          <div class="card-code">→ chứa business rule thuần túy</div>
+        </div>
+
+        <div class="card" style="--card-color:#fbbf24"
+          data-name="Domain Service"
+          data-tag="Domain Layer — Cross-entity Logic"
+          data-desc="Logic nghiệp vụ cần nhiều hơn 1 Entity mà không thuộc về Entity nào. Ví dụ: tính giá theo policy, kiểm tra rule cross-aggregate. Khác UseCase: Domain Service không có I/O side effects."
+          data-example="@DomainService
+public class PricingDomainService {
+  // Logic cần cả Order lẫn Customer lẫn Promotion
+  public Money calculatePrice(
+      Order order,
+      Customer customer,
+      List<Promotion> promos) {
+    // Áp dụng rule thuần domain
+    return pricingRule.apply(order, customer, promos);
+  }
+}">
+          <div class="card-tag">Cross-Entity Logic</div>
+          <div class="card-name">Domain Service</div>
+          <div class="card-desc">Logic cần nhiều Entity. Không có I/O. Không phụ thuộc infra</div>
+          <div class="card-code">≠ Application Service (không có I/O)</div>
+        </div>
+
+        <div class="card" style="--card-color:#f59e0b"
+          data-name="Repository (Port)"
+          data-tag="Domain Layer — Port"
+          data-desc="Interface định nghĩa trong Domain. Implementation ở Infrastructure. Domain chỉ biết interface, không biết SQL hay JPA. Đây là Dependency Inversion — Domain không phụ thuộc Infra."
+          data-example="// Interface định nghĩa ở Domain
+public interface OrderRepository {
+  Optional<Order> findById(OrderId id);
+  void save(Order order);
+  List<Order> findByCustomer(CustomerId id);
+}
+
+// Implementation ở Infrastructure layer
+@Repository
+public class JpaOrderRepository
+    implements OrderRepository { ... }">
+          <div class="card-tag">Port (Interface)</div>
+          <div class="card-name">Repository Port</div>
+          <div class="card-desc">Interface ở Domain, implement ở Infra. Dependency Inversion</div>
+          <div class="card-code">Domain → Port ← Infrastructure</div>
+        </div>
+
+        <div class="card" style="--card-color:#d97706"
+          data-name="Value Object"
+          data-tag="Domain Layer — Immutable"
+          data-desc="Object không có identity, chỉ có value. Immutable. Ví dụ: Money, Email, Address, PhoneNumber. Tự validate trong constructor. So sánh bằng value, không bằng reference."
+          data-example="public record Money(
+    BigDecimal amount,
+    Currency currency
+) {
+  public Money {
+    if (amount.compareTo(ZERO) < 0)
+      throw new InvalidMoneyException();
+  }
+
+  public Money add(Money other) {
+    if (!currency.equals(other.currency))
+      throw new CurrencyMismatch();
+    return new Money(amount.add(other.amount), currency);
+  }
+}">
+          <div class="card-tag">Immutable + Self-validating</div>
+          <div class="card-name">Value Object</div>
+          <div class="card-desc">Money, Email, Address. Immutable, validate trong constructor</div>
+          <div class="card-code">record / final class — no ID</div>
+        </div>
+
+        <div class="card" style="--card-color:#b45309"
+          data-name="Strategy"
+          data-tag="Domain Layer — Behavioral"
+          data-desc="Đóng gói algorithm/rule vào interface, swap runtime. Dùng khi có nhiều cách xử lý cùng 1 việc: pricing strategy, discount rule, tax calculation, payment method. Open/Closed Principle."
+          data-example="public interface DiscountStrategy {
+  Money calculate(Order order, Customer customer);
+}
+
+// Các implementation:
+// VipDiscountStrategy
+// SeasonalDiscountStrategy
+// LoyaltyDiscountStrategy
+
+// UseCase inject strategy phù hợp
+@Component
+public class PricingService {
+  private final Map<CustomerTier, DiscountStrategy> strategies;
+
+  public Money applyDiscount(Order o, Customer c) {
+    return strategies.get(c.tier()).calculate(o, c);
+  }
+}">
+          <div class="card-tag">Algorithm as Object</div>
+          <div class="card-name">Strategy</div>
+          <div class="card-desc">Swap algorithm/rule runtime. Pricing, discount, tax, routing</div>
+          <div class="card-code">Map&lt;Type, Strategy&gt; → runtime select</div>
+        </div>
+
+        <div class="card" style="--card-color:#92400e"
+          data-name="Factory"
+          data-tag="Domain Layer — Creational"
+          data-desc="Tạo Domain Object phức tạp. Ẩn constructor logic. Đảm bảo Domain Object luôn valid khi tạo ra. OrderFactory, UserFactory. Có thể là static method trong Entity (Order.create(...))."
+          data-example="public class OrderFactory {
+  public Order create(
+      Customer customer,
+      List<CartItem> cartItems,
+      ShippingAddress address) {
+
+    validateCartItems(cartItems);
+    var items = cartItems.stream()
+        .map(this::toLineItem).toList();
+    return new Order(
+      OrderId.generate(),
+      customer.getId(),
+      items,
+      address,
+      OrderStatus.DRAFT
+    );
+  }
+}">
+          <div class="card-tag">Complex Object Creation</div>
+          <div class="card-name">Factory</div>
+          <div class="card-desc">Tạo Domain Object phức tạp. Đảm bảo valid state khi khởi tạo</div>
+          <div class="card-code">Order.create() hoặc OrderFactory</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="layer-arrow">↓ Repository Port → Implementation ở Infra ↓</div>
+
+    <!-- ===== INFRASTRUCTURE LAYER ===== -->
+    <div class="layer infra-layer">
+      <div class="layer-label" style="color:var(--layer-infra); border-color:var(--layer-infra)">INFRA</div>
+      <div class="layer-content">
+        <div class="layer-header-row" style="width:100%">
+          <div class="layer-name-big" style="color:var(--layer-infra)">Infrastructure Layer</div>
+          <div class="layer-note">— Kết nối thế giới bên ngoài: DB, API, Queue</div>
+        </div>
+
+        <div class="card" style="--card-color:#10b981"
+          data-name="Adapter"
+          data-tag="Infrastructure Layer — Hexagonal"
+          data-desc="Implement Port từ Domain. Adapter chuyển đổi giữa Domain và external system. Có 2 loại: Inbound Adapter (nhận từ ngoài: REST, Kafka Consumer) và Outbound Adapter (gọi ra ngoài: DB, external API)."
+          data-example="// Outbound Adapter: implement domain port
+@Repository
+public class JpaOrderAdapter
+    implements OrderRepository {  // Port từ Domain
+
+  private final OrderJpaRepository jpa;
+  private final OrderMapper mapper;
+
+  public Optional<Order> findById(OrderId id) {
+    return jpa.findById(id.value())
+        .map(mapper::toDomain);
+  }
+}">
+          <div class="card-tag">Port Implementation</div>
+          <div class="card-name">Adapter</div>
+          <div class="card-desc">Implement Domain Port. Bridge giữa domain và external system</div>
+          <div class="card-code">Inbound (REST/MQ) · Outbound (DB/API)</div>
+        </div>
+
+        <div class="card" style="--card-color:#34d399"
+          data-name="Mapper"
+          data-tag="Infrastructure Layer — Transform"
+          data-desc="Chuyển đổi thuần túy field-by-field: Domain Entity ↔ JPA Entity ↔ DTO. Không có logic nghiệp vụ. Dùng MapStruct để generate. Tách biệt hoàn toàn domain model với persistence model."
+          data-example="@Mapper(componentModel = 'spring')
+public interface OrderMapper {
+  // Domain → JPA Entity
+  OrderJpaEntity toJpa(Order order);
+
+  // JPA Entity → Domain
+  Order toDomain(OrderJpaEntity entity);
+
+  // Domain → Response DTO
+  OrderResponse toResponse(Order order);
+}">
+          <div class="card-tag">Field-to-Field Transform</div>
+          <div class="card-name">Mapper</div>
+          <div class="card-desc">Domain ↔ JPA Entity ↔ DTO. Thuần field mapping, dùng MapStruct</div>
+          <div class="card-code">≠ Assembler (không có logic ghép)</div>
+        </div>
+
+        <div class="card" style="--card-color:#6ee7b7"
+          data-name="ACL (Anti-Corruption Layer)"
+          data-tag="Infrastructure Layer — Boundary"
+          data-desc="Ngăn domain bị 'ô nhiễm' bởi model của external system. Khi tích hợp third-party (payment gateway, shipping API), ACL dịch ngôn ngữ của họ sang ngôn ngữ của domain mình. Không để external model leak vào domain."
+          data-example="// External Payment Gateway model (Stripe)
+// → KHÔNG để PaymentIntent leak vào domain
+
+@Component
+public class StripePaymentAcl {
+  // Dịch domain → Stripe format
+  public PaymentResult charge(Payment payment) {
+    var stripeRequest = toStripeRequest(payment);
+    var stripeResult = stripeClient.charge(stripeRequest);
+    // Dịch Stripe result → domain concept
+    return toPaymentResult(stripeResult);
+  }
+}">
+          <div class="card-tag">External Model Protection</div>
+          <div class="card-name">ACL</div>
+          <div class="card-desc">Chặn model của external system leak vào domain. Translation layer</div>
+          <div class="card-code">External model ≠ Domain model</div>
+        </div>
+
+        <div class="card" style="--card-color:#059669"
+          data-name="Context"
+          data-tag="Infrastructure / Cross-cutting"
+          data-desc="Lưu context của request: userId, tenantId, correlationId, locale. Dùng ThreadLocal hoặc RequestScope. Cho phép bất kỳ tầng nào access mà không cần pass qua method params. Thường dùng với MDC cho logging."
+          data-example="// Context holder (ThreadLocal)
+public class RequestContext {
+  private static final ThreadLocal<Context>
+    CTX = new ThreadLocal<>();
+
+  public static void set(Context ctx) { CTX.set(ctx); }
+  public static Context get() { return CTX.get(); }
+  public static void clear() { CTX.remove(); }
+}
+
+// Trong Filter:
+MDC.put('correlationId', ctx.correlationId());
+MDC.put('userId', ctx.userId());">
+          <div class="card-tag">Request Scope State</div>
+          <div class="card-name">Context</div>
+          <div class="card-desc">userId, tenantId, correlationId. ThreadLocal. MDC logging</div>
+          <div class="card-code">Filter → set → UseCase → get → clear</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== CROSS-CUTTING CONCERNS ===== -->
+  <div class="section-title">Cross-Cutting Concerns — Xuyên suốt mọi tầng</div>
+
+  <div class="cross-cutting">
+    <div class="cross-cutting-label">⚡ CROSS-CUTTING — áp dụng ở mọi layer</div>
+    <div class="cross-cutting-cards">
+
+      <div class="card" style="--card-color:#ef4444; min-width:180px"
+        data-name="Decorator"
+        data-tag="Cross-cutting — AOP / Wrapper"
+        data-desc="Thêm behavior vào object mà không thay đổi class. Trong Java thường dùng AOP hoặc wrapper class. Ví dụ: add logging, caching, retry, circuit breaker, audit trail xung quanh UseCase hoặc Repository."
+        data-example="// Decorator pattern: wrap UseCase
+public class LoggingOrderUseCase
+    implements CreateOrderUseCase {
+
+  private final CreateOrderUseCase delegate;
+
+  public Order execute(CreateOrderCommand cmd) {
+    log.info('Creating order: {}', cmd);
+    try {
+      var result = delegate.execute(cmd);
+      log.info('Order created: {}', result.getId());
+      return result;
+    } catch (Exception e) {
+      log.error('Order creation failed', e);
+      throw e;
+    }
+  }
+}">
+        <div class="card-tag">@Aspect / Wrapper</div>
+        <div class="card-name">Decorator</div>
+        <div class="card-desc">Thêm logging, caching, retry vào bất kỳ component nào</div>
+        <div class="card-code">AOP @Around hoặc wrapper class</div>
+      </div>
+
+      <div class="card" style="--card-color:#f87171; min-width:180px"
+        data-name="Context (MDC/Tracing)"
+        data-tag="Cross-cutting — Observability"
+        data-desc="Correlation ID, Trace ID chạy xuyên suốt toàn bộ request. Set trong Filter, đọc ở bất kỳ đâu qua MDC. Thiết yếu cho distributed tracing và debug."
+        data-example="@Component
+public class CorrelationFilter
+    implements Filter {
+  public void doFilter(req, res, chain) {
+    var correlationId = UUID.randomUUID();
+    MDC.put('correlationId', correlationId);
+    RequestContext.set(new Context(correlationId));
+    try {
+      chain.doFilter(req, res);
+    } finally {
+      MDC.clear();
+      RequestContext.clear();
+    }
+  }
+}">
+        <div class="card-tag">Trace / Log Context</div>
+        <div class="card-name">MDC / Tracing</div>
+        <div class="card-desc">CorrelationId xuyên suốt. MDC cho logging. OpenTelemetry</div>
+        <div class="card-code">Filter → MDC.put → auto-clear</div>
+      </div>
+
+      <div class="card" style="--card-color:#fca5a5; min-width:180px"
+        data-name="Exception Handler"
+        data-tag="Cross-cutting — Error Handling"
+        data-desc="@ControllerAdvice bắt exception từ mọi tầng, convert sang HTTP error response chuẩn. Domain exception → 4xx. Technical exception → 5xx. Logging tập trung ở đây."
+        data-example="@ControllerAdvice
+public class GlobalExceptionHandler {
+
+  @ExceptionHandler(DomainException.class)
+  public ResponseEntity<ErrorResponse> handle(
+      DomainException e) {
+    return ResponseEntity
+      .status(e.httpStatus())
+      .body(new ErrorResponse(
+        e.errorCode(),
+        e.getMessage()
+      ));
+  }
+}">
+        <div class="card-tag">@ControllerAdvice</div>
+        <div class="card-name">Exception Handler</div>
+        <div class="card-desc">Bắt exception toàn cục. Domain → 4xx. Technical → 5xx</div>
+        <div class="card-code">Domain Exception → HTTP Status mapping</div>
+      </div>
+
+      <div class="card" style="--card-color:#fbd38d; min-width:180px"
+        data-name="Validator"
+        data-tag="Cross-cutting — Validation"
+        data-desc="3 tầng validation: (1) DTO: format/required (@Valid). (2) UseCase: business rule validation. (3) Domain: invariant enforcement. Mỗi tầng validate đúng loại concern của mình."
+        data-example="// Tầng 1: DTO format
+@NotBlank String name;
+@Email String email;
+
+// Tầng 2: UseCase business rule
+if (orderRepo.existsByIdempotencyKey(cmd.key())) {
+  throw new DuplicateOrderException();
+}
+
+// Tầng 3: Domain invariant
+public void addItem(Product p, int qty) {
+  if (items.size() >= MAX_ITEMS)
+    throw new OrderLimitExceededException();
+}">
+        <div class="card-tag">3-Layer Validation</div>
+        <div class="card-name">Validator</div>
+        <div class="card-desc">DTO (format) → UseCase (business) → Domain (invariant)</div>
+        <div class="card-code">@Valid + custom + domain rule</div>
+      </div>
+
+      <div class="card" style="--card-color:#86efac; min-width:180px"
+        data-name="Cache"
+        data-tag="Cross-cutting — Performance"
+        data-desc="@Cacheable trên UseCase hoặc Repository method. Decorator pattern để add caching layer. Redis cho distributed cache. Cần clear cache khi data thay đổi."
+        data-example="@Service
+public class CachedProductUseCase {
+
+  @Cacheable(
+    value = 'products',
+    key = '#productId',
+    unless = '#result == null'
+  )
+  public Product findById(String productId) {
+    return productRepo.findById(productId)
+        .orElseThrow(ProductNotFoundException::new);
+  }
+
+  @CacheEvict(value = 'products', key = '#p.id')
+  public void save(Product p) { ... }
+}">
+        <div class="card-tag">@Cacheable / Redis</div>
+        <div class="card-name">Cache</div>
+        <div class="card-desc">@Cacheable trên UseCase. Redis distributed cache. Evict on change</div>
+        <div class="card-code">Read-through / Write-through / Evict</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== WHEN TO USE WHAT ===== -->
+  <div class="section-title">Decision Guide — Nhìn tình huống → biết dùng gì</div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:16px; margin-bottom:40px;">
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px;">
+      <div style="font-size:10px; letter-spacing:2px; color:#00d4ff; margin-bottom:12px; font-weight:700;">KHI NÀO DÙNG FACADE vs USECASE?</div>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.8;">
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ UseCase khi:</div>
+        1 action rõ ràng, 1 transaction<br>
+        Controller gọi trực tiếp<br>
+        <br>
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Facade khi:</div>
+        Cần gọi nhiều UseCase theo thứ tự<br>
+        Controller quá phức tạp<br>
+        Cần hide complexity của application logic
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px;">
+      <div style="font-size:10px; letter-spacing:2px; color:#a78bfa; margin-bottom:12px; font-weight:700;">PRESENTER vs ASSEMBLER vs MAPPER?</div>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.8;">
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Mapper:</div>
+        Field-to-field thuần túy (MapStruct)<br>
+        <br>
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Presenter:</div>
+        Format cho display (currency, date, label)<br>
+        <br>
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Assembler:</div>
+        Ghép nhiều object → 1 response phức tạp
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px;">
+      <div style="font-size:10px; letter-spacing:2px; color:#f59e0b; margin-bottom:12px; font-weight:700;">ADAPTER vs ACL?</div>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.8;">
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Adapter:</div>
+        Implement Port interface từ domain<br>
+        JPA Repository, HTTP Client<br>
+        <br>
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ ACL:</div>
+        Chặn external model leak vào domain<br>
+        Thường wrap Adapter<br>
+        Stripe → Payment, ShipStation → Shipment
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px;">
+      <div style="font-size:10px; letter-spacing:2px; color:#10b981; margin-bottom:12px; font-weight:700;">EVENT vs MESSAGING?</div>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.8;">
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Domain Event:</div>
+        In-process, same transaction<br>
+        Spring ApplicationEventPublisher<br>
+        <br>
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Integration Event / Messaging:</div>
+        Cross-service, async<br>
+        Kafka / RabbitMQ<br>
+        Dùng Outbox Pattern để đảm bảo delivery
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px;">
+      <div style="font-size:10px; letter-spacing:2px; color:#ef4444; margin-bottom:12px; font-weight:700;">STRATEGY vs FACTORY?</div>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.8;">
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Strategy:</div>
+        Chọn algorithm lúc runtime<br>
+        Pricing, Discount, Tax, Routing<br>
+        <br>
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Factory:</div>
+        Tạo object phức tạp<br>
+        Ẩn construction logic<br>
+        Đảm bảo valid state từ đầu
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px;">
+      <div style="font-size:10px; letter-spacing:2px; color:#38bdf8; margin-bottom:12px; font-weight:700;">DECORATOR VÀ AOP?</div>
+      <div style="font-size:11px; color:#94a3b8; line-height:1.8;">
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ Decorator class:</div>
+        Explicit, testable, compile-time visible<br>
+        Tốt khi cần 1-2 UseCase cụ thể<br>
+        <br>
+        <div style="color:#fff; margin-bottom:4px; font-weight:600;">→ AOP @Aspect:</div>
+        Apply cross-cutting globally<br>
+        Logging, Audit, Retry, Transaction<br>
+        @Around pointcut
+      </div>
+    </div>
+
+  </div>
+
+  <div class="scroll-hint">— hover vào bất kỳ card nào để xem detail + code example —</div>
+
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+  <div class="popup-tag" id="popup-tag"></div>
+  <div class="popup-name" id="popup-name"></div>
+  <div class="popup-desc" id="popup-desc"></div>
+  <pre class="popup-example" id="popup-example"></pre>
+</div>
+
+<script>
+  const popup = document.getElementById('popup');
+  const cards = document.querySelectorAll('.card[data-name]');
+
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', (e) => {
+      document.getElementById('popup-name').textContent = card.dataset.name;
+      document.getElementById('popup-tag').textContent = card.dataset.tag;
+      document.getElementById('popup-desc').textContent = card.dataset.desc;
+      document.getElementById('popup-example').textContent = card.dataset.example;
+      popup.classList.add('active');
+      movePopup(e);
+    });
+    card.addEventListener('mousemove', movePopup);
+    card.addEventListener('mouseleave', () => popup.classList.remove('active'));
+  });
+
+  function movePopup(e) {
+    const x = e.clientX + 16;
+    const y = e.clientY + 16;
+    const pw = popup.offsetWidth || 360;
+    const ph = popup.offsetHeight || 300;
+    const tx = Math.min(x, window.innerWidth - pw - 10);
+    const ty = Math.min(y, window.innerHeight - ph - 10);
+    popup.style.left = tx + 'px';
+    popup.style.top = ty + 'px';
+  }
+</script>
+</body>
+</html>

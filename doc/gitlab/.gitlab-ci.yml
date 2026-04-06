@@ -1,0 +1,7 @@
+include:
+  - local: 'ci/variables.yml'
+  - local: 'ci/build.yml'
+  - local: 'ci/test.yml'
+  - local: 'ci/deploy.yml'
+  - local: 'ci/workflows/app1.yml'
+  - local: 'ci/workflows/app2.yml'

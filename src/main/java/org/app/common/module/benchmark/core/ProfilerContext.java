@@ -10,8 +10,8 @@ public final class ProfilerContext {
 
     private static final ThreadLocal<TraceNode> ROOT = new ThreadLocal<>();
 
-    public static void enter(String method) {
-        TraceNode node = new TraceNode(method);
+    public static void enter(String methodFullName) {
+        TraceNode node = new TraceNode(methodFullName);
         node.startNs = System.nanoTime();
         node.startMemKb = usedMemKb();
 
@@ -22,7 +22,13 @@ public final class ProfilerContext {
         } else {
             TraceNode parent = stack.peek();
             node.parent = parent;
-            parent.children.add(node);
+
+            if (parent.childrenMap.containsKey(methodFullName)) {
+                node = parent.childrenMap.get(methodFullName);
+            } else {
+                parent.childrenMap.put(methodFullName, node);
+                parent.children.add(node);
+            }
         }
 
         stack.push(node);
@@ -35,8 +41,16 @@ public final class ProfilerContext {
         }
 
         TraceNode node = stack.pop();
-        node.timeMs = (System.nanoTime() - node.startNs) / 1_000_000;
-        node.memKb = usedMemKb() - node.startMemKb;
+
+        long timeMs = (System.nanoTime() - node.startNs) / 1_000_000;
+        long memKb = usedMemKb() - node.startMemKb;
+
+        if (node.callCount == 1) {
+            node.timeMs = timeMs;
+            node.memKb = memKb;
+        } else {
+            node.mergeCall(timeMs, memKb);
+        }
     }
 
     private static long usedMemKb() {

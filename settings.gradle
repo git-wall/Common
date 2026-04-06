@@ -1,11 +1,14 @@
-pluginManagement {
-    plugins {
-        id 'org.jetbrains.kotlin.jvm' version '2.1.20'
-    }
-}
+//pluginManagement {
+//    plugins {
+//        id 'org.jetbrains.kotlin.jvm' version '2.1.20'
+//    }
+//}
 
-// settings.gradle
 buildCache {
+  remote(HttpBuildCache) {
+    url = 'https://gradle-cache.company.com'
+    push = true
+  }
   local {
     // Enable local build cache
     enabled = true
@@ -15,4 +18,52 @@ buildCache {
   }
 }
 
+dependencyResolutionManagement {
+  repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/release" }
+    maven { url "https://packages.confluent.io/maven/" }
+    //    maven { url "https://repo.spring.io/milestone" }
+//  maven { url "https://jitpack.io" }
+
+    // if you want to use local nexus repository
+//    maven {
+//        url getProp("SNAPSHOT_REPOSITORY_URL")
+//        allowInsecureProtocol = true
+//        credentials {
+//            username getProp("NEXUS_USERNAME")
+//            password getProp("NEXUS_PASSWORD")
+//        }
+//    }
+  }
+
+  versionCatalogs {
+    jsonLibs { from(files("gradle/json.toml")) }
+    logLibs { from(files("gradle/log.toml")) }
+    bigDataLibs { from(files("gradle/bigdata.toml")) }
+    intergationLibs { from(files("gradle/integration.toml")) }
+    dbLibs { from(files("gradle/db.toml")) }
+    analyzeLibs { from(files("gradle/analyze.toml")) }
+    springLibs { from(files("gradle/spring.toml")) }
+    testLibs { from(files("gradle/test.toml")) }
+    authLibs { from(files("gradle/auth.toml")) }
+    cacheLibs { from(files("gradle/cache.toml")) }
+    messageLibs { from(files("gradle/message.toml")) }
+  }
+}
+
 rootProject.name = 'Common'
+
+include 'core'
+include 'jackson'
+include 'analyze'
+include 'concurrent'
+include 'cache'
+include 'security'
+include 'http'
+include 'bigdata'
+include 'database'
+include 'aop'
+include 'message'
+include 'observation'
+include 'web'
