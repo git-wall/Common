@@ -6,6 +6,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.lang.NonNull;
 import org.springframework.util.Assert;
 
+// Service Locator pattern
+// Phá vỡ DI principle
+// Class phụ thuộc ẩn
 public class SpringContext implements ApplicationContextAware {
     private static ApplicationContext context;
 

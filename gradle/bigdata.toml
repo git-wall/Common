@@ -1,0 +1,53 @@
+[versions]
+flink = "2.0.0"
+beam = "2.66.0"
+spark = "3.4.2"
+
+[libraries]
+# --- flink ---
+flink-streaming-java = { group = "org.apache.flink", name = "flink-streaming-java", version.ref = "flink" }
+flink = { group = "org.apache.flink", name = "flink-core", version.ref = "flink" }
+flink-clients = { group = "org.apache.flink", name = "flink-clients", version.ref = "flink" }
+flink-table-common = { group = "org.apache.flink", name = "flink-table-common", version.ref = "flink" }
+flink-table-api-java-bridge = { group = "org.apache.flink", name = "flink-table-api-java-bridge", version.ref = "flink" }
+flink-statebackend-rocksdb = { group = "org.apache.flink", name = "flink-statebackend-rocksdb", version.ref = "flink" }
+flink-queryable-state-client-java = { group = "org.apache.flink", name = "flink-queryable-state-client-java", version.ref = "flink" }
+flink-state-processor-api = { group = "org.apache.flink", name = "flink-state-processor-api", version.ref = "flink" }
+flink-parquet = { group = "org.apache.flink", name = "flink-parquet", version.ref = "flink" }
+flink-avro = { group = "org.apache.flink", name = "flink-avro", version.ref = "flink" }
+flink-java = { group = "org.apache.flink", name = "flink-java", version = "1.20.1" }
+flink-connector-kafka = { group = "org.apache.flink", name = "flink-connector-kafka", version = "4.0.0-2.0" }
+flink-connector-elasticsearch7 = { group = "org.apache.flink", name = "flink-connector-elasticsearch7", version = "4.0.0-2.0" }
+
+# --- apache beam ---
+beam = { group = "org.apache.beam", name = "beam-sdks-java-core", version.ref = "beam" }
+# beam_runners_direct_java = { group = "org.apache.beam", name = "beam-runners-direct-java", version.ref = "beam" }
+beam_kafka = { group = "org.apache.beam", name = "beam-sdks-java-io-kafka", version.ref = "beam" }
+
+# --- apache spark ---
+spark = { group = "org.apache.spark", name = "spark-core_2.13", version.ref = "spark" }
+spark_sql = { group = "org.apache.spark", name = "spark-sql_2.13", version.ref = "spark" }
+
+[bundles]
+all = [
+  "flink-streaming-java", "flink", "flink-java", "flink-connector-kafka", "flink-connector-elasticsearch7",
+  "beam", "beam_kafka",
+  "spark", "spark_sql"
+]
+flink = [
+  "flink-streaming-java", 
+  "flink",
+#  "flink-clients", 
+#  "flink-table-common",
+#  "flink-table-api-java-bridge",
+#  "flink-statebackend-rocksdb",
+#  "flink-queryable-state-client-java",
+#  "flink-state-processor-api",
+#  "flink-parquet", 
+#  "flink-avro",
+  "flink-java", "flink-connector-kafka", "flink-connector-elasticsearch7"
+]
+
+beam = ["beam", "beam_kafka"]
+
+spark = ["spark", "spark_sql"]

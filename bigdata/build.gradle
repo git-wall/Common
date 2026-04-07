@@ -1,0 +1,8 @@
+group = 'platform.bigdata'
+version = '2.0.0'
+
+dependencies {
+  implementation bigDataLibs.bundles.all
+  implementation project(":jackson")
+  implementation project(":http")
+}

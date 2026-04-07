@@ -1,0 +1,30 @@
+group = 'platform.database'
+version = '2.0.0'
+
+dependencies {
+  implementation project(':jackson')
+  implementation dbLibs.couchbase
+  implementation dbLibs.es.client
+  implementation dbLibs.bundles.all
+  implementation 'org.elasticsearch.plugin:reindex-client:7.17.29'
+  implementation("org.postgresql:postgresql:42.7.10")
+  //  elasticsearch 8+ phu hop java 17+
+  //  implementation 'co.elastic.clients:elasticsearch-java:9.3.1'
+  implementation("com.zaxxer:HikariCP:4.0.3")
+  // 19. seata: Saga pattern
+  implementation ('io.seata:seata-all:2.0.0') {
+    exclude group: 'org.antlr', module: 'antlr4-runtime'
+  }
+  //  api 'io.seata:seata-spring-boot-starter:2.0.0'
+
+  implementation("org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.2")
+
+
+  // ── DataStax Java Driver 4.x ─────────────────────────────────────────────
+  // Works with: Cassandra 3.x / 4.x / 5.x  AND  ScyllaDB 4.x / 5.x / 6.x
+  // ScyllaDB shard-aware routing is handled automatically by the driver
+  // when connecting to ScyllaDB nodes.
+  implementation 'com.datastax.oss:java-driver-core:4.17.0'
+  implementation 'com.datastax.oss:java-driver-query-builder:4.17.0'   // fluent CQL builder
+  implementation 'com.datastax.oss:java-driver-mapper-runtime:4.17.0' // optional annotation mapper
+}

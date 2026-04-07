@@ -31,6 +31,9 @@ public class JsonTemplate implements Fluent<JsonTemplate> {
     }
 
     public JsonTemplate object(Object... os) {
+        if (objects == null) {
+            objects = new ArrayList<>();
+        }
         return chain(() -> objects.addAll(List.of(os)));
     }
 

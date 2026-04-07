@@ -29,7 +29,7 @@ public class RedisConfig {
     private Long ttl;
 
     /**
-     * Configures the Redis connection factory.
+     * Configures the Redis connection factory for single-node Redis setup.
      */
     @Bean
     @ConditionalOnProperty(name = {"redis.host", "redis.port"})
@@ -62,6 +62,8 @@ public class RedisConfig {
         template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
+        // you can wrap operations in transactions if needed
+        template.setEnableTransactionSupport(true);
         template.afterPropertiesSet();
         return template;
     }

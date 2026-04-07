@@ -1,13 +1,22 @@
 package org.app.common.context;
 
-import org.app.common.utils.RequestUtils;
+import org.apache.commons.collections4.MapUtils;
 
 import javax.annotation.PreDestroy;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
+/**
+ * --------------------------------------- <br/>
+ * Class nên chứa:  <br/>
+ * - correlation nội bộ <br/>
+ * - flags <br/>
+ * - execution state <br/>
+ * --------------------------------------- <br/>
+ * Ví dụ: <br/>
+ * - TracingContext.put("retryCount", 3); <br/>
+ * - TracingContext.put("abTest", "A");
+ * */
 public class TracingContext {
 
     private static final ThreadLocal<Map<String, Object>> CONTEXT = ThreadLocal.withInitial(HashMap::new);
@@ -20,29 +29,13 @@ public class TracingContext {
         return CONTEXT.get().get(key);
     }
 
-    public static void extractRequestId(HttpServletRequest httpServletRequest, Supplier<String> supplier) {
-        if (getRequestId() != null) return;
-
-        var requestId = RequestUtils.getRequestIdOrElse(httpServletRequest, supplier);
-
-        putRequestId(requestId);
-    }
-
-    public static void putRequestId(String requestId) {
-        put(RequestUtils.REQUEST_ID, requestId);
-    }
-
-    public static String getRequestId() {
-        return get(RequestUtils.REQUEST_ID).toString();
-    }
-
     public static Map<String, Object> getContext() {
         return CONTEXT.get();
     }
 
     public static void clear() {
         var x = CONTEXT.get();
-        if (x != null && !x.isEmpty()) {
+        if (!MapUtils.isEmpty(x)) {
             x.clear();
         }
         CONTEXT.remove();

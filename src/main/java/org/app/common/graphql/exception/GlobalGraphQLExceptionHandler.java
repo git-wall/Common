@@ -23,7 +23,8 @@ public class GlobalGraphQLExceptionHandler implements DataFetcherExceptionHandle
     public CompletableFuture<DataFetcherExceptionHandlerResult> handleException(
         DataFetcherExceptionHandlerParameters params) {
 
-        Throwable ex = params.getException();
+        Throwable raw = params.getException();
+        Throwable ex = unwrap(raw);
         var handler = registry.get(ex.getClass());
 
         GraphQLError error = (handler != null)
@@ -33,6 +34,10 @@ public class GlobalGraphQLExceptionHandler implements DataFetcherExceptionHandle
         return CompletableFuture.completedFuture(
             DataFetcherExceptionHandlerResult.newResult().error(error).build()
         );
+    }
+
+    private Throwable unwrap(Throwable ex) {
+        return (ex.getCause() != null) ? ex.getCause() : ex;
     }
 
     private GraphQLError defaultHandler(Throwable ex, DataFetcherExceptionHandlerParameters params) {

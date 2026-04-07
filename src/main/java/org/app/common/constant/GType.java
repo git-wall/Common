@@ -1,21 +1,16 @@
 package org.app.common.constant;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.app.common.utils.GsonUtils;
 
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 
-public class GType {
-    private GType() {
-    }
-
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public abstract class GType {
     // Common Type definitions for use with Jackson serialization/deserialization
-
-    public static final Type VOID = GsonUtils.typeOf(Void.class);
-
-    public static final Type OBJECT = GsonUtils.typeOf(Object.class);
 
     // List<String>
     public static final Type LIST_STRING = GsonUtils.typeOf(List.class, String.class);

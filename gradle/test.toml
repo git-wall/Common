@@ -1,0 +1,26 @@
+[versions]
+testcontainers = "2.0.3"
+jacoco = "0.8.12"
+awaitility = "4.3.0"
+
+[libraries]
+# --- test container ---
+testcontainers = { group = "org.testcontainers", name = "testcontainers", version.ref = "testcontainers" }
+testcontainers-postgresql = { group = "org.testcontainers", name = "testcontainers-postgresql", version.ref = "testcontainers" }
+testcontainers-junit-jupiter = { group = "org.testcontainers", name = "testcontainers-junit-jupiter", version.ref = "testcontainers" }
+
+# --- additional test libraries converted from Gradle lines ---
+jacoco_agent = { group = "org.jacoco", name = "org.jacoco.agent", version.ref = "jacoco" }
+awaitility = { group = "org.awaitility", name = "awaitility", version.ref = "awaitility" }
+
+[bundles]
+all = [
+  "testcontainers", 
+  "testcontainers-postgresql",
+  "testcontainers-junit-jupiter", 
+  "jacoco_agent",
+  "awaitility"
+]
+testcontainers = ["testcontainers", "testcontainers-postgresql", "testcontainers-junit-jupiter"]
+jacoco = ["jacoco_agent"]
+awaitility = ["awaitility"]

@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+group   = 'com.example'
+version = '1.0.0'
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // ── MyBatis Dynamic SQL — query builder only, no ORM, no reflection ──────
+    // Generates SQL strings + bound parameters. Works with ANY JDBC datasource.
+    implementation 'org.mybatis.dynamic-sql:mybatis-dynamic-sql:1.5.2'
+
+    // ── JDBC driver — pick your database ────────────────────────────────────
+    // PostgreSQL
+    runtimeOnly 'org.postgresql:postgresql:42.7.3'
+    // MySQL / MariaDB
+    // runtimeOnly 'com.mysql:mysql-connector-j:8.3.0'
+    // H2 (embedded, for tests)
+    testRuntimeOnly 'com.h2database:h2:2.2.224'
+
+    // ── Connection pool ──────────────────────────────────────────────────────
+    // HikariCP — fastest JDBC pool, caller sets up DataSource and passes in
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+
+    // ── Lombok ───────────────────────────────────────────────────────────────
+    compileOnly         'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    // ── SLF4J ────────────────────────────────────────────────────────────────
+    implementation 'org.slf4j:slf4j-api:2.0.13'
+    runtimeOnly    'ch.qos.logback:logback-classic:1.5.6'
+
+    // ── Test ─────────────────────────────────────────────────────────────────
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    testImplementation 'org.testcontainers:postgresql:1.20.1'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+/*
+ * Architecture notes
+ * ──────────────────
+ * mybatis-dynamic-sql is a QUERY BUILDER — it does NOT:
+ *   • manage connections      (caller provides DataSource / Connection)
+ *   • map rows to objects     (caller provides RowMapper lambda)
+ *   • use reflection at all   (zero reflection in hot paths)
+ *   • require Spring          (pure JDBC, works anywhere)
+ *
+ * What it DOES:
+ *   • Build type-safe WHERE clauses, JOINs, ORDER BY, paging
+ *   • Handle IN-list, LIKE, BETWEEN, IS NULL, sub-queries
+ *   • Render correct SQL per dialect (MySQL, PostgreSQL, etc.)
+ *   • Return SqlStatement (sql string + parameters) for execution
+ *
+ * This module wraps it with:
+ *   • PreparedStatement caching (compile once per JVM lifetime)
+ *   • Direct JDBC execution (no proxy, no interceptor overhead)
+ *   • Caller-supplied RowMapper<T> — zero reflection row mapping
+ *   • Batch execution with efficient addBatch/executeBatch
+ *   • Transaction support via TransactionScope
+ */

@@ -64,8 +64,7 @@ public interface AuthTokenInfo {
         var entity = new HttpEntity<>(getBody(), header);
         var restTemplate = new RestTemplate();
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-            getURI(), getHttpMethod(), entity, new ParameterizedTypeReference<Map<String, Object>>() {
-            }
+            getURI(), getHttpMethod(), entity, new ParameterizedTypeReference<>() {}
         );
 
         var body = response.getBody();

@@ -2,22 +2,24 @@ services:
   nexus:
     image: sonatype/nexus3
     container_name: nexus
+    # cam ghi du lieu len o dia cua host / prevent writing data to host disk
+    read_only: true
+    # chặn syscall nguy hiểm / block dangerous syscalls
+    cap_drop:
+      - ALL
+    # ngan truy cap tang cuong / enhance access control
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "8081:8081"
     networks:
       - nexus-network
     restart: always
-    
+
 networks:
   name:
+    # cam truy cap ben ngoai / not accessible from outside
+    internal: true
     driver: brigh
-    
-    
-configs:
-  
-secrets:
-  sd:
-    name: 
-    
-volumes:
+
   

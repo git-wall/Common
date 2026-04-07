@@ -1,0 +1,10 @@
+workflow:
+  rules:
+    - if: '$PIPELINE_TYPE == "app2"'
+
+variables:
+  APP_NAME: "app2"
+  RUN_BUILD: "true"
+  RUN_TEST: "false"
+  RUN_DEPLOY: "true"
+  ENV: "production"

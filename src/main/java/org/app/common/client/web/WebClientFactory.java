@@ -25,7 +25,7 @@ public class WebClientFactory {
                                              String clientSecret,
                                              int connectTimeout,
                                              long readTimeout) {
-        return new WebClientTemplate(baseUrl, authUrl, clientId, clientSecret, connectTimeout, readTimeout)
+        return new Client4(baseUrl, authUrl, clientId, clientSecret, connectTimeout, readTimeout)
                 .build();
     }
 

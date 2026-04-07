@@ -14,14 +14,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         description = "${spring.application.name}",
         version = "${spring.application.version}"
     ),
-    security = @SecurityRequirement(name = "oauth2_bearer"),
+    security = @SecurityRequirement(name = "Bearer Token"),
     servers = {
         @Server(
             url = "${server.servlet.context-path}",
             description = "Default Server URL")
     })
 @SecurityScheme(
-    name = "oauth2_bearer", type = SecuritySchemeType.OAUTH2,
+    name = "Bearer Token", type = SecuritySchemeType.HTTP,
     flows = @OAuthFlows(
         authorizationCode = @OAuthFlow(
             authorizationUrl = "${springdoc.oauth.authorization-url}",

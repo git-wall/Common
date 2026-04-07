@@ -1,13 +1,15 @@
 package org.app.common.support;
 
-import org.app.common.utils.EnrichUtils;
+import org.app.common.usecase.enrich.EnrichUtils;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class EnrichTest {
 
@@ -135,9 +137,8 @@ class EnrichTest {
         );
 
         // Define an enricher function
-        Function<Person, Person> enricher = p -> {
+        Consumer<Person> enricher = p -> {
             p.addHobby("Reading");
-            return p;
         };
 
         // Enrich the list
@@ -166,12 +167,11 @@ class EnrichTest {
         hobbiesByName.put("Bob", Arrays.asList("Hiking", "Cooking"));
 
         // Define an enricher function with context
-        BiFunction<Person, Map<String, List<String>>, Person> enricher = (p, ctx) -> {
+        BiConsumer<Person, Map<String, List<String>>> enricher = (p, ctx) -> {
             List<String> hobbies = ctx.get(p.getName());
             if (hobbies != null) {
                 hobbies.forEach(p::addHobby);
             }
-            return p;
         };
 
         // Enrich the list with context
@@ -191,36 +191,6 @@ class EnrichTest {
 
         assertTrue(enrichedPersons.get(2).getHobbies().contains("Hiking"));
         assertTrue(enrichedPersons.get(2).getHobbies().contains("Cooking"));
-    }
-
-    @Test
-    void testListInPlaceEnrichment() {
-        // Create a list of persons
-        List<Person> persons = new ArrayList<>(Arrays.asList(
-            new Person("John", 30),
-            new Person("Jane", 25),
-            new Person("Bob", 40)
-        ));
-
-        // Define an in-place enricher
-        BiConsumer<Person, Person> enricher = (p1, p2) -> {
-            p1.addHobby("Cooking");
-            p1.setAge(p1.getAge() + 1);
-        };
-
-        // Enrich the list in-place
-        List<Person> enrichedPersons = EnrichUtils.listInPlace(persons, enricher);
-
-        // Verify enrichment
-        assertEquals(3, enrichedPersons.size());
-        for (Person p : enrichedPersons) {
-            assertTrue(p.getHobbies().contains("Cooking"));
-            // Age should be incremented
-            assertTrue(p.getAge() > 25);
-        }
-
-        // Verify it's the same list
-        assertSame(persons, enrichedPersons);
     }
 
     @Test

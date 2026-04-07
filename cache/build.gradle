@@ -1,0 +1,16 @@
+group = 'platform'
+version = '2.0.0'
+
+dependencies {
+  implementation("com.google.guava:guava:33.5.0-jre")
+  implementation intergationLibs.bundles.ignite
+  implementation cacheLibs.caffeine
+  implementation("at.yawk.lz4:lz4-java:1.10.3")
+  implementation platform(jsonLibs.jackson.bom)
+  implementation jsonLibs.bundles.jackson
+  implementation cacheLibs.bundles.hazelcast
+
+  implementation cacheLibs.jedis
+  implementation cacheLibs.lettuce
+  implementation cacheLibs.redisson
+}

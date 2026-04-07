@@ -1,0 +1,8 @@
+group = 'platform.core'
+version = '2.0.0'
+
+dependencies {
+  api 'org.apache.commons:commons-lang3:3.18.0'
+  api 'org.reflections:reflections:0.10.2'
+  api 'io.vavr:vavr:1.0.0'
+}

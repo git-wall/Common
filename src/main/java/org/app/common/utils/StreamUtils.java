@@ -1,15 +1,13 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.function.Failable;
 import org.app.common.provider.Provider;
-import org.thymeleaf.util.ListUtils;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
@@ -17,9 +15,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StreamUtils {
-    private StreamUtils() {}
-
     public static final int STREAM_MAX_SIZE;
     public static final int STREAM_MIN_SIZE = 50_000;
 
@@ -40,23 +37,23 @@ public class StreamUtils {
      * }</pre>
      */
     public static <T, K> Map<K, List<T>> groupBy(List<T> list, Function<T, K> transfer) {
-        if (ListUtils.isEmpty(list)) return Collections.emptyMap();
+        if (list == null || list.isEmpty()) return Collections.emptyMap();
         return list.stream().collect(Collectors.groupingBy(transfer));
     }
 
-    public static <T, R> String innerJoin(Collection<T> list, Function<T, R> mapper, CharSequence delimiter) {
+    public static <T, R> String join(Collection<T> list, Function<T, R> mapper, CharSequence delimiter) {
         if (CollectionUtils.isEmpty(list)) return "";
         return list.stream()
             .map(Provider.thenToString(mapper))
             .collect(Collectors.joining(delimiter));
     }
 
-    public static <T> List<T> innerFilter(Collection<T> list, Predicate<T> filter) {
+    public static <T> List<T> filter(Collection<T> list, Predicate<T> filter) {
         if (CollectionUtils.isEmpty(list)) return Collections.emptyList();
         return list.stream().filter(filter).collect(Collectors.toList());
     }
 
-    public static <T, R> List<R> innerMapper(Collection<T> list, Function<T, R> mapper) {
+    public static <T, R> List<R> map(Collection<T> list, Function<T, R> mapper) {
         if (CollectionUtils.isEmpty(list)) return Collections.emptyList();
         return list.stream().map(mapper).collect(Collectors.toList());
     }
@@ -71,9 +68,37 @@ public class StreamUtils {
             .collect(Collectors.toList());
     }
 
-    public static <K, V> Map<K, V> asMap(Collection<V> list, Function<V, K> mapper) {
+    public static <T, R> String flatMapJoin(
+        Collection<T> source,
+        Function<T, ? extends Collection<R>> flatMapper,
+        Function<R, String> mapper,
+        String delimiter
+    ) {
+        return source.stream()
+            .filter(Provider.isNotNull())
+            .flatMap(t -> flatMapper.apply(t).stream())
+            .map(Provider.thenToString(mapper))
+            .collect(Collectors.joining(delimiter));
+    }
+
+    public static <K, V> Map<K, V> filterThentoMap(Collection<V> list, Predicate<V> filter, Function<V, K> keyMapper) {
         if (CollectionUtils.isEmpty(list)) return Collections.emptyMap();
-        return list.stream().collect(Collectors.toMap(mapper, Function.identity()));
+        return list.stream()
+            .filter(filter)
+            .collect(Collectors.toMap(
+                keyMapper,
+                Function.identity(), (a, b) -> a,
+                () -> new HashMap<>((int) (list.size() / 0.75f) + 1))
+            );
+    }
+
+    public static <K, V> Map<K, V> toMap(Collection<V> list, Function<V, K> keyMapper) {
+        if (CollectionUtils.isEmpty(list)) return Collections.emptyMap();
+        return list.stream().collect(Collectors.toMap(
+            keyMapper,
+            Function.identity(), (a, b) -> a,
+            () -> new HashMap<>((int) (list.size() / 0.75f) + 1))
+        );
     }
 
     static {

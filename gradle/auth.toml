@@ -1,0 +1,19 @@
+[versions]
+jwt = "0.12.6"
+goodle-2fa = "3.5.3"
+
+[libraries]
+# --- jwt ---
+jwt-api = { group = "io.jsonwebtoken", name = "jjwt-api", version.ref = "jwt" }
+jwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jwt" }
+jwt-jackson = { group = "io.jsonwebtoken", name = "jjwt-jackson", version.ref = "jwt" }
+jwt-auth = { group = "com.auth0", name = "java-jwt", version = "4.5.0" }
+
+# --- 2FA ---
+goodle-2fa-core = { group = "com.google.zxing", name = "core", version.ref = "goodle-2fa" }
+goodle-2fa-java = { group = "com.google.zxing", name = "javase", version.ref = "goodle-2fa" }
+fa-auth = { group = "com.warrenstrange", name = "googleauth", version = "1.5.0" }
+
+[bundles]
+jwt = ["jwt-api", "jwt-impl", "jwt-jackson", "jwt-auth"]
+goodle-auth = ["goodle-2fa-core", "goodle-2fa-java", "fa-auth"]

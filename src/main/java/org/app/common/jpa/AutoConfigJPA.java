@@ -32,7 +32,7 @@ public class AutoConfigJPA {
     @ConditionalOnBean(DataSource.class)
     @ConditionalOnProperty
     public EntityManagerFactory entityManagerFactory(DataSource dataSource) {
-        return JpaUtils.buildEntityManagerFactory(
+        return JpaBuilder.buildEntityManagerFactory(
                 dataSource,
                 jpaBaseProperties.getPersistenceUnitName(),
                 jpaBaseProperties.getPackagesToScan(),
@@ -43,6 +43,6 @@ public class AutoConfigJPA {
     @Bean
     @ConditionalOnBean(EntityManagerFactory.class)
     public PlatformTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
-        return JpaUtils.buildTransactionManager(entityManagerFactory, JpaUtils.TIMEOUT_DEFAULT);
+        return JpaBuilder.buildTransactionManager(entityManagerFactory, JpaBuilder.TIMEOUT_DEFAULT);
     }
 }

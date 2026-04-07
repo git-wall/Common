@@ -1,0 +1,16 @@
+spring:
+  redis:
+    timeout: 2s
+    password: redispass
+
+    sentinel:
+      master: mymaster
+      nodes:
+        - 10.0.0.2:26379
+        - 10.0.0.3:26379
+
+    lettuce:
+      pool:
+        max-active: 50
+        max-idle: 20
+        min-idle: 5

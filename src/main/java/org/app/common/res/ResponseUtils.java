@@ -1,11 +1,20 @@
 package org.app.common.res;
 
-import org.app.common.context.TracingContext;
+import org.app.common.utils.RequestUtils;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 
 public class ResponseUtils {
+    private ResponseUtils() {
+        /* This utility class should not be instantiated */
+    }
+
 
     public static class Success {
+        private Success() {
+            /* This utility class should not be instantiated */
+        }
+
         public static <T, E extends Enum<E>> ApiResponse<T, E> build(Object id, E code) {
             return  ApiResponse.<T, E>builder()
                     .id(id)
@@ -46,7 +55,7 @@ public class ResponseUtils {
 
         public static <T> ApiResponse<T, HttpStatus> ok() {
             return ApiResponse.<T, HttpStatus>builder()
-                    .id(TracingContext.getRequestId())
+                    .id(MDC.get(RequestUtils.REQUEST_ID))
                     .code(HttpStatus.OK)
                     .message(HttpStatus.OK.getReasonPhrase())
                     .error(false)
@@ -55,7 +64,7 @@ public class ResponseUtils {
 
         public static <T> ApiResponse<T, HttpStatus> ok(String message) {
             return ApiResponse.<T, HttpStatus>builder()
-                    .id(TracingContext.getRequestId())
+                    .id(MDC.get(RequestUtils.REQUEST_ID))
                     .code(HttpStatus.OK)
                     .message(message)
                     .error(false)
@@ -64,7 +73,7 @@ public class ResponseUtils {
 
         public static <T> ApiResponse<T, HttpStatus> ok(T data) {
             return ApiResponse.<T, HttpStatus>builder()
-                    .id(TracingContext.getRequestId())
+                    .id(MDC.get(RequestUtils.REQUEST_ID))
                     .code(HttpStatus.OK)
                     .message(HttpStatus.OK.getReasonPhrase())
                     .error(false)
@@ -95,7 +104,7 @@ public class ResponseUtils {
 
         public static <T, E extends Enum<E>> ApiResponse2<T, E> build(E code, String message, Object messageDetailError) {
             return ApiResponse2.<T, E>builder()
-                    .id(TracingContext.getRequestId())
+                    .id(MDC.get(RequestUtils.REQUEST_ID))
                     .error(true)
                     .code(code)
                     .message(message)
@@ -105,7 +114,7 @@ public class ResponseUtils {
 
         public static <T, E extends Enum<E>> ApiResponse<T, E> build(E code, String message) {
             return ApiResponse.<T, E>builder()
-                    .id(TracingContext.getRequestId())
+                    .id(MDC.get(RequestUtils.REQUEST_ID))
                     .error(true)
                     .code(code)
                     .message(message)
@@ -114,7 +123,7 @@ public class ResponseUtils {
 
         public static <T> ApiResponse<T, HttpStatus> notfound(String message) {
             return ApiResponse.<T, HttpStatus>builder()
-                    .id(TracingContext.getRequestId())
+                    .id(MDC.get(RequestUtils.REQUEST_ID))
                     .error(true)
                     .code(HttpStatus.NOT_FOUND)
                     .message(message)

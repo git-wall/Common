@@ -1,10 +1,16 @@
 package org.app.common.support;
 
+import com.fasterxml.jackson.databind.JavaType;
+import org.app.common.utils.JacksonUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class JSONObjectGetter {
     /**
@@ -78,5 +84,52 @@ public class JSONObjectGetter {
     public static int getCount(JSONObject jsonObject, String key) {
         List<String> values = getValuesInObject(jsonObject, key);
         return values.size();
+    }
+
+    public static List<Map<String, Object>> convertToListObj(JSONArray jsonArray, String... keys) {
+        return IntStream.range(0, jsonArray.length())
+            .mapToObj(i -> convertToMapObj(jsonArray, i, keys))
+            .collect(Collectors.toList());
+    }
+
+    public static <T> List<T> convertToListObj(JSONArray jsonArray, Class<T> clazz, String... keys) {
+        return IntStream.range(0, jsonArray.length())
+            .mapToObj(i -> convertToMapObj(jsonArray, i, clazz, keys))
+            .collect(Collectors.toList());
+    }
+
+    public static <T> List<T> convertToListObj(JSONArray jsonArray, JavaType type, String... keys) {
+        return IntStream.range(0, jsonArray.length())
+            .<T>mapToObj(i -> convertToMapObj(jsonArray, i, type, keys))
+            .collect(Collectors.toList());
+    }
+
+    public static Map<String, Object> convertToMapObj(JSONArray jsonArray, int i, String... keys) {
+        Map<String, Object> accumulatedValue = new HashMap<>(keys.length);
+        for (String key : keys) {
+            accumulatedValue.put(key, jsonArray.getJSONObject(i).get(key));
+        }
+        return accumulatedValue;
+    }
+
+    public static <T> T convertToMapObj(JSONArray jsonArray, int i, Class<T> clazz, String... keys) {
+        Map<String, Object> accumulatedValue = convertToMapObj(jsonArray, i, keys);
+        return JacksonUtils.convert(accumulatedValue, clazz);
+    }
+
+    public static <T> T convertToMapObj(JSONArray jsonArray, int i, JavaType type, String... keys) {
+        Map<String, Object> accumulatedValue = convertToMapObj(jsonArray, i, keys);
+        return JacksonUtils.convert(accumulatedValue, type);
+    }
+
+    public static <T> List<T> getValuesInObjectAsType(JSONArray jsonArray, String key, Class<T> clazz) {
+        List<T> accumulatedValues = new ArrayList<>(jsonArray.length());
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            T value = clazz.cast(jsonArray.getJSONObject(i).get(key));
+            accumulatedValues.add(value);
+        }
+
+        return accumulatedValues;
     }
 }

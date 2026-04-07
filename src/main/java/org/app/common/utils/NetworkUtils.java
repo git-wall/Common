@@ -1,5 +1,7 @@
 package org.app.common.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.http.HttpHost;
 
@@ -8,9 +10,8 @@ import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Objects;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NetworkUtils {
-    private NetworkUtils() {
-    }
 
     @SneakyThrows(value = UnknownHostException.class)
     public static String getLocalHostAddress() {
@@ -23,11 +24,13 @@ public class NetworkUtils {
     }
 
     @SneakyThrows(value = UnknownHostException.class)
-    public static byte[] getAddress() {return InetAddress.getLocalHost().getAddress();}
+    public static byte[] getAddress() {
+        return InetAddress.getLocalHost().getAddress();
+    }
 
     public static List<HttpHost> getHosts(String strHosts, int port, String protocol) {
         String[] hosts = Objects.requireNonNull(strHosts).split(",");
 
-        return ArrayUtils.map(hosts,host -> new HttpHost(host, port, protocol));
+        return ArrayUtils.map(hosts, host -> new HttpHost(host, port, protocol));
     }
 }

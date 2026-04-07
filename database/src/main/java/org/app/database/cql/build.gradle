@@ -1,0 +1,71 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '1.0.0'
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    // ── DataStax Java Driver 4.x ─────────────────────────────────────────────
+    // Works with: Cassandra 3.x / 4.x / 5.x  AND  ScyllaDB 4.x / 5.x / 6.x
+    // ScyllaDB shard-aware routing is handled automatically by the driver
+    // when connecting to ScyllaDB nodes.
+    implementation 'com.datastax.oss:java-driver-core:4.17.0'
+    implementation 'com.datastax.oss:java-driver-query-builder:4.17.0'   // fluent CQL builder
+    implementation 'com.datastax.oss:java-driver-mapper-runtime:4.17.0' // optional annotation mapper
+
+    // ── Reactive support (optional) ──────────────────────────────────────────
+    // Uncomment if you want Flux/Mono wrappers:
+    // implementation 'com.datastax.oss:java-driver-core:4.17.0'
+    // implementation 'io.projectreactor:reactor-core:3.6.8'
+
+    // ── Jackson ─────────────────────────────────────────────────────────────
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.1'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1'
+
+    // ── Codecs ───────────────────────────────────────────────────────────────
+    // Jackson-based UDT / codec support (built into driver-extras)
+    implementation 'com.datastax.oss:java-driver-extras:4.17.0'
+
+    // ── Lombok ───────────────────────────────────────────────────────────────
+    compileOnly     'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    // ── Logging ──────────────────────────────────────────────────────────────
+    implementation 'org.slf4j:slf4j-api:2.0.13'
+    runtimeOnly    'ch.qos.logback:logback-classic:1.5.6'
+
+    // ── Test ─────────────────────────────────────────────────────────────────
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+    // Testcontainers for integration tests with real Cassandra/ScyllaDB:
+    testImplementation 'org.testcontainers:cassandra:1.20.1'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+/*
+ * Cassandra vs ScyllaDB — same driver, different connection config:
+ *
+ * Cassandra:
+ *   contactPoints: ["127.0.0.1:9042"]
+ *   localDatacenter: "datacenter1"
+ *
+ * ScyllaDB:
+ *   contactPoints: ["127.0.0.1:9042"]   ← same CQL port
+ *   localDatacenter: "datacenter1"       ← check: nodetool status
+ *   // ScyllaDB auto-enables shard-aware routing via driver extensions
+ *
+ * Docker quick start:
+ *   Cassandra: docker run -d -p 9042:9042 cassandra:4.1
+ *   ScyllaDB:  docker run -d -p 9042:9042 scylladb/scylla --smp 1
+ */

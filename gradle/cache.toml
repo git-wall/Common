@@ -1,0 +1,31 @@
+[versions]
+hazelcast = "5.3.6"
+caffeine = "3.2.0"
+jedis = "5.2.0"
+valkey = "5.3.0"   # redis cache open source
+lettuce = "7.3.0.RELEASE"
+redisson = "4.3.0"
+
+[libraries]
+hazelcast = { group = "com.hazelcast", name = "hazelcast", version.ref = "hazelcast" }
+hazelcast_spring = { group = "com.hazelcast", name = "hazelcast-spring", version.ref = "hazelcast" }
+caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
+jedis = { group = "redis.clients", name = "jedis", version.ref = "jedis" }
+valkey = { group = "io.valkey", name = "valkey-java", version.ref = "valkey" }
+lettuce = { group = "io.lettuce", name = "lettuce-core", version.ref = "lettuce" }
+redisson = { group = "org.redisson", name = "redisson", version.ref = "redisson" }
+
+[bundles]
+# valkey | jedis use one of them, because they are both redis cache client, 
+# but valkey is open source, redis is not, so we prefer valkey, but if you want to use redis, you can use jedis.
+all = [
+  "hazelcast", 
+  "hazelcast_spring", 
+  "caffeine", 
+#  "jedis",
+#  "valkey"
+]
+hazelcast = ["hazelcast", "hazelcast_spring"]
+valkey = ["valkey"]
+
+

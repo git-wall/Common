@@ -298,4 +298,11 @@ public class RedisService {
     public <T> void removeMember(String category, T member) {
         zSetOps.remove(getKey(category), member);
     }
+
+    // ===================================================================
+    // Pub/Sub
+    // ===================================================================
+    public void pub(String chanel, String message) {
+        redisTemplate.convertAndSend(chanel, message);
+    }
 }

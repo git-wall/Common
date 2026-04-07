@@ -11,7 +11,6 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,31 +33,31 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     private String password;
 
     @Override
-    public @NotNull ClientConfiguration clientConfiguration() {
-        ClientConfiguration.MaybeSecureClientConfigurationBuilder builder = 
+    public ClientConfiguration clientConfiguration() {
+        ClientConfiguration.MaybeSecureClientConfigurationBuilder builder =
             ClientConfiguration.builder()
                 .connectedTo(host + ":" + port);
-        
+
         if (!username.isEmpty() && !password.isEmpty()) {
             builder.withBasicAuth(username, password);
         }
-        
+
         return builder.build();
     }
 
     @Bean
     public RestClient restClient() {
         RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, "http"));
-        
+
         if (!username.isEmpty() && !password.isEmpty()) {
 
             final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-            
+
             builder.setHttpClientConfigCallback(httpClientBuilder ->
                     httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
         }
-        
+
         return builder.build();
     }
 

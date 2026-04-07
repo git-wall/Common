@@ -1,6 +1,9 @@
 package org.app.common.utils;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
@@ -9,15 +12,15 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.io.InputStream;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -39,15 +42,37 @@ public class JacksonUtils {
     public static final String MAPPER_CASE_INSENSITIVE = "case_insensitive";
     public static final String MAPPER_SNAKE_CASE = "snake_case";
     public static final String MAPPER_FAIL_ON_UNKNOWN = "fail_on_unknown";
+    public static final String MAPPER_EAV = "eav";
 
     static {
-        // Initialize default mapper
-        DEFAULT_MAPPER = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
+        // Afterburner generates bytecode for:
+        // - Direct field access (no reflection)
+        // - Optimized type checking
+        // - Faster serialization/deserialization (10 - 30% speed improvement)
+        // Java 8/11 is ok, Java > 17 no need this
+        var afterburnerModule = new AfterburnerModule();
+        afterburnerModule.setUseValueClassLoader(JavaVersionUtils.isJava8());
+
+        // Initialize default mapper (only for DTO serialization/deserialization)
+        DEFAULT_MAPPER = JsonMapper.builder(jsonFactory())
+            .addModule(afterburnerModule)
+            .addModule(new ParameterNamesModule())
+            // SERIALIZATION
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+            // DESERIALIZATION
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
             .disable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
             .disable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
-            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+            // Enable reading unknown enum values as null
+            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
+            // FIELD, GETTER, SETTER, CREATOR ❌
+            .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+            // FIELD ✅
+            .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            .build();
 
         DEFAULT_READER = DEFAULT_MAPPER.reader();
         DEFAULT_WRITER = DEFAULT_MAPPER.writer();
@@ -78,7 +103,36 @@ public class JacksonUtils {
         registerMapper(MAPPER_FAIL_ON_UNKNOWN, new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
             .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL));
+
+        // DTO have dynamic field (Map<String, Object> / EAV)
+        // so we disable intern field names to avoid OOM
+        var factory = JsonFactory.builder()
+            .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
+            .enable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)
+            .build();
+        var mapperEAV = JsonMapper.builder(factory)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
+            .disable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+            .disable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
+            // FIELD, GETTER, SETTER, CREATOR ❌
+            .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+            // FIELD ✅
+            .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+            .build();
+
+        registerMapper(MAPPER_EAV, mapperEAV);
     }
+
+    public static JsonFactory jsonFactory() {
+        return JsonFactory.builder()
+            // ✅ Enable faster string parsing
+            .enable(JsonFactory.Feature.INTERN_FIELD_NAMES)
+            // ✅ Recycle buffers
+            .enable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)
+            .build();
+    }
+
 
     // ============ MAPPER REGISTRY MANAGEMENT ============
 
@@ -160,6 +214,24 @@ public class JacksonUtils {
     }
 
     @SneakyThrows
+    public static <T> T readValue(byte[] json, JavaType type) {
+        try {
+            return DEFAULT_MAPPER.readValue(json, type);
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException("Can not read to Type " + type.getRawClass().getSimpleName(), e);
+        }
+    }
+
+    @SneakyThrows
+    public static <T> T readValue(InputStream json, JavaType type) {
+        try {
+            return DEFAULT_MAPPER.readValue(json, type);
+        } catch (IllegalArgumentException e) {
+            throw new ConversionException("Can not read to Type " + type.getRawClass().getSimpleName(), e);
+        }
+    }
+
+    @SneakyThrows
     public static <T> T readValue(Object json, JavaType type) {
         return readValue(json, type, null);
     }
@@ -183,7 +255,7 @@ public class JacksonUtils {
     public static <K, V> Map<K, V> readToMap(Object json, Class<K> key, Class<V> value, String mapperName) {
         try {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
-            return mapper.readValue(json.toString(), typeOf(Map.class, key, value));
+            return mapper.readValue(json.toString(), typeMapOf(key, value));
         } catch (IllegalArgumentException e) {
             throw new ConversionException(
                 String.format("Can not read to Map<%s, %s>", key.getSimpleName(), value.getSimpleName()), e);
@@ -199,13 +271,20 @@ public class JacksonUtils {
     public static <T> List<T> readToList(Object json, Class<T> elementType, String mapperName) {
         try {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
-            return mapper.readValue(json.toString(), typeOf(List.class, elementType));
+            return mapper.readValue(json.toString(), typeListOf(elementType));
         } catch (IllegalArgumentException e) {
             throw new ConversionException(String.format("Can not read to List<%s>", elementType.getSimpleName()), e);
         }
     }
 
     // ============ CONVERT OPERATIONS WITH MAPPER SELECTION ============
+    public static <T> T convert(Object json, JavaType type) {
+        return DEFAULT_MAPPER.convertValue(json, type);
+    }
+
+    public static <T> T convert(Object json, JavaType type, String mapperName) {
+        return getMapper(mapperName).convertValue(json, type);
+    }
 
     @SneakyThrows
     public static <T> T convert(Object json, Class<T> clazz) {
@@ -255,12 +334,28 @@ public class JacksonUtils {
         return TF.constructMapType(Map.class, key, value);
     }
 
+    public static JavaType mapType(JavaType keyType, JavaType valueType) {
+        return TF.constructMapType(Map.class, keyType, valueType);
+    }
+
     public static JavaType listType(Class<?> elementType) {
         return TF.constructCollectionType(List.class, elementType);
     }
 
     public static JavaType setType(Class<?> elementType) {
         return TF.constructCollectionType(Set.class, elementType);
+    }
+
+    public static JavaType typeOf(Class<?> mainType) {
+        return TF.constructType(mainType);
+    }
+
+    public static JavaType typeListOf(Class<?> mainType) {
+        return TF.constructCollectionType(List.class, mainType);
+    }
+
+    public static JavaType typeMapOf(Class<?> key, Class<?> value) {
+        return TF.constructMapType(HashMap.class, key, value);
     }
 
     public static JavaType typeOf(Class<?> mainType, Class<?>... parameterTypes) {
@@ -276,6 +371,10 @@ public class JacksonUtils {
         return TF.constructParametricType(mainType, javaParamTypes);
     }
 
+    public static JavaType typeOf(Class<?> mainType, JavaType... javaParamTypes) {
+        return TF.constructParametricType(mainType, javaParamTypes);
+    }
+
     // ============ WRITE OPERATIONS ============
 
     @SneakyThrows
@@ -287,6 +386,17 @@ public class JacksonUtils {
     public static String writeValueAsString(Object o, String mapperName) {
         ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
         return mapper.writeValueAsString(o);
+    }
+
+    @SneakyThrows
+    public static byte[] writeValueAsBytes(Object o) {
+        return writeValueAsBytes(o, null);
+    }
+
+    @SneakyThrows
+    public static byte[] writeValueAsBytes(Object o, String mapperName) {
+        ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
+        return mapper.writeValueAsBytes(o);
     }
 
     @SneakyThrows
@@ -329,20 +439,20 @@ public class JacksonUtils {
     }
 
     public static void replaceNullStrings(JsonNode node) {
-        if (node.isObject()) {
-            node.properties().forEach(entry -> {
-                JsonNode childNode = entry.getValue();
-                if (childNode.isTextual() && childNode.textValue().equalsIgnoreCase("null")) {
-                    ((ObjectNode) node).putNull(entry.getKey());
-                } else {
-                    replaceNullStrings(childNode);
-                }
-            });
-        } else if (node.isArray()) {
-            for (JsonNode arrayElement : node) {
-                replaceNullStrings(arrayElement);
-            }
-        }
+//        if (node.isObject()) {
+//            node.properties().forEach(entry -> {
+//                JsonNode childNode = entry.getValue();
+//                if (childNode.isTextual() && childNode.textValue().equalsIgnoreCase("null")) {
+//                    ((ObjectNode) node).putNull(entry.getKey());
+//                } else {
+//                    replaceNullStrings(childNode);
+//                }
+//            });
+//        } else if (node.isArray()) {
+//            for (JsonNode arrayElement : node) {
+//                replaceNullStrings(arrayElement);
+//            }
+//        }
     }
 
     public <T> T deepClone(T source) {

@@ -1,0 +1,41 @@
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    // [%X{requestId}] add requestId vào trước mỗi log để truy vết
+    <appender name="STDOUT" class="ch.qos.logback.classic.AsyncAppender">
+        <encoder>
+          // %msg%n%ex{15} message exception(15 dong dau tien)
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{requestId}] %-5level %logger{36} - %msg%n%ex{15}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="GELF" class="de.siegmar.logbackgelf.GelfUdpAppender">
+        <graylogHost>localhost</graylogHost>
+        <graylogPort>12201</graylogPort>
+        <maxChunkSize>508</maxChunkSize>
+        <useCompression>true</useCompression>
+
+        <encoder class="de.siegmar.logbackgelf.GelfEncoder">
+            <originHost>localhost</originHost>
+            <includeRawMessage>false</includeRawMessage>
+            <includeMarker>true</includeMarker>
+            <includeMdcData>true</includeMdcData>
+            <includeCallerData>false</includeCallerData>
+            <includeRootCauseData>false</includeRootCauseData>
+            <includeLevelName>true</includeLevelName>
+
+            <shortPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>[%X{requestId}] - %logger{35} - %msg%n</pattern>
+            </shortPatternLayout>
+
+            <fullPatternLayout class="ch.qos.logback.classic.PatternLayout">
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{requestId}] %-5level %logger{35} - %msg%n</pattern>
+            </fullPatternLayout>
+        </encoder>
+    </appender>
+
+    <root level="INFO"> <!-- Set to INFO or DEBUG as needed -->
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="GELF"/>
+    </root>
+</configuration>

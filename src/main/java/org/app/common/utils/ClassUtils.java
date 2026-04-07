@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,5 +75,12 @@ public class ClassUtils {
         return java.util.Arrays.stream(fields)
             .map(Field::getName)
             .collect(Collectors.toList());
+    }
+
+    @SneakyThrows
+    public static <T> T invokeMethod(Class<?> clazz, String methodName, Class<T> target) {
+        Method method = clazz.getMethod(methodName);
+        Object o = method.invoke(null);
+        return target.cast(o);
     }
 }
