@@ -18,7 +18,7 @@ public class Servant<T> {
     }
 
     public <R> Collection<R> serveAndCollect(
-            Collection<T> serviced, 
+            Collection<T> serviced,
             Function<T, R> service,
             Collection<R> results) {
         serviced.stream()

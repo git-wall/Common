@@ -2,7 +2,6 @@ package org.app.common.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -114,14 +113,14 @@ public class DataUtils {
     }
 
     public static <T> List<T> ifEmptyDefault(List<T> data, List<T> defaultValue) {
-        if (CollectionUtils.isEmpty(data)) {
+        if (data.isEmpty()) {
             return defaultValue;
         }
         return data;
     }
 
     public static <T> List<T> defaultListOf(List<T> data) {
-        if (CollectionUtils.isEmpty(data)) {
+        if (data.isEmpty()) {
             return Collections.emptyList();
         }
         return data;

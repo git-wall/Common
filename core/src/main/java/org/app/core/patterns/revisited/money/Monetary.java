@@ -1,7 +1,5 @@
 package org.app.core.patterns.revisited.money;
 
-import org.app.common.money.Money;
-
 import java.math.BigDecimal;
 import java.util.Currency;
 

@@ -4,10 +4,13 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.app.web.RequestUtils;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -84,17 +87,26 @@ public class AuthUtils {
 
     public static String extractTokenId(Authentication auth) {
         Object principal = auth.getPrincipal();
+
+        if (auth instanceof AnonymousAuthenticationToken) {
+            throw new AccessDeniedException("ACCESS_DENIED");
+        }
+
+        if (auth instanceof JwtAuthenticationToken) {
+            JwtAuthenticationToken contextHolder = (JwtAuthenticationToken) auth;
+
+            return contextHolder.getToken().getSubject();
+        }
+
         if (auth.getPrincipal() instanceof Jwt) {
             return ((Jwt) principal).getId(); // jti
         }
+
         return null;
     }
 
-    public static String extractTokenHash(HttpServletRequest req) {
-        String token = RequestUtils.getToken(req);
-        if (!StringUtils.hasText(token)) return null;
-
-        return DigestUtils.sha256Hex(token);
+    public static String extractTokenJwt(Authentication auth) {
+        return ((Jwt) auth.getPrincipal()).getTokenValue();
     }
 
     public static Map<String, Object> extractAttributes(Authentication auth) {
@@ -109,6 +121,13 @@ public class AuthUtils {
         }
 
         return Map.copyOf(attrs);
+    }
+
+    public static String extractTokenHash(HttpServletRequest req) {
+        String token = RequestUtils.getToken(req);
+        if (!StringUtils.hasText(token)) return null;
+
+        return DigestUtils.sha256Hex(token);
     }
 
     public static boolean isSensitive(String claim) {

@@ -5,10 +5,9 @@ import org.app.common.module.scoring_rules.formula.ExpressionParser;
 import org.app.common.module.scoring_rules.formula.Node;
 import org.app.common.module.scoring_rules.rule.Rule;
 import org.app.common.module.scoring_rules.rule.RuleResult;
-import org.app.common.pipeline.v2.Pipeline;
-import org.app.common.struct.dag.Dag;
-import org.app.common.struct.dag.HashDag;
-import org.jetbrains.annotations.NotNull;
+import org.app.core.algorithms.dag.Dag;
+import org.app.core.algorithms.dag.HashDag;
+import org.app.core.patterns.revisited.pipeline.v2.Pipeline;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -98,7 +97,7 @@ public class RuleEngine {
      *                  and the value is the result as a BigDecimal.
      * @return A string representing the formula with all placeholders replaced by actual values.
      */
-    private static @NotNull String replaceValInStr(Object object, Rule rule, Map<Long, BigDecimal> resultMap) {
+    private static String replaceValInStr(Object object, Rule rule, Map<Long, BigDecimal> resultMap) {
         String formula = replaceTemplateWithObj(rule.getFormula(), object);
         formula = replaceRuleResults(formula, resultMap);
         formula = replaceFormulaWithRule(formula, rule.getValue().toPlainString());

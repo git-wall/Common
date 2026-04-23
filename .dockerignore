@@ -1,7 +1,12 @@
 # IntelliJ project files
+.gradle
 .idea
-*.iml
+.git
+.kotlin
+.settings
+.zed
 out
-gen
+build
+*.iml
+*.log
 
-/.dockerignore

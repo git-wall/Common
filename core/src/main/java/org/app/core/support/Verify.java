@@ -1,8 +1,9 @@
 package org.app.core.support;
 
 import lombok.NoArgsConstructor;
-import org.app.core.exception.logic.VerifyException;
 import org.app.core.utils.StringUtils;
+import org.app.exception.StackLocators;
+import org.app.exception.VerifyException;
 
 import java.util.Collection;
 import java.util.Map;
@@ -333,6 +334,10 @@ public abstract class Verify {
         if (superType == null || subType == null || !superType.isAssignableFrom(subType)) {
             throw new VerifyException(message);
         }
+    }
+
+    static {
+        StackLocators.registerIgnoreClass(Verify.class);
     }
 }
 

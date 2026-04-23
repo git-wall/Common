@@ -1,22 +1,17 @@
 package org.app.jackson;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.app.exception.SlightException;
+import org.app.exception.StackLocators;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,106 +21,14 @@ import java.util.function.Consumer;
 public class JacksonUtils {
 
     // Default mapper
-    protected static final ObjectMapper DEFAULT_MAPPER;
-    protected static final ObjectReader DEFAULT_READER;
-    protected static final ObjectWriter DEFAULT_WRITER;
-    protected static final ObjectWriter DEFAULT_WRITER_PRETTY;
-    protected static final TypeFactory TF;
+    protected static ObjectMapper DEFAULT_MAPPER;
+    protected static ObjectReader DEFAULT_READER;
+    protected static ObjectWriter DEFAULT_WRITER;
+    protected static ObjectWriter DEFAULT_WRITER_PRETTY;
+    protected static TypeFactory TF;
 
     // Mapper registry for reusable custom mappers
     private static final Map<String, ObjectMapper> MAPPER_REGISTRY = new ConcurrentHashMap<>();
-
-    // Pre-configured mapper names
-    public static final String MAPPER_CASE_INSENSITIVE = "case_insensitive";
-    public static final String MAPPER_SNAKE_CASE = "snake_case";
-    public static final String MAPPER_FAIL_ON_UNKNOWN = "fail_on_unknown";
-    public static final String MAPPER_EAV = "eav";
-
-    static {
-        // Afterburner generates bytecode for:
-        // - Direct field access (no reflection)
-        // - Optimized type checking
-        // - Faster serialization/deserialization (10 - 30% speed improvement)
-        // Java 8/11 is ok, Java > 17 no need this
-        var afterburnerModule = new AfterburnerModule();
-        // Initialize default mapper (only for DTO serialization/deserialization)
-        DEFAULT_MAPPER = JsonMapper.builder(jsonFactory())
-            .addModule(afterburnerModule)
-            // SERIALIZATION
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            // DESERIALIZATION
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-            .disable(DeserializationFeature.ADJUST_DATES_TO_CONTEXT_TIME_ZONE)
-            .disable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
-            .disable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
-            // Enable reading unknown enum values as null
-            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
-            // FIELD, GETTER, SETTER, CREATOR ❌
-            .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-            // FIELD ✅
-            .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .build();
-
-        DEFAULT_READER = DEFAULT_MAPPER.reader();
-        DEFAULT_WRITER = DEFAULT_MAPPER.writer();
-        DEFAULT_WRITER_PRETTY = DEFAULT_MAPPER.writerWithDefaultPrettyPrinter();
-        TF = DEFAULT_MAPPER.getTypeFactory();
-
-        // Register pre-configured mappers
-        registerPreconfiguredMappers();
-    }
-
-    private static void registerPreconfiguredMappers() {
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
-        // Case insensitive mapper
-        registerMapper(MAPPER_CASE_INSENSITIVE, JsonMapper.builder()
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .addModule(javaTimeModule)
-            .build());
-
-        // Snake case mapper
-        registerMapper(MAPPER_SNAKE_CASE, new ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL));
-
-        // Strict mapper (fail on unknown properties)
-        registerMapper(MAPPER_FAIL_ON_UNKNOWN, new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-            .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL));
-
-        // DTO have dynamic field (Map<String, Object> / EAV)
-        // so we disable intern field names to avoid OOM
-        var factory = JsonFactory.builder()
-            .disable(JsonFactory.Feature.INTERN_FIELD_NAMES)
-            .enable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)
-            .build();
-        var mapperEAV = JsonMapper.builder(factory)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL)
-            .disable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
-            .disable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT)
-            // FIELD, GETTER, SETTER, CREATOR ❌
-            .visibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
-            // FIELD ✅
-            .visibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .build();
-
-        registerMapper(MAPPER_EAV, mapperEAV);
-    }
-
-    public static JsonFactory jsonFactory() {
-        return JsonFactory.builder()
-            // ✅ Enable faster string parsing
-            .enable(JsonFactory.Feature.INTERN_FIELD_NAMES)
-            // ✅ Recycle buffers
-            .enable(JsonFactory.Feature.USE_THREAD_LOCAL_FOR_BUFFER_RECYCLING)
-            .build();
-    }
-
 
     // ============ MAPPER REGISTRY MANAGEMENT ============
 
@@ -189,82 +92,71 @@ public class JacksonUtils {
 
     // ============ READ OPERATIONS WITH MAPPER SELECTION ============
 
-    @SneakyThrows
     public static <T> T readValue(Object json, Class<T> clazz) {
         return readValue(json, clazz, null);
     }
 
-    @SneakyThrows
     public static <T> T readValue(Object json, Class<T> clazz, String mapperName) {
         try {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
             return mapper.readValue(json.toString(), clazz);
-        } catch (IllegalArgumentException e) {
-            throw new ConversionException("Can not read to Class " + clazz.getSimpleName(), e);
+        } catch (JsonProcessingException e) {
+            throw ReadException.of(clazz, e);
         }
     }
 
-    @SneakyThrows
     public static <T> T readValue(byte[] json, JavaType type) {
         try {
             return DEFAULT_MAPPER.readValue(json, type);
-        } catch (IllegalArgumentException e) {
-            throw new ConversionException("Can not read to Type " + type.getRawClass().getSimpleName(), e);
+        } catch (IOException e) {
+            throw ReadException.of(type, e);
         }
     }
 
-    @SneakyThrows
     public static <T> T readValue(InputStream json, JavaType type) {
         try {
             return DEFAULT_MAPPER.readValue(json, type);
-        } catch (IllegalArgumentException e) {
-            throw new ConversionException("Can not read to Type " + type.getRawClass().getSimpleName(), e);
+        } catch (IOException e) {
+            throw ReadException.of(type, e);
         }
     }
 
-    @SneakyThrows
     public static <T> T readValue(Object json, JavaType type) {
         return readValue(json, type, null);
     }
 
-    @SneakyThrows
     public static <T> T readValue(Object json, JavaType type, String mapperName) {
         try {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
             return mapper.readValue(json.toString(), type);
-        } catch (IllegalArgumentException e) {
-            throw new ConversionException("Can not read to Type " + type.getRawClass().getSimpleName(), e);
+        } catch (JsonProcessingException e) {
+            throw ReadException.of(type, e);
         }
     }
 
-    @SneakyThrows
     public static <K, V> Map<K, V> readToMap(Object json, Class<K> key, Class<V> value) {
         return readToMap(json, key, value, null);
     }
 
-    @SneakyThrows
     public static <K, V> Map<K, V> readToMap(Object json, Class<K> key, Class<V> value, String mapperName) {
         try {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
             return mapper.readValue(json.toString(), typeMapOf(key, value));
-        } catch (IllegalArgumentException e) {
-            throw new ConversionException(
-                String.format("Can not read to Map<%s, %s>", key.getSimpleName(), value.getSimpleName()), e);
+        } catch (JsonProcessingException e) {
+            throw ReadException.ofMap(key, value, e);
         }
     }
 
-    @SneakyThrows
     public static <T> List<T> readToList(Object json, Class<T> elementType) {
         return readToList(json, elementType, null);
     }
 
-    @SneakyThrows
     public static <T> List<T> readToList(Object json, Class<T> elementType, String mapperName) {
         try {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
             return mapper.readValue(json.toString(), typeListOf(elementType));
-        } catch (IllegalArgumentException e) {
-            throw new ConversionException(String.format("Can not read to List<%s>", elementType.getSimpleName()), e);
+        } catch (JsonProcessingException e) {
+            throw ReadException.ofList(elementType, e);
         }
     }
 
@@ -277,18 +169,16 @@ public class JacksonUtils {
         return getMapper(mapperName).convertValue(json, type);
     }
 
-    @SneakyThrows
     public static <T> T convert(Object json, Class<T> clazz) {
         return convert(json, clazz, null);
     }
 
-    @SneakyThrows
     public static <T> T convert(Object json, Class<T> clazz, String mapperName) {
         try {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
             return mapper.convertValue(json, clazz);
         } catch (IllegalArgumentException e) {
-            throw new ConversionException("Can not convert to Class " + clazz.getSimpleName(), e);
+            throw ConversionException.of(clazz, e);
         }
     }
 
@@ -301,8 +191,7 @@ public class JacksonUtils {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
             return mapper.convertValue(json, typeOf(Map.class, key, value));
         } catch (IllegalArgumentException e) {
-            throw new ConversionException(
-                String.format("Can not convert to Map<%s, %s>", key.getSimpleName(), value.getSimpleName()), e);
+            throw ConversionException.ofMap(key, value, e);
         }
     }
 
@@ -315,7 +204,7 @@ public class JacksonUtils {
             ObjectMapper mapper = mapperName == null ? DEFAULT_MAPPER : getMapper(mapperName);
             return mapper.convertValue(json, typeOf(List.class, elementType));
         } catch (IllegalArgumentException e) {
-            throw new ConversionException(String.format("Can not convert to List<%s>", elementType.getSimpleName()), e);
+            throw ConversionException.ofList(elementType, e);
         }
     }
 
@@ -445,19 +334,79 @@ public class JacksonUtils {
 
     // ============ EXCEPTIONS ============
 
-    public static class ConversionException extends RuntimeException {
-        private static final long serialVersionUID = 2594071083304122225L;
+    public static class ConversionException extends SlightException {
+        private static final long serialVersionUID = -1693109783788356747L;
+
+        public ConversionException(String message) {
+            super(message);
+        }
 
         public ConversionException(String message, Throwable cause) {
             super(message, cause);
         }
+
+        public static ConversionException of(Class<?> clazz, Throwable cause) {
+            String message = String.format("Cannot convert to %s: %s", clazz.getSimpleName(), cause.getMessage());
+            return new ConversionException(message);
+        }
+
+        public static ConversionException of(JavaType type, Throwable cause) {
+            String message = String.format("Cannot convert to %s: %s", type.getRawClass().getSimpleName(), cause.getMessage());
+            return new ConversionException(message);
+        }
+
+        public static ConversionException ofMap(Class<?> clazzKey, Class<?> clazzVal, Throwable cause) {
+            String message = String.format(
+                "Cannot convert to Map<%s,%s>: %s",
+                clazzKey.getSimpleName(), clazzVal.getSimpleName(), cause.getMessage());
+
+            return new ConversionException(message);
+        }
+
+        public static ConversionException ofList(Class<?> elementType, Throwable cause) {
+            String message = String.format("Cannot convert to List<%s>: %s", elementType.getSimpleName(), cause.getMessage());
+            return new ConversionException(message);
+        }
     }
 
-    public static class ReadException extends RuntimeException {
+    public static class ReadException extends SlightException {
         private static final long serialVersionUID = 2594071083304122225L;
 
-        public ReadException(String message, Throwable cause) {
-            super(message, cause);
+        protected ReadException(String message) {
+            super(message);
         }
+
+        public static ReadException of(Class<?> clazz, Throwable cause) {
+            String message = String.format("Failed to read to %s: %s", clazz.getSimpleName(), cause.getMessage());
+            return new ReadException(message);
+        }
+
+        public static ReadException of(JavaType type, Throwable cause) {
+            String message = String.format(
+                "Failed to read to %s: %s", type.getRawClass().getSimpleName(), cause.getMessage());
+
+            return new ReadException(message);
+        }
+
+        public static ReadException ofMap(Class<?> clazzKey, Class<?> clazzVal, Throwable cause) {
+            String message = String.format(
+                "Failed to read to Map<%s,%s>: %s",
+                clazzKey.getSimpleName(), clazzVal.getSimpleName(), cause.getMessage());
+
+            return new ReadException(message);
+        }
+
+        public static ReadException ofList(Class<?> elementType, Throwable cause) {
+            String message = String.format(
+                "Failed to read to List<%s>: %s", elementType.getSimpleName(), cause.getMessage());
+
+            return new ReadException(message);
+        }
+    }
+
+    static {
+        StackLocators.registerIgnoreClass(ConversionException.class);
+        StackLocators.registerIgnoreClass(ReadException.class);
+        StackLocators.registerIgnoreClass(JacksonUtils.class);
     }
 }

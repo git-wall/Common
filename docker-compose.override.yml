@@ -1,8 +1,17 @@
 services:
   nexus:
     volumes:
+      # volume này sẽ được tạo ra bởi Docker và gắn vào container tại /nexus-data, nơi Nexus lưu trữ dữ liệu của nó. 
+      # Điều này đảm bảo rằng dữ liệu của Nexus được lưu trữ bền vững và không bị mất khi container dừng hoặc bị xóa.
       - nexus-data:/nexus-data
+      # volume này sẽ gắn thư mục cấu hình của Nexus từ máy chủ vào container, 
+      # cho phép bạn dễ dàng quản lý và chỉnh sửa cấu hình của Nexus mà không cần phải truy cập vào container.
+      # Đảm bảo rằng thư mục cấu hình trên máy chủ có quyền đọc (read-only) để ngăn chặn việc container ghi dữ liệu vào đó,
+      # giúp bảo vệ cấu hình khỏi bị thay đổi hoặc hỏng.
+      - ./nexus-configuration:/nexus-configuration:ro
     environment:
       - INSTALL4J_ADD_VM_PARAMS=-Xms1200m -Xmx1200m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
       - NEXUS_SECURITY_RANDOMPASSWORD=false
       - NEXUS_CONTEXT=nexus
+    env_file:
+      - .env

@@ -22,8 +22,7 @@ public class CMDUtils {
                 output.append(line).append("\n");
             }
             process.waitFor();
-        } catch (Exception e) {
-            LogUtils.tracing(e);
+        } catch (Exception ignored) {
         }
         return output.toString();
     }

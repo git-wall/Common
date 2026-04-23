@@ -9,7 +9,7 @@ public class Ambassador<T, R> {
     private final Function<Exception, R> fallback;
     private final int retryCount;
 
-    public Ambassador(Supplier<T> serviceProvider, 
+    public Ambassador(Supplier<T> serviceProvider,
                      Function<T, R> operation,
                      Function<Exception, R> fallback,
                      int retryCount) {

@@ -2,7 +2,6 @@ package org.app.core.action;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.SneakyThrows;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -80,9 +79,9 @@ public class StreamPipeline<T> {
      * Với type safety hoàn toàn cần dùng StreamPipeline<U> riêng.
      */
     @SuppressWarnings("unchecked")
-    public <U> StreamPipeline<U> map(Function<T, U> mapper) {
+    public <U> StreamPipeline<U> map(Function<U, U> mapper) {
         StreamPipeline<U> next = (StreamPipeline<U>) this;
-        next.transformers.add(chunk -> mapper.apply(chunk));
+        next.transformers.add(mapper);
         return next;
     }
 

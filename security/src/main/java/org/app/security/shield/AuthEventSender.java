@@ -3,9 +3,8 @@ package org.app.security.shield;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.app.common.kafka.multi.BrokerManager;
+import org.app.jackson.JacksonUtils;
 import org.app.security.shield.event.AuthSecurityEvent;
-import org.app.common.utils.JacksonUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +16,10 @@ public class AuthEventSender {
     private final String topic;
 
     public AuthEventSender(
-        BrokerManager brokerManager,
-        @Value("${monitor.log.kafka.topic}") String topic,
-        @Value("${monitor.log.kafka.brokerId}") String brokerId) {
+        KafkaProducer<String, String> producer,
+        @Value("${monitor.log.kafka.topic}") String topic) {
         this.topic = topic;
-        this.producer = brokerManager.getProducer(brokerId);
+        this.producer = producer;
     }
 
     public void send(AuthSecurityEvent event) {

@@ -1,0 +1,47 @@
+apply plugin: 'nu.studer.jooq'
+
+dependencies {
+  jooqGenerator 'org.postgresql:postgresql:42.7.10'
+  jooqGenerator 'org.jooq:jooq-codegen:3.14.16'
+}
+
+jooq {
+  version = '3.14.16'
+
+  configurations {
+    main {
+      generationTool {
+        jdbc {
+          driver = "org.postgresql.Driver"
+          url = "jdbc:postgresql://localhost:5432/mydb"
+          user = "user"
+          password = "password"
+        }
+        generator {
+          name = "org.jooq.codegen.JavaGenerator"
+          database {
+            name = "org.jooq.meta.postgres.PostgresDatabase"
+            inputSchema = "public"
+            includes = '.*'
+          }
+          target {
+            packageName = "org.app.database.jooq"
+            directory = "build/generated-sources/jooq"
+          }
+        }
+      }
+    }
+  }
+}
+
+// Ngắt sự phụ thuộc để build.gradle không tự gọi sang đây
+project.afterEvaluate {
+  // Bật lại task generateJooq và loại bỏ nó khỏi dependencies của compileJava
+  tasks.named('generateJooq').configure {
+    enabled = true
+  }
+  // Loại bỏ generateJooq khỏi dependencies của compileJava để tránh lỗi circular dependency
+  tasks.named('compileJava').configure {
+    dependsOn = dependsOn.findAll { it.toString() != 'generateJooq' }
+  }
+}

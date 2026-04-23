@@ -11,6 +11,7 @@ dependencies {
   implementation project(":observation")
   implementation project(":message")
   implementation project(":aop")
+  implementation project(":network")
 
   implementation(authLibs.bundles.goodle.auth)
   implementation(authLibs.bundles.jwt)
@@ -19,4 +20,11 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-security'
   implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
   implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+
+
+  implementation("org.casbin:jdbc-adapter:2.13.0")
+  implementation("org.casbin:jcasbin-redis-watcher:1.9.0")
+  implementation("org.casbin:jcasbin:1.99.0")
+  implementation("org.casbin:casdoor-spring-boot-starter:1.15.0")
+  implementation("org.casbin:casdoor-java-sdk:1.42.0")
 }

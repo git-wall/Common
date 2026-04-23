@@ -21,8 +21,8 @@ public class FeatureToggle {
     }
 
     public boolean isEnabled(String featureName) {
-        return dynamicFeatures.containsKey(featureName) 
-            ? dynamicFeatures.get(featureName).get() 
+        return dynamicFeatures.containsKey(featureName)
+            ? dynamicFeatures.get(featureName).get()
             : features.getOrDefault(featureName, false);
     }
 
