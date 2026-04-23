@@ -1,7 +1,7 @@
 package org.app.core.support;
 
 import lombok.Getter;
-import org.app.core.exception.logic.VerifyException;
+import org.app.exception.VerifyException;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -43,22 +43,12 @@ public final class Result<T> {
         return new Result<>(null, error);
     }
 
-    public static <T> Result<T> fail(String message) {
-        return new Result<>(null, new VerifyException(message));
-    }
-
-    /** Bọc code có thể throw — tự catch thành Result.fail */
     public static <T> Result<T> of(ThrowingSupplier<T> supplier) {
         try {
             return ok(supplier.get());
         } catch (Throwable e) {
             return fail(e);
         }
-    }
-
-    /** Từ Optional — empty → fail với message */
-    public static <T> Result<T> of(T data, String messageIfEmpty) {
-        return data != null ? Result.ok(data) : fail(messageIfEmpty);
     }
 
     /** Từ Optional — empty → fail từ supplier exception */

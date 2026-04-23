@@ -1,7 +1,5 @@
 package org.app.common.context;
 
-import org.apache.commons.collections4.MapUtils;
-
 import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +33,7 @@ public class TracingContext {
 
     public static void clear() {
         var x = CONTEXT.get();
-        if (!MapUtils.isEmpty(x)) {
+        if (!x.isEmpty()) {
             x.clear();
         }
         CONTEXT.remove();

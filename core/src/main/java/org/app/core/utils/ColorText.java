@@ -46,12 +46,12 @@ public class ColorText {
     public static String bgOrange(String text) { return BG_ORANGE + text + RESET; }
     public static String bgGray(String text) { return BG_GRAY + text + RESET; }
 
-    public static String redText(String text) { return RED + text + RESET; }
-    public static String greenText(String text) { return GREEN + text + RESET; }
-    public static String blueText(String text) { return BLUE + text + RESET; }
-    public static String yellowText(String text) { return YELLOW + text + RESET; }
-    public static String blackText(String text) { return BLACK + text + RESET; }
-    public static String whiteText(String text) { return WHITE + text + RESET; }
-    public static String purpleText(String text) { return PURPLE + text + RESET; }
-    public static String cyanText(String text) { return CYAN + text + RESET; }
+    public static String red(String text) { return RED + text + RESET; }
+    public static String green(String text) { return GREEN + text + RESET; }
+    public static String blue(String text) { return BLUE + text + RESET; }
+    public static String yellow(String text) { return YELLOW + text + RESET; }
+    public static String black(String text) { return BLACK + text + RESET; }
+    public static String white(String text) { return WHITE + text + RESET; }
+    public static String purple(String text) { return PURPLE + text + RESET; }
+    public static String cyan(String text) { return CYAN + text + RESET; }
 }

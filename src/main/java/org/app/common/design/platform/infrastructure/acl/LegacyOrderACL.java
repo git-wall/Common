@@ -11,7 +11,6 @@ import org.app.common.design.platform.domain.model.order.OrderStatus;
 import org.app.common.design.platform.domain.model.product.Product;
 import org.app.common.design.platform.repo.CustomerRepository;
 import org.app.common.design.platform.repo.ProductRepository;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -195,7 +194,7 @@ public class LegacyOrderACL {
         return status;
     }
 
-    private static @NotNull OrderStatus getOrderStatus(int statusCode) {
+    private static OrderStatus getOrderStatus(int statusCode) {
         switch (statusCode) {
             case 0:
                 return OrderStatus.DRAFT;

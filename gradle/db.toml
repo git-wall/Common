@@ -46,9 +46,9 @@ jooq = ["jooq", "jooq_codegen", "jooq_meta"]
 
 # Bundle that includes all libraries in this catalog for convenience
 all = [
-#  "jooq",
-#  "jooq_codegen",
-#  "jooq_meta",
+  "jooq",
+  "jooq_codegen",
+  "jooq_meta",
 #  "couchbase",
 #  "ektorp",
 #  "vesoft_client",

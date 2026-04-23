@@ -1,0 +1,4 @@
+
+# chi dung khi tren may that 
+#    - docker rmi -f $(sudo docker images -f "dangling=true" -q --no-trunc) || true
+#    - docker image prune -a --force --filter "until=24h" --filter "dangling=false"

@@ -17,8 +17,8 @@ package org.app.security.shield.constant;
  * | ------------------ | -------------- |
  * | NO_TOKEN           | Gọi API bừa    |
  * | INSUFFICIENT_SCOPE | Thử vượt quyền |
- * | INVALID_SIGNATURE  | Token giả      |
- * | TOKEN_EXPIRED      | Token cũ       |
+ * | INVALID_SIGNATURE  | Fake Token     |
+ * | TOKEN_EXPIRED      | Old Token      |
  * }</pre>
  * // Mối đe dọa bảo mật có thể liên quan
  * <pre>{@code

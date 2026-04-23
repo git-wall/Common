@@ -2,7 +2,7 @@ package org.app.bigdata.notification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.app.http.ClientUtils;
+import org.app.http.core.ClientUtils;
 
 import java.net.http.HttpClient;
 import java.util.HashMap;

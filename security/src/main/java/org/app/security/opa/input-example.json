@@ -1,0 +1,21 @@
+{
+  "user": {
+    "id": "user123",
+    "roles": ["user", "editor"],
+    "authenticated": true,
+    "department": "engineering"
+  },
+  "request": {
+    "method": "GET",
+    "path": "/api/documents/123",
+    "headers": {
+      "content-type": "application/json"
+    }
+  },
+  "resource": {
+    "id": "doc123",
+    "owner": "user456",
+    "type": "document",
+    "visibility": "internal"
+  }
+}

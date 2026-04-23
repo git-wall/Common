@@ -3,7 +3,6 @@ package org.app.common.thread;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -29,10 +28,6 @@ public class ThreadUtils {
         log.info("Core CPU available: {}", CORE_AVAILABLE);
     }
 
-    public static int getActiveCount() {
-        // Returns the number of active threads in the current thread's thread group
-        return Thread.activeCount();
-    }
     public static int getActiveCount() {
         // Returns the number of active threads in the current thread's thread group
         return Thread.activeCount();
@@ -160,7 +155,7 @@ public class ThreadUtils {
         }
     }
 
-    private static @NotNull ThreadFactory getThreadFactory(String name) {
+    private static ThreadFactory getThreadFactory(String name) {
         return r -> {
             Thread thread = Executors.defaultThreadFactory().newThread(r);
             thread.setName(name);

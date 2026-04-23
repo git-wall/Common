@@ -1,0 +1,9 @@
+{
+  "name": {
+    "type": "text",
+    "fields": {
+      "keyword": { "type": "keyword" }
+    }
+  },
+  "price": { "type": "long" }
+}

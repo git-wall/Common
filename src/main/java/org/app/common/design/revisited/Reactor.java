@@ -14,7 +14,7 @@ public class Reactor<T> {
     }
 
     public void dispatch(String eventType, T event) {
-        if (handlers.containsKey(eventType) && 
+        if (handlers.containsKey(eventType) &&
             eventTypes.get(eventType).isInstance(event)) {
             handlers.get(eventType).accept(event);
         }

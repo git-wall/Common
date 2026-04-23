@@ -66,6 +66,15 @@ FROM debian:bullseye-slim
 ENV JAVA_HOME=/opt/java
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
+# Linux Alpine
+# RUN apk add --no-cache make
+# CentOS/RHEL/Oracle Linux
+# RUN microdnf install make && microdnf clean all
+# Ubuntu / Debian
+RUN apt-get update  \
+    && apt-get install -y make  \
+    && rm -rf /var/lib/apt/lists/* # Clean up apt cache to reduce image size
+
 # -u	User ID	Giúp quản lý quyền ghi file chính xác.
 # -r	System account	Bảo mật hơn, gọn nhẹ vì không tạo home folder.
 # -m	Tự động tạo thư mục cá nhân tại /home/thanh ,	Cần thiết nếu bạn muốn lưu cài đặt cá nhân cho user.

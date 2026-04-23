@@ -64,6 +64,18 @@ wc file                 # Count lines, words, and characters
 ```
 
 ### File Permissions
+```text
+7 (4+2+1): Full (đọc, ghi, thực thi).
+6 (4+2): Đọc và ghi.
+5 (4+1): Đọc và thực thi.
+4: Chỉ đọc.
+0: nothing
+
+owner | group | others
+  7   |  7    |  7        # rwx rwx rwx
+  7   |  5    |  5        # rwx r-x r-x
+  6   |  4    |  4        # rw- r-- r--
+```
 ```bash
 chmod 755 file          # Set permissions (rwx for owner, rx for group/others)
 chmod +x file           # Make file executable

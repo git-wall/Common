@@ -1,0 +1,43 @@
+services:
+  keycloak-postgres:
+    container_name: keycloak-postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_DB: keycloak
+    ports:
+      - "5431:5432"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.6
+    container_name: keycloak
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin
+      KC_HTTP_PORT: 80
+
+      DB_VENDOR: POSTGRES
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      DB_DATABASE: keycloak
+      DB_ADDR: postgres
+      DB_SCHEMA: public
+
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_USER: keycloak_admin
+      KEYCLOAK_PASSWORD: keycloak_admin123
+      KC_HOSTNAME: localhost
+    depends_on:
+      - keycloak-postgres
+    command:
+      - start-dev
+      - --import-realm
+    ports:
+      - "8181:8080"
