@@ -2,8 +2,6 @@ package org.app.common.support;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.thymeleaf.util.ListUtils;
-
 import java.util.List;
 import java.util.Map;
 
@@ -212,7 +210,7 @@ public class Verify extends org.springframework.util.Assert {
      * @param message the exception message if the verification fails
      */
     public static void ifEmpty(List<?> list, String message) {
-        if (ListUtils.isEmpty(list)) {
+        if (list == null || list.isEmpty()) {
             throw new VerifyException(message);
         }
     }

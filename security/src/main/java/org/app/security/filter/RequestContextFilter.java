@@ -1,9 +1,9 @@
 package org.app.security.filter;
 
+import org.app.network.Network;
 import org.app.observation.context.ContextHolder;
 import org.app.observation.context.ContextKey;
 import org.app.observation.context.RequestContext;
-import org.app.security.utils.NetworkUtils;
 import org.app.web.RequestUtils;
 import org.slf4j.MDC;
 
@@ -23,7 +23,7 @@ public class RequestContextFilter implements Filter {
             .method   (httpRequest .getMethod())
             .path     (httpRequest .getRequestURI())
             .clientIp (RequestUtils.getRemoteAddress(httpRequest))
-            .serviceIp(NetworkUtils.getLocalHostAddress())
+            .serviceIp(Network     .localHostAddress())
             .domain   (RequestUtils.getDomain(host))
             .userAgent(RequestUtils.getUserAgent(httpRequest))
             .deviceId (RequestUtils.getDeviceId(httpRequest))

@@ -50,5 +50,4 @@ local.properties
 ./devop/node_modules/
 /node_modules/
 /.vscode/
-src/main/resources/resilience.properties
-src/main/resources/swagger.properties
+*/build

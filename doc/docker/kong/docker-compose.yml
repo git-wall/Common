@@ -1,0 +1,67 @@
+version: '3.8'
+
+networks:
+  kong-net:
+    driver: bridge
+
+services:
+  kong-database:
+    image: postgres:17.5
+    container_name: kong-database
+    networks:
+      - kong-net
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+      POSTGRES_PASSWORD: kong
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "kong"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kong-migrations:
+    image: kong:latest
+    container_name: kong-migrations
+    networks:
+      - kong-net
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_PASSWORD: kong
+    command: kong migrations bootstrap
+    depends_on:
+      kong-database:
+        condition: service_healthy
+
+  kong:
+    image: kong:latest
+    container_name: kong
+    networks:
+      - kong-net
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_PROXY_LISTEN: 0.0.0.0:8000, 0.0.0.0:8443 ssl
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+    depends_on:
+      kong-migrations:
+        condition: service_completed_successfully
+
+  # --- THÊM KONGA TẠI ĐÂY ---
+  konga:
+    image: pantsel/konga
+    container_name: konga
+    networks:
+      - kong-net
+    environment:
+      NODE_ENV: production
+    ports:
+      - "1337:1337"
+    depends_on:
+      - kong

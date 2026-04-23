@@ -1,0 +1,6 @@
+opa:
+  url: http://localhost:8181
+  version : /v1/data
+  domain: order
+  policyPath: auth/allow
+  

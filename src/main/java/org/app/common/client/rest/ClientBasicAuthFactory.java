@@ -12,7 +12,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
 import org.app.common.client.ClientBasicAuthInfo;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
@@ -66,7 +65,7 @@ public class ClientBasicAuthFactory extends HttpComponentsClientHttpRequestFacto
     }
 
     @Override
-    protected HttpContext createHttpContext(@NotNull HttpMethod httpMethod, @NotNull URI uri) {
+    protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
         // Create AuthCache instance
         AuthCache authCache = new BasicAuthCache();
 

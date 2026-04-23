@@ -2,6 +2,7 @@ group = 'platform.jackson'
 version = '2.0.0'
 
 dependencies {
+  api(project(":exception"))
   api platform(jsonLibs.jackson.bom)
   api jsonLibs.bundles.jackson
 }

@@ -28,6 +28,7 @@ public class RequestContext {
 
     private long time;
 
-    // future extensible
-    private Map<String, Object> attributes;
+    private Object payload;
+
+    private Map<String, Object> metadata;
 }

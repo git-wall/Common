@@ -13,23 +13,6 @@ import java.util.function.Predicate;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Loop {
 
-    public static <T, K> Map<K, List<T>> group(List<T> list, Function<T, K> keyExtractor) {
-        Map<K, List<T>> result = new HashMap<>();
-
-        for (T item : list) {
-            K key = keyExtractor.apply(item);
-
-            List<T> bucket = result.get(key);
-            if (bucket == null) {
-                bucket = new ArrayList<>();
-                result.put(key, bucket);
-            }
-            bucket.add(item);
-        }
-
-        return result;
-    }
-
     public static <T, K> Map<K, List<T>> groupBy(List<T> list, Function<T, K> keyExtractor) {
         Map<K, List<T>> result = new HashMap<>();
 

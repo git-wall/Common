@@ -1,16 +1,14 @@
 package org.app.common.client;
 
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 public class TokenProvider {
     private String cachedToken;
     private final ReentrantLock lock = new ReentrantLock();
-    private final Supplier<OAuth2AccessToken> tokenFetcher;
+    private final Supplier<String> tokenFetcher;
 
-    public TokenProvider(Supplier<OAuth2AccessToken> tokenFetcher) {
+    public TokenProvider(Supplier<String> tokenFetcher) {
         this.tokenFetcher = tokenFetcher;
     }
 
@@ -24,7 +22,7 @@ public class TokenProvider {
             if (cachedToken != null) {
                 return cachedToken;
             }
-            cachedToken = tokenFetcher.get().getTokenValue();
+            cachedToken = tokenFetcher.get();
             return cachedToken;
         } finally {
             lock.unlock();
@@ -34,7 +32,7 @@ public class TokenProvider {
     public String refreshToken() {
         lock.lock();
         try {
-            cachedToken = tokenFetcher.get().getTokenValue();
+            cachedToken = tokenFetcher.get();
             return cachedToken;
         } finally {
             lock.unlock();

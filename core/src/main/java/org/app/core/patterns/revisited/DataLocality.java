@@ -1,11 +1,8 @@
 package org.app.core.patterns.revisited;
 
-import org.app.common.entities.Action;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class DataLocality<T> {
 
@@ -25,22 +22,5 @@ public class DataLocality<T> {
             List<T> batch = data.subList(i, end);
             batchProcessor.accept(batch);
         }
-    }
-
-    public Action processBatch(Function<List<T>, int[]> batchProcessor) {
-        int size = data.size();
-        Action action = new Action(size);
-
-        for (int i = 0; i < size; i += batchSize) {
-            int end = Math.min(i + batchSize, size);
-            List<T> batch = data.subList(i, end);
-            try {
-                int[] rs = batchProcessor.apply(batch);
-                action.collectDataInfo(rs);
-            } catch (Exception e) {
-                action.incrementUnknownSuccess(batch.size());
-            }
-        }
-        return action;
     }
 }

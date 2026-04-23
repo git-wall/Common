@@ -11,7 +11,7 @@ import javax.cache.spi.CachingProvider;
 public class CacheManagerUtils {
     public static final String RATE_LIMIT_CACHE = "rate-limit-buckets";
 
-    /// JCache with Redisson for Bucket4j
+    /// JCache with Redisson for Bucket
     public static CacheManager getCacheManagerForBucket(Config config) {
         CachingProvider provider = Caching.getCachingProvider();
         CacheManager cacheManager = provider.getCacheManager();

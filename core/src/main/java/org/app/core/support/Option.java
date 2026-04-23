@@ -88,7 +88,7 @@ public class Option {
      * @param <T>    the type of the input value
      * @return the input value if the predicate evaluates to {@code true}, otherwise the {@code other} value
      */
-    public static <T> T filterAndOrElse(T t, Predicate<T> filter, T other) {
+    public static <T> T filterOrElse(T t, Predicate<T> filter, T other) {
         return Optional.ofNullable(t)
             .filter(filter)
             .orElse(other);

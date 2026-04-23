@@ -3,7 +3,6 @@ import lombok.Builder;
 import lombok.Value;
 import org.app.common.design.platform.domain.model.order.Order;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Value
 @Builder

@@ -4,6 +4,7 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -11,60 +12,45 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
 
 @Configuration
+@EnableConfigurationProperties(ElasticsearchProperties.class)
+@RequiredArgsConstructor
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
-
-    @Value("${elasticsearch.host:localhost}")
-    private String host;
-
-    @Value("${elasticsearch.port:9200}")
-    private int port;
-
-    @Value("${elasticsearch.username:}")
-    private String username;
-
-    @Value("${elasticsearch.password:}")
-    private String password;
+    private final ElasticsearchProperties properties;
 
     @Override
     public ClientConfiguration clientConfiguration() {
-        ClientConfiguration.MaybeSecureClientConfigurationBuilder builder =
-            ClientConfiguration.builder()
-                .connectedTo(host + ":" + port);
-
-        if (!username.isEmpty() && !password.isEmpty()) {
-            builder.withBasicAuth(username, password);
-        }
-
-        return builder.build();
+        return ClientConfiguration.builder()
+            .connectedTo(properties.getHostAndPort())
+            .withBasicAuth(properties.getUsername(), properties.getPassword())
+            .build();
     }
 
     @Bean
     public RestClient restClient() {
-        RestClientBuilder builder = RestClient.builder(new HttpHost(host, port, "http"));
+        var httpHost = new HttpHost(properties.getHost(), properties.getPort(), "http");
+        RestClientBuilder builder = RestClient.builder(httpHost);
 
-        if (!username.isEmpty() && !password.isEmpty()) {
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        var usernamePasswordCredentials = new UsernamePasswordCredentials(properties.getUsername(), properties.getPassword());
+        credentialsProvider.setCredentials(AuthScope.ANY, usernamePasswordCredentials);
 
-            final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(username, password));
-
-            builder.setHttpClientConfigCallback(httpClientBuilder ->
-                    httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
-        }
+        builder.setHttpClientConfigCallback(
+            httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
+        );
 
         return builder.build();
     }
 
     @Bean
     public ElasticsearchTransport elasticsearchTransport() {
-        return new RestClientTransport(
-                restClient(), new JacksonJsonpMapper());
+        return new RestClientTransport(restClient(), new JacksonJsonpMapper());
     }
 
     @Bean

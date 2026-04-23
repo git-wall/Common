@@ -3,7 +3,7 @@ package org.app.bigdata.flink.sink;
 import org.apache.flink.api.connector.sink2.SinkWriter;
 import org.app.bigdata.notification.NotificationInfo;
 import org.app.bigdata.notification.SnapShot;
-import org.app.http.request.RequestUtils;
+import org.app.http.core.request.RequestUtils;
 import org.app.jackson.JacksonUtils;
 
 import java.net.http.HttpClient;

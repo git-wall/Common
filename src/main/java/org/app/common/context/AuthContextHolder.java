@@ -1,6 +1,6 @@
 package org.app.common.context;
 
-import org.app.common.interceptor.context.AuthContext;
+import org.app.observation.context.AuthContext;
 
 public final class AuthContextHolder {
     private static final ThreadLocal<AuthContext> CTX = new ThreadLocal<>();

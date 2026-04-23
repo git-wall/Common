@@ -2,7 +2,7 @@ package org.app.security.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.app.security.security.opa.OpaFilter;
+import org.app.security.opa.OpaFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;

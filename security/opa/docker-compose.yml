@@ -1,0 +1,8 @@
+services:
+  opa:
+    image: openpolicyagent/opa:latest
+    command: ["run", "--server", "--config-file=/config/opa-config.yaml"]
+    volumes:
+      - ./opa-config.yaml:/config/opa-config.yaml
+    ports:
+      - "8181:8181"

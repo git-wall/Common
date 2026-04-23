@@ -7,7 +7,6 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.app.common.utils.JacksonUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -87,7 +86,7 @@ public class Client4 {
                 );
     }
 
-    private @NotNull Mono<ClientResponse> retryIf401(WebClient authWebClient, ClientRequest request, ExchangeFunction next, ClientResponse clientResponse) {
+    private Mono<ClientResponse> retryIf401(WebClient authWebClient, ClientRequest request, ExchangeFunction next, ClientResponse clientResponse) {
         if (clientResponse.statusCode() == HttpStatus.UNAUTHORIZED) {
             return clientResponse.bodyToMono(String.class)
                     .flatMap(errorBody -> {

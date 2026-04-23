@@ -15,8 +15,9 @@ import java.util.stream.Stream;
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public abstract class RequestUtils {
-    public static final String REQUEST_ID = "X-Request-Id";
 
+    public static final String REQUEST_ID = "X-Request-Id";
+    public static final String IDEMPOTENCY_KEY = "X-Idempotency-Key";
     // auth
     public static final String TOKEN_PREFIX = "Bearer ";
 
@@ -136,6 +137,11 @@ public abstract class RequestUtils {
     public static String getRequestId(HttpServletRequest request) {
         if (request == null) return null;
         return request.getHeader(REQUEST_ID);
+    }
+
+    public static String getIdempotencyKey(HttpServletRequest request) {
+        if (request == null) return null;
+        return request.getHeader(IDEMPOTENCY_KEY);
     }
 
     public static String getDeviceId(HttpServletRequest request) {

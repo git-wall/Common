@@ -22,6 +22,5 @@ public class QRUtils {
         } catch (Exception e) {
             throw new RuntimeException("Failed to generate QR code", e);
         }
-
     }
 }
